@@ -25,7 +25,7 @@ const cadetsData = [
 
 export default function CadetsPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState({ batch: '', rank: '', bloodGroup: '' });
+    const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all' });
     const [showActiveOnly, setShowActiveOnly] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const cadetsPerPage = 10;
@@ -33,9 +33,9 @@ export default function CadetsPage() {
     const filteredCadets = cadetsData.filter(cadet => {
         return (
             cadet.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (filters.batch === '' || cadet.batch.toString() === filters.batch) &&
-            (filters.rank === '' || cadet.rank === filters.rank) &&
-            (filters.bloodGroup === '' || cadet.bloodGroup === filters.bloodGroup) &&
+            (filters.batch === 'all' || cadet.batch.toString() === filters.batch) &&
+            (filters.rank === 'all' || cadet.rank === filters.rank) &&
+            (filters.bloodGroup === 'all' || cadet.bloodGroup === filters.bloodGroup) &&
             (!showActiveOnly || (new Date().getFullYear() - cadet.batch) <= 3) // Assuming 'active' means within 3 years
         );
     });
@@ -48,7 +48,7 @@ export default function CadetsPage() {
 
     const handleReset = () => {
         setSearchTerm('');
-        setFilters({ batch: '', rank: '', bloodGroup: '' });
+        setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all' });
         setShowActiveOnly(true);
         setCurrentPage(1);
     }
@@ -68,7 +68,7 @@ export default function CadetsPage() {
                             <Select onValueChange={value => setFilters(f => ({ ...f, batch: value }))} value={filters.batch}>
                                 <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All</SelectItem>
+                                    <SelectItem value="all">All</SelectItem>
                                     {[2020, 2021, 2022, 2023].map(year => <SelectItem key={year} value={String(year)}>{year}</SelectItem>)}
                                 </SelectContent>
                             </Select>
@@ -78,7 +78,7 @@ export default function CadetsPage() {
                             <Select onValueChange={value => setFilters(f => ({ ...f, rank: value }))} value={filters.rank}>
                                 <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All</SelectItem>
+                                    <SelectItem value="all">All</SelectItem>
                                     {['CDT', 'LCPL', 'CPL', 'SGT', 'CSM', 'JUO', 'SUO'].map(rank => <SelectItem key={rank} value={rank}>{rank}</SelectItem>)}
                                 </SelectContent>
                             </Select>
@@ -88,7 +88,7 @@ export default function CadetsPage() {
                             <Select onValueChange={value => setFilters(f => ({ ...f, bloodGroup: value }))} value={filters.bloodGroup}>
                                 <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All</SelectItem>
+                                    <SelectItem value="all">All</SelectItem>
                                     {['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                                 </SelectContent>
                             </Select>
