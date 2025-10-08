@@ -1,4 +1,5 @@
 'use client';
+import { React } from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,8 +18,10 @@ const cadetsData = [
 
 
 export default function EditCadetPage({ params }: { params: { institutionName: string, cadetId: string } }) {
-    const institutionName = decodeURIComponent(params.institutionName);
-    const cadetId = params.cadetId;
+    const resolvedParams = React.use(params);
+    const institutionName = decodeURIComponent(resolvedParams.institutionName);
+    const cadetId = resolvedParams.cadetId;
+
     const cadet = cadetsData.find(c => c.id === parseInt(cadetId));
     
     // In a real app, you would have a form state management library like react-hook-form
