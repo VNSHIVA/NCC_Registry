@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "ncc-background",
+      "description": "A background image for the NCC landing page.",
+      "imageUrl": "https://picsum.photos/seed/nccbg/1920/1080",
+      "imageHint": "light military texture"
+    },
+    {
+      "id": "ncc-logo",
+      "description": "The logo for the NCC squadron.",
+      "imageUrl": "https://picsum.photos/seed/ncclogo/200/200",
+      "imageHint": "NCC logo"
+    }
+  ]
 }
