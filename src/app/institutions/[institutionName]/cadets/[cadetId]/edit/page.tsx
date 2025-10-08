@@ -219,9 +219,9 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="None" /></SelectTrigger>
                                         <SelectContent>
                                              <SelectItem value="">None</SelectItem>
-                                            <SelectItem value="RDC-I">RDC - I</section>
-                                            <SelectItem value="RDC-II">RDC - II</section>
-                                            <SelectItem value="RDC-F">RDC - Finals</section>
+                                            <SelectItem value="RDC-I">RDC - I</SelectItem>
+                                            <SelectItem value="RDC-II">RDC - II</SelectItem>
+                                            <SelectItem value="RDC-F">RDC - Finals</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
