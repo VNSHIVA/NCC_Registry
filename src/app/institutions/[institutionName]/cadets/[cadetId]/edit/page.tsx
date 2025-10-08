@@ -34,7 +34,8 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     }
 
     const handleSelectChange = (id: string, value: string) => {
-        setFormData(prev => ({ ...prev!, [id]: value }));
+        const updatedValue = value === 'none' ? null : value;
+        setFormData(prev => ({ ...prev!, [id]: updatedValue }));
     }
     
     const handleCampChange = (campType: 'atcCatc' | 'nationalCamps', index: number, field: 'date' | 'location', value: string) => {
@@ -203,10 +204,10 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <Label htmlFor="tsc">TSC - Levels</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('tsc', value)} value={formData.camps.tsc || ''}>
+                                    <Select onValueChange={(value) => handleSelectChange('tsc', value)} value={formData.camps.tsc || 'none'}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="None" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">None</SelectItem>
+                                            <SelectItem value="none">None</SelectItem>
                                             <SelectItem value="TSC-I">TSC - I</SelectItem>
                                             <SelectItem value="TSC-II">TSC - II</SelectItem>
                                             <SelectItem value="TSC-F">TSC - Finals</SelectItem>
@@ -215,10 +216,10 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="rdc">RDC - Levels</Label>
-                                     <Select onValueChange={(value) => handleSelectChange('rdc', value)} value={formData.camps.rdc || ''}>
+                                     <Select onValueChange={(value) => handleSelectChange('rdc', value)} value={formData.camps.rdc || 'none'}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="None" /></SelectTrigger>
                                         <SelectContent>
-                                             <SelectItem value="">None</SelectItem>
+                                             <SelectItem value="none">None</SelectItem>
                                             <SelectItem value="RDC-I">RDC - I</SelectItem>
                                             <SelectItem value="RDC-II">RDC - II</SelectItem>
                                             <SelectItem value="RDC-F">RDC - Finals</SelectItem>
@@ -240,5 +241,3 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         </div>
     );
 }
-
-    
