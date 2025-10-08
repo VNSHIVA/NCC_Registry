@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search, Edit } from 'lucide-react';
+import Link from 'next/link';
 
 const institutionsData = [
   {
@@ -56,6 +57,7 @@ export default function InstitutionsPage() {
             type="search"
             placeholder="Search institutions..."
             className="pl-10 bg-white/20 backdrop-blur-sm border-white/30"
+            value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
@@ -74,10 +76,12 @@ export default function InstitutionsPage() {
               <p>
                 <span className="font-semibold">Total Cadets:</span> {institution.cadets}
               </p>
-               <Button variant="outline" className="w-full mt-4 group bg-transparent hover:bg-black/10">
-                View Details and Edit
-                <Edit className="ml-2 h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-              </Button>
+               <Link href={`/institutions/${encodeURIComponent(institution.name)}/cadets`}>
+                  <Button variant="outline" className="w-full mt-4 group bg-transparent hover:bg-black/10">
+                    View Details and Edit
+                    <Edit className="ml-2 h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  </Button>
+               </Link>
             </CardContent>
           </Card>
         ))}
