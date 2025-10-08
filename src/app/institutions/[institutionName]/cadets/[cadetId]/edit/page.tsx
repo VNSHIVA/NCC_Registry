@@ -18,7 +18,8 @@ const cadetsData = [
 
 export default function EditCadetPage({ params }: { params: { institutionName: string, cadetId: string } }) {
     const institutionName = decodeURIComponent(params.institutionName);
-    const cadet = cadetsData.find(c => c.id === parseInt(params.cadetId));
+    const cadetId = params.cadetId;
+    const cadet = cadetsData.find(c => c.id === parseInt(cadetId));
     
     // In a real app, you would have a form state management library like react-hook-form
     // For simplicity, we'll use simple useState here.
@@ -240,4 +241,5 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
             </Card>
         </div>
     );
-}
+
+    
