@@ -5,24 +5,13 @@ import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Home() {
-  const bgImage = PlaceHolderImages.find((p) => p.id === 'ncc-background');
-  const logoImage = PlaceHolderImages.find((p) => p.id === 'ncc-logo');
+  
 
   return (
     <main
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden"
+      className="relative bg flex min-h-screen flex-col items-center justify-center overflow-hidden"
     >
-      {bgImage && (
-        <Image
-          src={bgImage.imageUrl}
-          alt={bgImage.description}
-          fill
-          className="object-cover -z-10"
-          quality={100}
-          priority
-          data-ai-hint={bgImage.imageHint}
-        />
-      )}
+ 
       
       <div className="flex flex-col items-center justify-center text-center space-y-16">
         <motion.h1
@@ -58,15 +47,15 @@ export default function Home() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
         >
-          {logoImage && (
-            <Image
-              src={logoImage.imageUrl}
-              alt={logoImage.description}
+  
+            <img
+              src="ncc_logo0.png"
+
               width={200}
               height={200}
-              data-ai-hint={logoImage.imageHint}
+
             />
-          )}
+
         </motion.div>
       </div>
     </main>
