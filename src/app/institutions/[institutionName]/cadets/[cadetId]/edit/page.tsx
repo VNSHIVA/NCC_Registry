@@ -17,6 +17,7 @@ const cadetsData = [
 
 
 export default function EditCadetPage({ params }: { params: { institutionName: string, cadetId: string } }) {
+    const institutionName = decodeURIComponent(params.institutionName);
     const cadet = cadetsData.find(c => c.id === parseInt(params.cadetId));
     
     // In a real app, you would have a form state management library like react-hook-form
@@ -228,7 +229,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                         </section>
 
                         <div className="flex justify-end gap-4 mt-8">
-                           <Link href={`/institutions/${encodeURIComponent(params.institutionName)}/cadets`}>
+                           <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets`}>
                              <Button type="button" variant="outline">Cancel</Button>
                            </Link>
                             <Button type="submit">Save Changes</Button>
