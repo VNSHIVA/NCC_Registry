@@ -10,17 +10,17 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 const cadetsData = [
-    { id: 1, name: 'Aarav Sharma', regNo: 'TN21SDA123456', rank: 'CDT', batch: 2022, bloodGroup: 'O+', photo: '/placeholder-avatars/male-1.jpg' },
-    { id: 2, name: 'Diya Patel', regNo: 'TN21SWA123457', rank: 'LCPL', batch: 2022, bloodGroup: 'A+', photo: '/placeholder-avatars/female-1.jpg' },
-    { id: 3, name: 'Arjun Singh', regNo: 'TN21SDA123458', rank: 'SGT', batch: 2021, bloodGroup: 'B+', photo: '/placeholder-avatars/male-2.jpg' },
-    { id: 4, name: 'Priya Kumar', regNo: 'TN21SWA123459', rank: 'CDT', batch: 2023, bloodGroup: 'AB+', photo: '/placeholder-avatars/female-2.jpg' },
-    { id: 5, name: 'Rohan Gupta', regNo: 'TN21SDA123460', rank: 'CPL', batch: 2021, bloodGroup: 'O-', photo: '/placeholder-avatars/male-3.jpg' },
-    { id: 6, name: 'Sneha Reddy', regNo: 'TN21SWA123461', rank: 'CSM', batch: 2020, bloodGroup: 'B-', photo: '/placeholder-avatars/female-3.jpg' },
-    { id: 7, name: 'Vikram Yadav', regNo: 'TN21SDA123462', rank: 'SUO', batch: 2020, bloodGroup: 'A-', photo: '/placeholder-avatars/male-4.jpg' },
-    { id: 8, name: 'Ananya Iyer', regNo: 'TN21SWA123463', rank: 'JUO', batch: 2021, bloodGroup: 'AB-', photo: '/placeholder-avatars/female-4.jpg' },
-    { id: 9, name: 'Karan Malhotra', regNo: 'TN21SDA123464', rank: 'LCPL', batch: 2023, bloodGroup: 'O+', photo: '/placeholder-avatars/male-5.jpg' },
-    { id: 10, name: 'Meera Menon', regNo: 'TN21SWA123465', rank: 'CDT', batch: 2022, bloodGroup: 'A+', photo: '/placeholder-avatars/female-5.jpg' },
-    { id: 11, name: 'Suresh Pillai', regNo: 'TN21SDA123466', rank: 'SGT', batch: 2021, bloodGroup: 'B+', photo: '/placeholder-avatars/male-6.jpg' },
+    { id: 1, name: 'Aarav Sharma', regNo: 'TN21SDA123456', rank: 'CDT', batch: 2022, bloodGroup: 'O+' },
+    { id: 2, name: 'Diya Patel', regNo: 'TN21SWA123457', rank: 'LCPL', batch: 2022, bloodGroup: 'A+' },
+    { id: 3, name: 'Arjun Singh', regNo: 'TN21SDA123458', rank: 'SGT', batch: 2021, bloodGroup: 'B+' },
+    { id: 4, name: 'Priya Kumar', regNo: 'TN21SWA123459', rank: 'CDT', batch: 2023, bloodGroup: 'AB+' },
+    { id: 5, name: 'Rohan Gupta', regNo: 'TN21SDA123460', rank: 'CPL', batch: 2021, bloodGroup: 'O-' },
+    { id: 6, name: 'Sneha Reddy', regNo: 'TN21SWA123461', rank: 'CSM', batch: 2020, bloodGroup: 'B-' },
+    { id: 7, name: 'Vikram Yadav', regNo: 'TN21SDA123462', rank: 'SUO', batch: 2020, bloodGroup: 'A-' },
+    { id: 8, name: 'Ananya Iyer', regNo: 'TN21SWA123463', rank: 'JUO', batch: 2021, bloodGroup: 'AB-' },
+    { id: 9, name: 'Karan Malhotra', regNo: 'TN21SDA123464', rank: 'LCPL', batch: 2023, bloodGroup: 'O+' },
+    { id: 10, name: 'Meera Menon', regNo: 'TN21SWA123465', rank: 'CDT', batch: 2022, bloodGroup: 'A+' },
+    { id: 11, name: 'Suresh Pillai', regNo: 'TN21SDA123466', rank: 'SGT', batch: 2021, bloodGroup: 'B+' },
 ];
 
 export default function CadetsPage() {
@@ -110,8 +110,8 @@ export default function CadetsPage() {
                 {currentCadets.map(cadet => (
                     <Card key={cadet.id} className="bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/30 overflow-hidden">
                         <CardContent className="p-4 flex flex-col items-center text-center">
-                            <Image src={cadet.photo} alt={cadet.name} width={80} height={80} className="rounded-full mb-4 border-2 border-primary" />
-                            <h3 className="text-lg font-semibold text-primary">{cadet.name}</h3>
+                            
+                            <h3 className="text-lg font-semibold text-primary pt-4">{cadet.name}</h3>
                             <p className="text-sm text-muted-foreground">{cadet.regNo}</p>
                             <div className="flex justify-center gap-4 my-3 text-sm">
                                 <div><span className="font-semibold">Rank:</span> {cadet.rank}</div>

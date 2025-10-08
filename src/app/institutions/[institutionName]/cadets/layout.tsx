@@ -11,15 +11,8 @@ export default function CadetsLayout({
   const institutionName = decodeURIComponent(params.institutionName);
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: 'hsl(var(--background))' }}>
-      <nav className="bg-primary text-primary-foreground shadow-md sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2 text-lg font-bold">
-              <img src="/ncc_logo0.png" width={32} height={32} alt="NCC Logo" className="bg-white rounded-full"/>
-              <span>2(TN) ARMD SQN NCC</span>
-            </Link>
-          </div>
+    <div>
+      <div className="container mx-auto px-6 py-3 flex justify-between items-center">
           <div className="flex-1 text-center">
              <h1 className="text-xl font-semibold">Cadets of {institutionName}</h1>
           </div>
@@ -32,7 +25,6 @@ export default function CadetsLayout({
              </button>
           </div>
         </div>
-      </nav>
       <main>{children}</main>
     </div>
   );
