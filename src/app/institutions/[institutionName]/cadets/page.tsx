@@ -7,23 +7,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+import Link from 'next/link';
 
 const cadetsData = [
-    { id: 1, name: 'Aarav Sharma', regNo: 'TN21SDA123456', rank: 'CDT', batch: 2022, bloodGroup: 'O+' },
-    { id: 2, name: 'Diya Patel', regNo: 'TN21SWA123457', rank: 'LCPL', batch: 2022, bloodGroup: 'A+' },
-    { id: 3, name: 'Arjun Singh', regNo: 'TN21SDA123458', rank: 'SGT', batch: 2021, bloodGroup: 'B+' },
-    { id: 4, name: 'Priya Kumar', regNo: 'TN21SWA123459', rank: 'CDT', batch: 2023, bloodGroup: 'AB+' },
-    { id: 5, name: 'Rohan Gupta', regNo: 'TN21SDA123460', rank: 'CPL', batch: 2021, bloodGroup: 'O-' },
-    { id: 6, name: 'Sneha Reddy', regNo: 'TN21SWA123461', rank: 'CSM', batch: 2020, bloodGroup: 'B-' },
-    { id: 7, name: 'Vikram Yadav', regNo: 'TN21SDA123462', rank: 'SUO', batch: 2020, bloodGroup: 'A-' },
-    { id: 8, name: 'Ananya Iyer', regNo: 'TN21SWA123463', rank: 'JUO', batch: 2021, bloodGroup: 'AB-' },
-    { id: 9, name: 'Karan Malhotra', regNo: 'TN21SDA123464', rank: 'LCPL', batch: 2023, bloodGroup: 'O+' },
-    { id: 10, name: 'Meera Menon', regNo: 'TN21SWA123465', rank: 'CDT', batch: 2022, bloodGroup: 'A+' },
-    { id: 11, name: 'Suresh Pillai', regNo: 'TN21SDA123466', rank: 'SGT', batch: 2021, bloodGroup: 'B+' },
+    { id: 1, name: 'Aarav Sharma', regNo: 'TN21SDA123456', rank: 'CDT', batch: 2022, bloodGroup: 'O+', institution: "St. Joseph's College", dob: '2004-05-15', mobile: '9876543210', email: 'aarav.sharma@example.com', education: 'B.Sc. Physics', nokName: 'Suresh Sharma', nokRelation: 'Father', nokContact: '9876543211', sportsCulturals: 'Cricket', homeAddress: '123, Main Street, Trichy', adhaar: '123456789012', camps: { atcCatc: [{ date: '2023-06-10', location: 'Trichy' }], nationalCamps: [], tsc: null, rdc: null } },
+    { id: 2, name: 'Diya Patel', regNo: 'TN21SWA123457', rank: 'LCPL', batch: 2022, bloodGroup: 'A+', institution: "St. Joseph's College", dob: '2004-08-22', mobile: '9876543212', email: 'diya.patel@example.com', education: 'B.Com', nokName: 'Ramesh Patel', nokRelation: 'Father', nokContact: '9876543213', sportsCulturals: 'Bharatanatyam', homeAddress: '456, North Street, Trichy', adhaar: '234567890123', camps: { atcCatc: [{ date: '2023-06-10', location: 'Trichy' }], nationalCamps: [], tsc: null, rdc: null } },
+    { id: 3, name: 'Arjun Singh', regNo: 'TN21SDA123458', rank: 'SGT', batch: 2021, bloodGroup: 'B+', institution: 'National Institute of Technology', dob: '2003-02-10', mobile: '9876543214', email: 'arjun.singh@example.com', education: 'B.E. Mech', nokName: 'Vikram Singh', nokRelation: 'Father', nokContact: '9876543215', sportsCulturals: 'Football', homeAddress: '789, West Street, Trichy', adhaar: '345678901234', camps: { atcCatc: [], nationalCamps: [{ date: '2022-10-05', location: 'Delhi' }], tsc: 'TSC-I', rdc: null } },
+    { id: 4, name: 'Priya Kumar', regNo: 'TN21SWA123459', rank: 'CDT', batch: 2023, bloodGroup: 'AB+', institution: 'Bishop Heber College', dob: '2005-11-30', mobile: '9876543216', email: 'priya.kumar@example.com', education: 'B.A. English', nokName: 'Sunita Kumar', nokRelation: 'Mother', nokContact: '9876543217', sportsCulturals: 'Singing', homeAddress: '101, East Street, Trichy', adhaar: '456789012345', camps: { atcCatc: [], nationalCamps: [], tsc: null, rdc: null } },
+    { id: 5, name: 'Rohan Gupta', regNo: 'TN21SDA123460', rank: 'CPL', batch: 2021, bloodGroup: 'O-', institution: 'Jamal Mohamed College', dob: '2003-07-19', mobile: '9876543218', email: 'rohan.gupta@example.com', education: 'B.Sc. CS', nokName: 'Anil Gupta', nokRelation: 'Father', nokContact: '9876543219', sportsCulturals: 'Basketball', homeAddress: '212, South Street, Trichy', adhaar: '567890123456', camps: { atcCatc: [], nationalCamps: [], tsc: null, rdc: 'RDC-I' } },
+    { id: 6, name: 'Sneha Reddy', regNo: 'TN21SWA123461', rank: 'CSM', batch: 2020, bloodGroup: 'B-', institution: 'Urumu Dhanalakshmi College', dob: '2002-04-25', mobile: '9876543220', email: 'sneha.reddy@example.com', education: 'B.E. CSE', nokName: 'Murali Reddy', nokRelation: 'Father', nokContact: '9876543221', sportsCulturals: 'Painting', homeAddress: '313, Central Street, Trichy', adhaar: '678901234567', camps: { atcCatc: [], nationalCamps: [], tsc: null, rdc: null } },
+    { id: 7, name: 'Vikram Yadav', regNo: 'TN21SDA123462', rank: 'SUO', batch: 2020, bloodGroup: 'A-', institution: 'Holy Cross College', dob: '2002-09-05', mobile: '9876543222', email: 'vikram.yadav@example.com', education: 'B.Tech IT', nokName: 'Ram Yadav', nokRelation: 'Father', nokContact: '9876543223', sportsCulturals: 'Kabaddi', homeAddress: '414, Cross Street, Trichy', adhaar: '789012345678', camps: { atcCatc: [], nationalCamps: [], tsc: 'TSC-F', rdc: 'RDC-F' } },
+    { id: 8, name: 'Ananya Iyer', regNo: 'TN21SWA123463', rank: 'JUO', batch: 2021, bloodGroup: 'AB-', institution: "St. Joseph's College", dob: '2003-12-12', mobile: '9876543224', email: 'ananya.iyer@example.com', education: 'B.Sc. Maths', nokName: 'Geetha Iyer', nokRelation: 'Mother', nokContact: '9876543225', sportsCulturals: 'Chess', homeAddress: '515, New Street, Trichy', adhaar: '890123456789', camps: { atcCatc: [], nationalCamps: [], tsc: null, rdc: null } },
+    { id: 9, name: 'Karan Malhotra', regNo: 'TN21SDA123464', rank: 'LCPL', batch: 2023, bloodGroup: 'O+', institution: 'National Institute of Technology', dob: '2005-01-20', mobile: '9876543226', email: 'karan.malhotra@example.com', education: 'B.E. ECE', nokName: 'Raj Malhotra', nokRelation: 'Father', nokContact: '9876543227', sportsCulturals: 'Hockey', homeAddress: '616, Old Street, Trichy', adhaar: '901234567890', camps: { atcCatc: [], nationalCamps: [], tsc: null, rdc: null } },
+    { id: 10, name: 'Meera Menon', regNo: 'TN21SWA123465', rank: 'CDT', batch: 2022, bloodGroup: 'A+', institution: 'Bishop Heber College', dob: '2004-03-18', mobile: '9876543228', email: 'meera.menon@example.com', education: 'B.A. History', nokName: 'Prakash Menon', nokRelation: 'Father', nokContact: '9876543229', sportsCulturals: 'Debate', homeAddress: '717, College Road, Trichy', adhaar: '012345678901', camps: { atcCatc: [], nationalCamps: [], tsc: null, rdc: null } },
+    { id: 11, name: 'Suresh Pillai', regNo: 'TN21SDA123466', rank: 'SGT', batch: 2021, bloodGroup: 'B+', institution: 'Jamal Mohamed College', dob: '2003-10-01', mobile: '9876543230', email: 'suresh.pillai@example.com', education: 'B.Com CA', nokName: 'Kavitha Pillai', nokRelation: 'Mother', nokContact: '9876543231', sportsCulturals: 'Volleyball', homeAddress: '818, Royal Road, Trichy', adhaar: '112345678902', camps: { atcCatc: [], nationalCamps: [], tsc: null, rdc: null } },
 ];
 
-export default function CadetsPage() {
+export default function CadetsPage({ params }: { params: { institutionName: string } }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all' });
     const [showActiveOnly, setShowActiveOnly] = useState(true);
@@ -36,7 +36,7 @@ export default function CadetsPage() {
             (filters.batch === 'all' || cadet.batch.toString() === filters.batch) &&
             (filters.rank === 'all' || cadet.rank === filters.rank) &&
             (filters.bloodGroup === 'all' || cadet.bloodGroup === filters.bloodGroup) &&
-            (!showActiveOnly || (new Date().getFullYear() - cadet.batch) <= 3) // Assuming 'active' means within 3 years
+            (!showActiveOnly || (new Date().getFullYear() - cadet.batch) <= 3) 
         );
     });
     
@@ -120,7 +120,9 @@ export default function CadetsPage() {
                             </div>
                             <div className="flex gap-2 w-full mt-2">
                                 <Button variant="outline" className="flex-1 bg-transparent hover:bg-black/10">View</Button>
-                                <Button variant="default" className="flex-1">Edit</Button>
+                                <Link href={`/institutions/${encodeURIComponent(params.institutionName)}/cadets/${cadet.id}/edit`} className="flex-1">
+                                    <Button variant="default" className="w-full">Edit</Button>
+                                </Link>
                             </div>
                         </CardContent>
                     </Card>
