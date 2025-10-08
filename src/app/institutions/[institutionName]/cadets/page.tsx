@@ -24,6 +24,7 @@ const cadetsData = [
 ];
 
 export default function CadetsPage({ params }: { params: { institutionName: string } }) {
+    const institutionName = decodeURIComponent(params.institutionName);
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all' });
     const [showActiveOnly, setShowActiveOnly] = useState(true);
@@ -120,7 +121,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                             </div>
                             <div className="flex gap-2 w-full mt-2">
                                 <Button variant="outline" className="flex-1 bg-transparent hover:bg-black/10">View</Button>
-                                <Link href={`/institutions/${encodeURIComponent(params.institutionName)}/cadets/${cadet.id}/edit`} className="flex-1">
+                                <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}/edit`} className="flex-1">
                                     <Button variant="default" className="w-full">Edit</Button>
                                 </Link>
                             </div>
