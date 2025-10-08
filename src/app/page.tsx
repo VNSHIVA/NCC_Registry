@@ -1,6 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
@@ -40,6 +42,15 @@ export default function Home() {
             DISCIPLINE
           </motion.h2>
         </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.9, ease: 'easeOut' }}
+        >
+          <Link href="/institutions">
+            <Button size="lg" className="text-lg">Dashboard</Button>
+          </Link>
+        </motion.div>
       </div>
     </main>
   );
