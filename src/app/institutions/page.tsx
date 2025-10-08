@@ -8,7 +8,7 @@ import { Search, Edit } from 'lucide-react';
 
 const institutionsData = [
   {
-    name: 'St. Joseph\'s College',
+    name: "St. Joseph's College",
     principal: 'Dr. John Doe',
     cadets: 104,
   },
@@ -55,7 +55,7 @@ export default function InstitutionsPage() {
           <Input
             type="search"
             placeholder="Search institutions..."
-            className="pl-10 bg-white"
+            className="pl-10 bg-white/20 backdrop-blur-sm border-white/30"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
@@ -63,7 +63,7 @@ export default function InstitutionsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredInstitutions.map((institution, index) => (
-          <Card key={index} className="bg-card shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card key={index} className="bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/30">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-primary">{institution.name}</CardTitle>
             </CardHeader>
@@ -74,7 +74,7 @@ export default function InstitutionsPage() {
               <p>
                 <span className="font-semibold">Total Cadets:</span> {institution.cadets}
               </p>
-               <Button variant="outline" className="w-full mt-4 group">
+               <Button variant="outline" className="w-full mt-4 group bg-transparent hover:bg-black/10">
                 View Details and Edit
                 <Edit className="ml-2 h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
               </Button>

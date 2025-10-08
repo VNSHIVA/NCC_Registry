@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { ArrowDown } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -46,9 +47,13 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9, ease: 'easeOut' }}
+          className="flex flex-col items-center space-y-2"
         >
+          <ArrowDown className="h-8 w-8 text-primary animate-bounce" />
           <Link href="/institutions">
-            <Button size="lg" className="text-lg">Dashboard</Button>
+            <Button size="lg" className="text-lg">
+              Dashboard
+            </Button>
           </Link>
         </motion.div>
       </div>
