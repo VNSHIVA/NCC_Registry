@@ -88,7 +88,7 @@ body {
 }
 
 .bg {
-  background-image: url("https://storage.googleapis.com/project-spark-30815148.us-central1.firesafe.app/images/5f04a747-8b21-4a7b-a764-a78bee85e135.png");
+  background-image: url("/Design.png");
   background-size: cover;
   background-position: center;
 }

@@ -5,20 +5,14 @@ import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Home() {
-  
-
   return (
-    <main
-      className="relative bg flex min-h-screen flex-col items-center justify-center overflow-hidden"
-    >
- 
-      
-      <div className="flex flex-col items-center justify-center text-center space-y-16">
+    <main className="bg flex min-h-screen flex-col items-center justify-center overflow-hidden">
+      <div className="flex flex-col items-center justify-center space-y-16 text-center">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="text-4xl md:text-6xl font-bold tracking-wider text-primary"
+          className="text-4xl font-bold tracking-wider text-primary md:text-6xl"
         >
           2(TN) ARMD SQN NCC TRICHY
         </motion.h1>
@@ -28,7 +22,7 @@ export default function Home() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-            className="text-3xl md:text-5xl font-semibold text-accent"
+            className="text-3xl font-semibold text-accent md:text-5xl"
           >
             UNITY
           </motion.h2>
@@ -36,7 +30,7 @@ export default function Home() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-            className="text-3xl md:text-5xl font-semibold text-accent"
+            className="text-3xl font-semibold text-accent md:text-5xl"
           >
             DISCIPLINE
           </motion.h2>
@@ -47,15 +41,7 @@ export default function Home() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
         >
-  
-            <img
-              src="ncc_logo0.png"
-
-              width={200}
-              height={200}
-
-            />
-
+          <img src="ncc_logo0.png" width={200} height={200} alt="NCC Logo" />
         </motion.div>
       </div>
     </main>
