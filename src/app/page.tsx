@@ -23,7 +23,7 @@ export default function Home() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-            className="text-3xl font-semibold text-accent md:text-5xl"
+            className="text-3xl font-semibold text-primary md:text-5xl"
           >
             UNITY
           </motion.h2>
@@ -38,7 +38,7 @@ export default function Home() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
-            className="text-3xl font-semibold text-accent md:text-5xl"
+            className="text-3xl font-semibold text-primary md:text-5xl"
           >
             DISCIPLINE
           </motion.h2>
