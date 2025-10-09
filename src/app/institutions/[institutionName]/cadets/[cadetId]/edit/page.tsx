@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,24 +7,61 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
-
-// Mock data, in a real app this would come from a database
-const cadetsData = [
-    { id: 1, name: 'Aarav Sharma', regNo: 'TN21SDA123456', rank: 'CDT', batch: 2022, bloodGroup: 'O+', institution: "St. Joseph's College", dob: '2004-05-15', mobile: '9876543210', email: 'aarav.sharma@example.com', education: 'B.Sc. Physics', nokName: 'Suresh Sharma', nokRelation: 'Father', nokContact: '9876543211', sportsCulturals: 'Cricket', homeAddress: '123, Main Street, Trichy', adhaar: '123456789012', camps: { atcCatc: [{ date: '2023-06-10', location: 'Trichy' }], nationalCamps: [], tsc: null, rdc: null } },
-    { id: 2, name: 'Diya Patel', regNo: 'TN21SWA123457', rank: 'LCPL', batch: 2022, bloodGroup: 'A+', institution: "St. Joseph's College", dob: '2004-08-22', mobile: '9876543212', email: 'diya.patel@example.com', education: 'B.Com', nokName: 'Ramesh Patel', nokRelation: 'Father', nokContact: '9876543213', sportsCulturals: 'Bharatanatyam', homeAddress: '456, North Street, Trichy', adhaar: '234567890123', camps: { atcCatc: [{ date: '2023-06-10', location: 'Trichy' }], nationalCamps: [], tsc: null, rdc: null } },
-    { id: 3, name: 'Arjun Singh', regNo: 'TN21SDA123458', rank: 'SGT', batch: 2021, bloodGroup: 'B+', institution: 'National Institute of Technology', dob: '2003-02-10', mobile: '9876543214', email: 'arjun.singh@example.com', education: 'B.E. Mech', nokName: 'Vikram Singh', nokRelation: 'Father', nokContact: '9876543215', sportsCulturals: 'Football', homeAddress: '789, West Street, Trichy', adhaar: '345678901234', camps: { atcCatc: [], nationalCamps: [{ date: '2022-10-05', location: 'Delhi' }], tsc: 'TSC-I', rdc: null } },
-];
+import { getCadet, updateCadet } from '@/lib/cadet-service';
+import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 export default function EditCadetPage({ params }: { params: { institutionName: string, cadetId: string } }) {
+    const router = useRouter();
     const resolvedParams = React.use(params);
     const institutionName = decodeURIComponent(resolvedParams.institutionName);
     const cadetId = resolvedParams.cadetId;
-    const cadet = cadetsData.find(c => c.id === parseInt(cadetId));
     
-    // In a real app, you would have a form state management library like react-hook-form
-    // For simplicity, we'll use simple useState here.
-    const [formData, setFormData] = useState(cadet);
+    const [formData, setFormData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        async function fetchCadet() {
+            setLoading(true);
+            const data = await getCadet(cadetId);
+            if(data) {
+                // Ensure camps data is properly initialized
+                if (!data.camps) {
+                    data.camps = { atcCatc: [], nationalCamps: [], tsc: null, rdc: null };
+                } else {
+                    if (!data.camps.atcCatc) data.camps.atcCatc = [];
+                    if (!data.camps.nationalCamps) data.camps.nationalCamps = [];
+                }
+                setFormData(data);
+            }
+            setLoading(false);
+        }
+        fetchCadet();
+    }, [cadetId]);
+
+    if (loading) {
+        return (
+             <div className="container mx-auto px-4 py-8">
+                <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+                    <CardHeader>
+                        <Skeleton className="h-8 w-1/2" />
+                    </CardHeader>
+                    <CardContent className="space-y-8">
+                         {Array.from({ length: 3 }).map((_, i) => (
+                        <section key={i}>
+                            <Skeleton className="h-6 w-1/3 mb-4" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {Array.from({ length: 6 }).map((_, j) => <Skeleton key={j} className="h-10 w-full" />)}
+                            </div>
+                        </section>
+                        ))}
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     if (!formData) {
         return <div className="container mx-auto px-4 py-8">Cadet not found</div>
@@ -32,50 +69,68 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
-        setFormData(prev => ({ ...prev!, [id]: value }));
+        setFormData((prev: any) => ({ ...prev!, [id]: value }));
     }
 
     const handleSelectChange = (id: string, value: string) => {
         const updatedValue = value === 'none' ? null : value;
-        setFormData(prev => ({ ...prev!, [id]: updatedValue }));
+        if (id === 'tsc' || id === 'rdc') {
+            setFormData((prev: any) => ({
+                ...prev,
+                camps: { ...prev.camps, [id]: updatedValue }
+            }));
+        } else {
+             setFormData((prev: any) => ({ ...prev!, [id]: value }));
+        }
     }
     
     const handleCampChange = (campType: 'atcCatc' | 'nationalCamps', index: number, field: 'date' | 'location', value: string) => {
-        setFormData(prev => {
-            const newCamps = { ...prev!.camps };
-            (newCamps[campType][index] as any)[field] = value;
-            return { ...prev!, camps: newCamps };
+        setFormData((prev: any) => {
+            const newCamps = { ...prev.camps };
+            const updatedCamps = [...newCamps[campType]];
+            updatedCamps[index] = { ...updatedCamps[index], [field]: value };
+            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
         });
     }
 
     const addCamp = (campType: 'atcCatc' | 'nationalCamps') => {
-        setFormData(prev => {
-            const newCamps = { ...prev!.camps };
-            newCamps[campType].push({ date: '', location: '' });
-            return { ...prev!, camps: newCamps };
+        setFormData((prev: any) => {
+            const newCamps = { ...prev.camps };
+            const updatedCamps = [...newCamps[campType], { date: '', location: '' }];
+            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
         });
     }
 
     const removeCamp = (campType: 'atcCatc' | 'nationalCamps', index: number) => {
-        setFormData(prev => {
-            const newCamps = { ...prev!.camps };
-            newCamps[campType].splice(index, 1);
-            return { ...prev!, camps: newCamps };
+        setFormData((prev: any) => {
+            const newCamps = { ...prev.camps };
+            const updatedCamps = [...newCamps[campType]];
+            updatedCamps.splice(index, 1);
+            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
         });
     }
     
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically send the data to your backend API to save it.
-        console.log('Updated Cadet Data:', formData);
-        alert('Cadet details saved successfully! (Check console for data)');
+        setIsSubmitting(true);
+        try {
+            // Firestore doesn't like the 'id' field in the data object
+            const { id, ...dataToUpdate } = formData;
+            await updateCadet(cadetId, dataToUpdate, institutionName);
+            // Optionally show success toast
+            router.push(`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadetId}`);
+        } catch (error) {
+            console.error("Failed to update cadet", error);
+            // Optionally show error toast
+            setIsSubmitting(false);
+        }
     }
 
     return (
         <div className="container mx-auto px-4 py-8">
             <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-primary">Edit Cadet: {cadet?.name}</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-primary">Edit Cadet: {formData.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-8">
@@ -99,6 +154,10 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 <div>
                                     <Label htmlFor="name">Name</Label>
                                     <Input id="name" value={formData.name} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="batch">Batch</Label>
+                                    <Input id="batch" type="number" value={formData.batch} onChange={handleInputChange} className="mt-1 bg-white/20" />
                                 </div>
                                 <div>
                                     <Label htmlFor="institution">Institution</Label>
@@ -169,7 +228,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                              {/* ATC/CATC */}
                             <div className="mb-6">
                                 <h4 className="font-semibold mb-2">ATC / CATC</h4>
-                                {formData.camps.atcCatc.map((camp, index) => (
+                                {formData.camps.atcCatc.map((camp: any, index: number) => (
                                     <div key={index} className="flex items-end gap-4 mb-2 p-2 border rounded-md">
                                         <div className="flex-1">
                                             <Label htmlFor={`atcDate-${index}`}>Date Attended</Label>
@@ -187,7 +246,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                             {/* National Camps */}
                              <div className="mb-6">
                                 <h4 className="font-semibold mb-2">National Camps</h4>
-                                {formData.camps.nationalCamps.map((camp, index) => (
+                                {formData.camps.nationalCamps.map((camp: any, index: number) => (
                                     <div key={index} className="flex items-end gap-4 mb-2 p-2 border rounded-md">
                                         <div className="flex-1">
                                             <Label htmlFor={`nationalDate-${index}`}>Date Attended</Label>
@@ -200,8 +259,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                          <Button type="button" variant="destructive" size="sm" onClick={() => removeCamp('nationalCamps', index)}>Remove</Button>
                                     </div>
                                 ))}
-                                <Button type="button" variant="outline" size="sm" onClick={() => addCamp('nationalCamps')}>Add National Camp</Button>
-                            </div>
+                                <Button type="button" variant="outline" size="sm" onClick={() => addCamp('nationalCamps')}>Add National Camp</Button>                            </div>
                             {/* TSC / RDC */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -232,10 +290,10 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                         </section>
 
                         <div className="flex justify-end gap-4 mt-8">
-                           <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets`}>
-                             <Button type="button" variant="outline">Cancel</Button>
+                           <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadetId}`}>
+                             <Button type="button" variant="outline" disabled={isSubmitting}>Cancel</Button>
                            </Link>
-                            <Button type="submit">Save Changes</Button>
+                            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Changes'}</Button>
                         </div>
                     </form>
                 </CardContent>

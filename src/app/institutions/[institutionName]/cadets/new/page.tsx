@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,73 +7,105 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
+import { addCadet } from '@/lib/cadet-service';
+import { useRouter } from 'next/navigation';
 
-// Mock data, in a real app this would come from a database
-const cadetsData = [
-    { id: 1, name: 'Aarav Sharma', regNo: 'TN21SDA123456', rank: 'CDT', batch: 2022, bloodGroup: 'O+', institution: "St. Joseph's College", dob: '2004-05-15', mobile: '9876543210', email: 'aarav.sharma@example.com', education: 'B.Sc. Physics', nokName: 'Suresh Sharma', nokRelation: 'Father', nokContact: '9876543211', sportsCulturals: 'Cricket', homeAddress: '123, Main Street, Trichy', adhaar: '123456789012', camps: { atcCatc: [{ date: '2023-06-10', location: 'Trichy' }], nationalCamps: [], tsc: null, rdc: null } },
-    { id: 2, name: 'Diya Patel', regNo: 'TN21SWA123457', rank: 'LCPL', batch: 2022, bloodGroup: 'A+', institution: "St. Joseph's College", dob: '2004-08-22', mobile: '9876543212', email: 'diya.patel@example.com', education: 'B.Com', nokName: 'Ramesh Patel', nokRelation: 'Father', nokContact: '9876543213', sportsCulturals: 'Bharatanatyam', homeAddress: '456, North Street, Trichy', adhaar: '234567890123', camps: { atcCatc: [{ date: '2023-06-10', location: 'Trichy' }], nationalCamps: [], tsc: null, rdc: null } },
-    { id: 3, name: 'Arjun Singh', regNo: 'TN21SDA123458', rank: 'SGT', batch: 2021, bloodGroup: 'B+', institution: 'National Institute of Technology', dob: '2003-02-10', mobile: '9876543214', email: 'arjun.singh@example.com', education: 'B.E. Mech', nokName: 'Vikram Singh', nokRelation: 'Father', nokContact: '9876543215', sportsCulturals: 'Football', homeAddress: '789, West Street, Trichy', adhaar: '345678901234', camps: { atcCatc: [], nationalCamps: [{ date: '2022-10-05', location: 'Delhi' }], tsc: 'TSC-I', rdc: null } },
-];
+const initialCamp = { date: '', location: '' };
+const initialCamps = {
+    atcCatc: [],
+    nationalCamps: [],
+    tsc: null,
+    rdc: null,
+};
 
+export default function NewCadetPage({ params }: { params: { institutionName: string } }) {
+    const router = useRouter();
+    const resolvedParams = React.use(params);
+    const institutionName = decodeURIComponent(resolvedParams.institutionName);
 
-export default function EditCadetPage({ params }: { params: { institutionName: string, cadetId: string } }) {
-        const resolvedParams = React.use(params);
-    const institutionName = decodeURIComponent(params.institutionName);
-    const cadet = cadetsData.find(c => c.id === parseInt(params.cadetId));
-    
-    // In a real app, you would have a form state management library like react-hook-form
-    // For simplicity, we'll use simple useState here.
-    const [formData, setFormData] = useState(cadet);
-
-    if (!formData) {
-        return <div className="container mx-auto px-4 py-8">Cadet not found</div>
-    }
+    const [formData, setFormData] = useState({
+        institution: institutionName,
+        name: '',
+        regNo: '',
+        rank: 'CDT',
+        batch: new Date().getFullYear(),
+        bloodGroup: 'O+',
+        dob: '',
+        mobile: '',
+        email: '',
+        education: '',
+        nokName: '',
+        nokRelation: '',
+        nokContact: '',
+        sportsCulturals: '',
+        homeAddress: '',
+        adhaar: '',
+        camps: initialCamps
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
-        setFormData(prev => ({ ...prev!, [id]: value }));
+        setFormData(prev => ({ ...prev, [id]: value }));
     }
 
     const handleSelectChange = (id: string, value: string) => {
-        setFormData(prev => ({ ...prev!, [id]: value }));
-    }
+        const updatedValue = value === 'none' ? null : value;
+        if (id === 'tsc' || id === 'rdc') {
+            setFormData(prev => ({
+                ...prev,
+                camps: { ...prev.camps, [id]: updatedValue }
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, [id]: value }));
+        }
+    };
     
     const handleCampChange = (campType: 'atcCatc' | 'nationalCamps', index: number, field: 'date' | 'location', value: string) => {
         setFormData(prev => {
-            const newCamps = { ...prev!.camps };
-            (newCamps[campType][index] as any)[field] = value;
-            return { ...prev!, camps: newCamps };
+            const newCamps = { ...prev.camps };
+            const updatedCamps = [...newCamps[campType]];
+            updatedCamps[index] = { ...updatedCamps[index], [field]: value };
+            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
         });
     }
 
     const addCamp = (campType: 'atcCatc' | 'nationalCamps') => {
         setFormData(prev => {
-            const newCamps = { ...prev!.camps };
-            newCamps[campType].push({ date: '', location: '' });
-            return { ...prev!, camps: newCamps };
+            const newCamps = { ...prev.camps };
+            const updatedCamps = [...newCamps[campType], { date: '', location: '' }];
+            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
         });
     }
 
     const removeCamp = (campType: 'atcCatc' | 'nationalCamps', index: number) => {
         setFormData(prev => {
-            const newCamps = { ...prev!.camps };
-            newCamps[campType].splice(index, 1);
-            return { ...prev!, camps: newCamps };
+            const newCamps = { ...prev.camps };
+            const updatedCamps = [...newCamps[campType]];
+            updatedCamps.splice(index, 1);
+            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
         });
     }
     
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically send the data to your backend API to save it.
-        console.log('Updated Cadet Data:', formData);
-        alert('Cadet details saved successfully! (Check console for data)');
+        setIsSubmitting(true);
+        try {
+            await addCadet(formData, institutionName);
+            // Optionally, show a success toast
+            router.push(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
+        } catch (error) {
+            console.error("Failed to add cadet", error);
+            // Optionally, show an error toast
+            setIsSubmitting(false);
+        }
     }
 
     return (
         <div className="container mx-auto px-4 py-8">
             <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-primary">Edit Cadet: {cadet?.name}</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-primary">Add New Cadet</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-8">
@@ -83,7 +115,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
                                     <Label htmlFor="regNo">Regimental No</Label>
-                                    <Input id="regNo" value={formData.regNo} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Input id="regNo" value={formData.regNo} onChange={handleInputChange} className="mt-1 bg-white/20" required/>
                                 </div>
                                 <div>
                                     <Label htmlFor="rank">Rank</Label>
@@ -96,7 +128,11 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="name">Name</Label>
-                                    <Input id="name" value={formData.name} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Input id="name" value={formData.name} onChange={handleInputChange} className="mt-1 bg-white/20" required/>
+                                </div>
+                                 <div>
+                                    <Label htmlFor="batch">Batch</Label>
+                                    <Input id="batch" type="number" value={formData.batch} onChange={handleInputChange} className="mt-1 bg-white/20" required/>
                                 </div>
                                 <div>
                                     <Label htmlFor="institution">Institution</Label>
@@ -167,7 +203,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                              {/* ATC/CATC */}
                             <div className="mb-6">
                                 <h4 className="font-semibold mb-2">ATC / CATC</h4>
-                                {formData.camps.atcCatc.map((camp, index) => (
+                                {(formData.camps.atcCatc as any[]).map((camp, index) => (
                                     <div key={index} className="flex items-end gap-4 mb-2 p-2 border rounded-md">
                                         <div className="flex-1">
                                             <Label htmlFor={`atcDate-${index}`}>Date Attended</Label>
@@ -185,7 +221,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                             {/* National Camps */}
                              <div className="mb-6">
                                 <h4 className="font-semibold mb-2">National Camps</h4>
-                                {formData.camps.nationalCamps.map((camp, index) => (
+                                {(formData.camps.nationalCamps as any[]).map((camp, index) => (
                                     <div key={index} className="flex items-end gap-4 mb-2 p-2 border rounded-md">
                                         <div className="flex-1">
                                             <Label htmlFor={`nationalDate-${index}`}>Date Attended</Label>
@@ -204,7 +240,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <Label htmlFor="tsc">TSC - Levels</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('tsc', value)} value={formData.camps.tsc || ''}>
+                                    <Select onValueChange={(value) => handleSelectChange('tsc', value)} value={formData.camps.tsc || 'none'}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="None" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="none">None</SelectItem>
@@ -216,13 +252,13 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="rdc">RDC - Levels</Label>
-                                     <Select onValueChange={(value) => handleSelectChange('rdc', value)} value={formData.camps.rdc || ''}>
+                                     <Select onValueChange={(value) => handleSelectChange('rdc', value)} value={formData.camps.rdc || 'none'}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="None" /></SelectTrigger>
                                         <SelectContent>
                                              <SelectItem value="none">None</SelectItem>
-                                            <SelectItem value="RDC-I">RDC - I</section>
-                                            <SelectItem value="RDC-II">RDC - II</section>
-                                            <SelectItem value="RDC-F">RDC - Finals</section>
+                                            <SelectItem value="RDC-I">RDC - I</SelectItem>
+                                            <SelectItem value="RDC-II">RDC - II</SelectItem>
+                                            <SelectItem value="RDC-F">RDC - Finals</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -231,9 +267,9 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
 
                         <div className="flex justify-end gap-4 mt-8">
                            <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets`}>
-                             <Button type="button" variant="outline">Cancel</Button>
+                             <Button type="button" variant="outline" disabled={isSubmitting}>Cancel</Button>
                            </Link>
-                            <Button type="submit">Save Changes</Button>
+                            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Cadet'}</Button>
                         </div>
                     </form>
                 </CardContent>
