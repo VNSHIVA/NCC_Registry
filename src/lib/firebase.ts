@@ -1,15 +1,15 @@
-'use client';
+
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 // IMPORTANT: Replace this with your own Firebase project configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCY1dGUCM35guqsE1632j0NYLXI0THTmQ8",
+  authDomain: "ncctrichy-d60fa.firebaseapp.com",
+  projectId: "ncctrichy-d60fa",
+  storageBucket: "ncctrichy-d60fa.firebasestorage.app",
+  messagingSenderId: "245703083753",
+  appId: "1:245703083753:web:97f041cb56cbabba989278"
 };
 
 // Initialize Firebase
