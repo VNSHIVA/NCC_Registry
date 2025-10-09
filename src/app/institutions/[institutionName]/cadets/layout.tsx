@@ -2,6 +2,7 @@
 import { Home, Building, Users, Search, UserCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import React from 'react';
 
 export default function CadetsLayout({
   children,
@@ -11,7 +12,8 @@ export default function CadetsLayout({
   params: { institutionName: string };
 }) {
   const pathname = usePathname();
-  const institutionName = decodeURIComponent(params.institutionName);
+  const resolvedParams = React.use(params);
+  const institutionName = decodeURIComponent(resolvedParams.institutionName);
 
   const isCadetListPage = pathname === `/institutions/${encodeURIComponent(institutionName)}/cadets`;
 
