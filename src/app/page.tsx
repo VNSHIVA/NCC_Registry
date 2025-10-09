@@ -18,7 +18,7 @@ export default function Home() {
           2(TN) ARMD SQN NCC TRICHY
         </motion.h1>
 
-        <div className="flex items-center space-x-12 md:space-x-24">
+        <div className="flex flex-col items-center space-y-8 md:flex-row md:space-y-0 md:space-x-24">
           <motion.h2
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -43,6 +43,7 @@ export default function Home() {
             DISCIPLINE
           </motion.h2>
         </div>
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
