@@ -21,7 +21,6 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     const resolvedParams = React.use(params);
     const institutionName = decodeURIComponent(resolvedParams.institutionName);
     const cadetId = resolvedParams.cadetId;
-
     const cadet = cadetsData.find(c => c.id === parseInt(cadetId));
     
     // In a real app, you would have a form state management library like react-hook-form
