@@ -17,6 +17,7 @@ const cadetsData = [
 
 
 export default function EditCadetPage({ params }: { params: { institutionName: string, cadetId: string } }) {
+        const resolvedParams = React.use(params);
     const institutionName = decodeURIComponent(params.institutionName);
     const cadet = cadetsData.find(c => c.id === parseInt(params.cadetId));
     
