@@ -3,14 +3,32 @@
     {
       "id": "ncc-background",
       "description": "A background image for the NCC landing page.",
-      "imageUrl": "https://picsum.photos/seed/nccbg/1920/1080",
-      "imageHint": "light military texture"
+      "imageUrl": "https://images.unsplash.com/photo-1716205504198-79e70439c667?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzdWJ0bGUlMjBtaWxpdGFyeSUyMHRleHR1cmV8ZW58MHx8fHwxNzYwNzkyODA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "subtle military texture"
     },
     {
       "id": "ncc-logo",
       "description": "The logo for the NCC squadron.",
-      "imageUrl": "https://picsum.photos/seed/ncclogo/200/200",
+      "imageUrl": "/ncc_logo0.png",
       "imageHint": "NCC logo"
+    },
+    {
+      "id": "institutions-background",
+      "description": "Background for the institutions page.",
+      "imageUrl": "https://images.unsplash.com/photo-1717250265352-51c2466e245b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YXJjaGl0ZWN0dXJhbCUyMGxhbmRtYXJrJTIwc2tldGNofGVufDB8fHx8MTc2MDc5MjgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "architectural landmark sketch"
+    },
+    {
+      "id": "cadets-background",
+      "description": "Background for the cadets list page.",
+      "imageUrl": "https://images.unsplash.com/photo-1587895095511-91d28707dd1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYXJjaGluZyUyMGNhZGV0cyUyMHNpbGhvdWV0dGV8ZW58MHx8fHwxNzYwNzkyODA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "marching cadets silhouette"
+    },
+    {
+      "id": "cadet-detail-background",
+      "description": "Background for the cadet detail page.",
+      "imageUrl": "https://images.unsplash.com/photo-1667918140078-9db890beab86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZmFpbnQlMjBtZWRhbHMlMjBwYXR0ZXJufGVufDB8fHx8MTc2MDc5MjgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "faint medals pattern"
     }
   ]
 }
