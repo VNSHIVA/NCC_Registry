@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Search, ChevronLeft, ChevronRight, PlusCircle } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, PlusCircle, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { getCadets } from '@/lib/cadet-service';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CadetImportDialog } from '@/components/cadet-import-dialog';
 
 export default function CadetsPage({ params }: { params: { institutionName: string } }) {
     const resolvedParams = React.use(params);
@@ -22,14 +23,16 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const [showActiveOnly, setShowActiveOnly] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const cadetsPerPage = 9;
+    const [isImporting, setIsImporting] = useState(false);
+
+    async function fetchCadets() {
+        setLoading(true);
+        const cadets = await getCadets(institutionName);
+        setCadetsData(cadets);
+        setLoading(false);
+    }
 
     useEffect(() => {
-        async function fetchCadets() {
-            setLoading(true);
-            const cadets = await getCadets(institutionName);
-            setCadetsData(cadets);
-            setLoading(false);
-        }
         fetchCadets();
     }, [institutionName]);
 
@@ -63,6 +66,12 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
     return (
         <div className="container mx-auto px-4 py-8">
+            <CadetImportDialog
+                isOpen={isImporting}
+                onClose={() => setIsImporting(false)}
+                onImportSuccess={fetchCadets}
+                institutionName={institutionName}
+            />
             <Card className="mb-8 bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
                 <CardContent className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
@@ -109,6 +118,9 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" onClick={handleReset} className="bg-transparent hover:bg-black/10">Reset</Button>
+                            <Button variant="outline" onClick={() => setIsImporting(true)}>
+                                <Upload className="mr-2 h-4 w-4" /> Import Cadets
+                            </Button>
                              <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/new`}>
                                 <Button>
                                     <PlusCircle className="mr-2 h-4 w-4" /> Add New Cadet
