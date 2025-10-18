@@ -87,7 +87,7 @@
 }
 
 .bg {
-  background-image: url("https://picsum.photos/seed/nccbg/1920/1080");
+  background-image: url("/Design.png");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

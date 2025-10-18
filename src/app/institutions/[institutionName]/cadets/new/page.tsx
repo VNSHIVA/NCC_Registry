@@ -103,7 +103,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+            <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-primary">Add New Cadet</CardTitle>
                 </CardHeader>

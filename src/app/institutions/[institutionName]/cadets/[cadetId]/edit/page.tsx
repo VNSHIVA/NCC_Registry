@@ -44,7 +44,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     if (loading) {
         return (
              <div className="container mx-auto px-4 py-8">
-                <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+                <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                     <CardHeader>
                         <Skeleton className="h-8 w-1/2" />
                     </CardHeader>
@@ -128,7 +128,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+            <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-primary">Edit Cadet: {formData.name}</CardTitle>
                 </CardHeader>

@@ -53,7 +53,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     return (
       <div className="container mx-auto px-4 py-8">
         <Skeleton className="h-12 w-1/4 mb-4" />
-        <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+        <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
           <CardHeader>
             <Skeleton className="h-8 w-1/2" />
           </CardHeader>
@@ -82,7 +82,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
         <ArrowLeft className="h-4 w-4" />
         Back to Cadets List
       </Link>
-      <Card className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+      <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>

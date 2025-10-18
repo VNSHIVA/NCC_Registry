@@ -73,7 +73,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 onImportSuccess={fetchCadets}
                 institutionName={institutionName}
             />
-            <Card className="mb-8 bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+            <Card className="mb-8 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardContent className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                         <div className="relative">
@@ -112,18 +112,18 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                             </Select>
                         </div>
                     </div>
-                     <div className="flex items-center justify-between mt-6">
+                     <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
                          <div className="flex items-center space-x-2">
                             <Switch id="active-cadets" checked={showActiveOnly} onCheckedChange={setShowActiveOnly} />
                             <Label htmlFor="active-cadets">Show Active Cadets Only (3 years)</Label>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <Button variant="outline" onClick={handleReset} className="bg-transparent hover:bg-black/10">Reset</Button>
-                            <Button variant="outline" onClick={() => setIsImporting(true)}>
+                            <Button variant="outline" onClick={() => setIsImporting(true)} className="w-full sm:w-auto">
                                 <Upload className="mr-2 h-4 w-4" /> Import Cadets
                             </Button>
-                             <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/new`}>
-                                <Button>
+                             <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/new`} className="w-full sm:w-auto">
+                                <Button className="w-full">
                                     <PlusCircle className="mr-2 h-4 w-4" /> Add New Cadet
                                 </Button>
                             </Link>
@@ -135,7 +135,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {loading ? (
                     Array.from({ length: cadetsPerPage }).map((_, index) => (
-                        <Card key={index} className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30 overflow-hidden">
+                        <Card key={index} className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20 overflow-hidden">
                             <CardContent className="p-4 flex flex-col items-center text-center">
                                 <Skeleton className="h-6 w-3/4 mt-4"/>
                                 <Skeleton className="h-4 w-1/2 mt-2"/>
@@ -152,7 +152,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                         </Card>
                     ))
                 ) : currentCadets.map(cadet => (
-                    <Card key={cadet.id} className="bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/30 overflow-hidden">
+                    <Card key={cadet.id} className="bg-card/80 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/20 overflow-hidden">
                         <CardContent className="p-4 flex flex-col items-center text-center">
                             
                             <h3 className="text-lg font-semibold text-primary pt-4">{cadet.name}</h3>

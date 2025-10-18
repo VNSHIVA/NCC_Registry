@@ -13,8 +13,8 @@ export default function Home() {
   const logo = PlaceHolderImages.find(p => p.id === 'ncc-logo');
 
   return (
-    <main className="flex min-h-[calc(100vh-68px)] flex-col items-center justify-center overflow-hidden bg-background">
-      <div className="flex flex-col items-center justify-center space-y-16 text-center bg-card/70 backdrop-blur-sm p-8 md:p-16 rounded-lg shadow-2xl">
+    <main className="flex min-h-[calc(100vh-68px)] flex-col items-center justify-center overflow-hidden">
+      <div className="flex flex-col items-center justify-center space-y-16 text-center bg-card/70 backdrop-blur-sm p-8 md:p-16 rounded-xl shadow-2xl border border-white/20">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

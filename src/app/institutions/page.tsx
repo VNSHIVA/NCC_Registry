@@ -81,9 +81,9 @@ export default function InstitutionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex justify-between items-center gap-4">
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <h1 className="text-3xl font-bold text-primary">Institutions</h1>
-        <div className="flex-1 flex justify-end items-center gap-4">
+        <div className="flex-1 w-full md:w-auto flex flex-col sm:flex-row justify-end items-center gap-4">
             <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -96,7 +96,7 @@ export default function InstitutionsPage() {
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                    <Button>
+                    <Button className="w-full sm:w-auto">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Add Institution
                     </Button>
@@ -147,7 +147,7 @@ export default function InstitutionsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="bg-card shadow-lg backdrop-blur-lg border rounded-xl border-white/30">
+            <Card key={index} className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
               <CardHeader>
                 <Skeleton className="h-6 w-3/4" />
               </CardHeader>
@@ -160,7 +160,7 @@ export default function InstitutionsPage() {
           ))
         ) : (
           filteredInstitutions.map((institution, index) => (
-            <Card key={index} className="bg-card shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/30">
+            <Card key={index} className="bg-card/80 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/20">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-primary">{institution.name}</CardTitle>
               </CardHeader>
