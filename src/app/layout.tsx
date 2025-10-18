@@ -6,6 +6,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import Link from 'next/link';
 import { Building, Home, Users, Menu, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function RootLayout({
   children,
@@ -13,6 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
 
   return (
     <html lang="en">
@@ -21,7 +25,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg">
+      <body className={cn("font-body antialiased", !isHomePage && "bg")}>
       <nav className="bg-primary/90 text-primary-foreground shadow-md backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-3 flex justify-between items-center">
           <div className="flex items-center">
