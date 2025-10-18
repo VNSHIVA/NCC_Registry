@@ -63,7 +63,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         setCurrentPage(1);
     }
     
-    const batchYears = [...new Set(cadetsData.map(c => c.batch).filter(Boolean))].sort((a, b) => b - a);
+    const batchYears = [2027, 2026, 2025, 2024, 2023, 2022, 2021, 2020];
 
     return (
         <div className="container mx-auto px-4 py-8">
