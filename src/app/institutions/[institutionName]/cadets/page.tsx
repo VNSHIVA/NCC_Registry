@@ -175,7 +175,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         }
     };
 
-    const batchYears = Array.from(new Set(cadetsData.map(c => c.batch))).sort((a, b) => b - a);
+    const batchYears = Array.from(new Set(cadetsData.map(c => c.batch).filter(Boolean))).sort((a,b) => b - a);
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -358,3 +358,5 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         </div>
     );
 }
+
+    
