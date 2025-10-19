@@ -26,6 +26,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import { format, parseISO } from 'date-fns';
 import { campTypes } from '@/lib/constants';
 
@@ -102,10 +109,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const formatDateForExport = (dateString: string) => {
         if (!dateString) return '';
         try {
-            //Handles both yyyy-mm-dd and other date formats that parseISO can handle
             return format(parseISO(dateString), 'dd/MM/yyyy');
         } catch (e) {
-            // If parseISO fails, maybe it's already in a different format or invalid
             return dateString;
         }
     }
@@ -115,10 +120,23 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         return camp ? camp.label : typeValue;
     }
 
-
     const formatDataForExport = (data: any[]) => {
+        // First, find all unique camp type/level combinations to create headers
+        const allCampHeaders = new Set<string>();
+        data.forEach(cadet => {
+            if (cadet.camps && Array.isArray(cadet.camps)) {
+                cadet.camps.forEach((camp: any) => {
+                    const campName = getCampLabel(camp.campType);
+                    const header = camp.level ? `${campName} - ${camp.level}` : campName;
+                    if(header) allCampHeaders.add(header);
+                });
+            }
+        });
+    
+        const uniqueCampHeaders = Array.from(allCampHeaders);
+    
         return data.map(cadet => {
-            const formattedCadet: {[key: string]: any} = {
+            const formattedCadet: { [key: string]: any } = {
                 'Regimental No': cadet.regNo || '',
                 'Rank': cadet.rank || '',
                 'CDT Name': cadet.name || '',
@@ -136,21 +154,34 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'NOK Relation': cadet.nokRelation || '',
                 'NOK Contact': cadet.nokContact || '',
             };
-
-            if (cadet.camps && cadet.camps.length > 0) {
-                cadet.camps.forEach((camp: any, index: number) => {
-                    const campPrefix = `Camp #${index + 1}`;
-                    formattedCadet[`${campPrefix} - Type`] = camp?.campType ? getCampLabel(camp.campType) : '';
-                    formattedCadet[`${campPrefix} - Level`] = camp?.level || '';
-                    formattedCadet[`${campPrefix} - Location`] = camp?.location || '';
-                    formattedCadet[`${campPrefix} - Start Date`] = camp?.startDate ? formatDateForExport(camp.startDate) : '';
-                    formattedCadet[`${campPrefix} - End Date`] = camp?.endDate ? formatDateForExport(camp.endDate) : '';
-                    formattedCadet[`${campPrefix} - Duration (Days)`] = camp?.durationDays || '';
-                    formattedCadet[`${campPrefix} - Reward`] = camp?.reward || '';
-                    formattedCadet[`${campPrefix} - Certificate URL`] = camp?.certificateUrl || '';
+    
+            // Initialize all possible camp headers for this cadet
+            uniqueCampHeaders.forEach(header => {
+                formattedCadet[`${header} - Location`] = '';
+                formattedCadet[`${header} - Start Date`] = '';
+                formattedCadet[`${header} - End Date`] = '';
+                formattedCadet[`${header} - Duration (Days)`] = '';
+                formattedCadet[`${header} - Reward`] = '';
+                formattedCadet[`${header} - Certificate URL`] = '';
+            });
+    
+            // Populate the camp details for the camps this cadet attended
+            if (cadet.camps && Array.isArray(cadet.camps)) {
+                cadet.camps.forEach((camp: any) => {
+                    const campName = getCampLabel(camp.campType);
+                    const header = camp.level ? `${campName} - ${camp.level}` : campName;
+    
+                    if (uniqueCampHeaders.includes(header)) {
+                        formattedCadet[`${header} - Location`] = camp.location || '';
+                        formattedCadet[`${header} - Start Date`] = camp.startDate ? formatDateForExport(camp.startDate) : '';
+                        formattedCadet[`${header} - End Date`] = camp.endDate ? formatDateForExport(camp.endDate) : '';
+                        formattedCadet[`${header} - Duration (Days)`] = camp.durationDays || '';
+                        formattedCadet[`${header} - Reward`] = camp.reward || '';
+                        formattedCadet[`${header} - Certificate URL`] = camp.certificateUrl || '';
+                    }
                 });
             }
-
+    
             return formattedCadet;
         });
     };
@@ -192,7 +223,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             exportToExcel(filteredCadets, `All_Cadets_${institutionName.replace(/\s+/g, '_')}`);
         }
     };
-
+    
     const batchYears = [...new Set(cadetsData.map(c => c.batch).filter(Boolean))].sort((a,b) => b - a);
 
 
@@ -292,12 +323,21 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                            <Button variant="outline" onClick={() => setIsImporting(true)} className="w-full sm:w-auto bg-transparent hover:bg-black/10">
                                 <Upload className="mr-2 h-4 w-4" /> Import Cadets
                             </Button>
-                            <Button onClick={() => setExportConfirm({ show: true, type: 'selected' })} disabled={selectedCadets.length === 0} className="w-full sm:w-auto">
-                                <Download className="mr-2 h-4 w-4" /> Export Selected
-                            </Button>
-                             <Button onClick={() => setExportConfirm({ show: true, type: 'all' })} variant="outline" className="w-full sm:w-auto bg-transparent hover:bg-black/10">
-                                <Download className="mr-2 h-4 w-4" /> Export All
-                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="w-full sm:w-auto bg-transparent hover:bg-black/10">
+                                        <Download className="mr-2 h-4 w-4" /> Export Data
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setExportConfirm({ show: true, type: 'selected' })} disabled={selectedCadets.length === 0}>
+                                        Export Selected
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setExportConfirm({ show: true, type: 'all' })}>
+                                        Export All Filtered
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
                 </CardContent>
