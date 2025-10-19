@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Search, ChevronLeft, ChevronRight, PlusCircle, Upload, Download } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, PlusCircle, Upload, Download, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { getCadets } from '@/lib/cadet-service';
+import { getCadets, deleteCadets } from '@/lib/cadet-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CadetImportDialog } from '@/components/cadet-import-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,6 +31,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 
 import { format, parseISO, differenceInDays } from 'date-fns';
@@ -52,6 +53,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const [selectedCadets, setSelectedCadets] = useState<string[]>([]);
     const { toast } = useToast();
     const [exportConfirm, setExportConfirm] = useState<{ show: boolean, type: 'selected' | 'all' }>({ show: false, type: 'all' });
+    const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean, type: 'selected' | 'all' }>({ show: false, type: 'all' });
 
 
     async function fetchCadets() {
@@ -122,7 +124,6 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     }
     
     const formatDataForExport = (data: any[]) => {
-        // First, find all unique camps across all cadets to create dynamic headers
         const allCamps = new Set<string>();
         data.forEach(cadet => {
             if (cadet.camps && cadet.camps.length > 0) {
@@ -168,10 +169,18 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'NOK Contact': cadet.nokContact || '',
             };
 
+            uniqueCamps.forEach(campIdentifier => {
+                 row[`${campIdentifier} - Location`] = '';
+                 row[`${campIdentifier} - Start Date`] = '';
+                 row[`${campIdentifier} - End Date`] = '';
+                 row[`${campIdentifier} - Duration`] = '';
+                 row[`${campIdentifier} - Reward`] = '';
+            });
+
             if (cadet.camps && cadet.camps.length > 0) {
                 cadet.camps.forEach((camp: any) => {
                     const campIdentifier = `${getCampLabel(camp.campType)}${camp.level ? ` - ${camp.level}` : ''}`;
-                    if (campIdentifier) {
+                    if (campIdentifier && uniqueCamps.includes(campIdentifier)) {
                         const duration = (camp.startDate && camp.endDate)
                             ? differenceInDays(new Date(camp.endDate), new Date(camp.startDate)) + 1
                             : (camp.durationDays || '');
@@ -229,6 +238,37 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         }
     };
     
+    const handleConfirmDelete = async () => {
+        const { type } = deleteConfirm;
+        setDeleteConfirm({ show: false, type: 'all' });
+        
+        let idsToDelete: string[] = [];
+        let count = 0;
+
+        if (type === 'selected') {
+            idsToDelete = selectedCadets;
+            count = selectedCadets.length;
+        } else {
+            idsToDelete = filteredCadets.map(c => c.id);
+            count = filteredCadets.length;
+        }
+        
+        if (idsToDelete.length === 0) {
+            toast({ title: "No cadets to delete", variant: "destructive" });
+            return;
+        }
+
+        try {
+            await deleteCadets(idsToDelete, institutionName);
+            toast({ title: "Success", description: `${count} cadet(s) deleted successfully.` });
+            setSelectedCadets([]);
+            fetchCadets(); // Refresh data
+        } catch (error) {
+            console.error("Failed to delete cadets:", error);
+            toast({ title: "Error", description: "Failed to delete cadets.", variant: "destructive" });
+        }
+    };
+    
     const batchYears = [...new Set(cadetsData.map(c => c.batch).filter(Boolean))].sort((a,b) => b - a);
 
 
@@ -252,6 +292,21 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                     <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={handleConfirmExport}>Confirm & Export</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            
+            <AlertDialog open={deleteConfirm.show} onOpenChange={(open) => !open && setDeleteConfirm({show: false, type: 'all'})}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. You are about to permanently delete {deleteConfirm.type === 'selected' ? `${selectedCadets.length} selected` : `${filteredCadets.length} filtered`} cadet(s).
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleConfirmDelete} variant="destructive">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -335,7 +390,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 aria-label="Select all cadets on current page"
                             />
                             <Label htmlFor="select-all-toggle" className="text-sm font-medium">
-                                {selectedCadets.length > 0 ? `${selectedCadets.length} cadet(s) selected` : "Select cadets to export"}
+                                {selectedCadets.length > 0 ? `${selectedCadets.length} cadet(s) selected` : "Select cadets"}
                             </Label>
                         </div>
 
@@ -355,6 +410,22 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => setExportConfirm({ show: true, type: 'all' })}>
                                         Export All Filtered
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                             <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="destructive" className="w-full sm:w-auto" disabled={selectedCadets.length === 0 && filteredCadets.length === 0}>
+                                        <Trash2 className="mr-2 h-4 w-4" /> Bulk Actions
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setDeleteConfirm({ show: true, type: 'selected' })} disabled={selectedCadets.length === 0} className="text-destructive">
+                                        Delete Selected
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => setDeleteConfirm({ show: true, type: 'all' })} disabled={filteredCadets.length === 0} className="text-destructive">
+                                        Delete All Filtered
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>

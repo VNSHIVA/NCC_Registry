@@ -1,6 +1,6 @@
 'use server';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, getDoc, updateDoc, addDoc, deleteDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, updateDoc, addDoc, deleteDoc, query, where, writeBatch } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
 // NOTE: In a real app, you would have more robust error handling.
@@ -40,5 +40,16 @@ export async function addCadet(data: any, institutionName: string) {
 export async function deleteCadet(id: string, institutionName: string) {
     const cadetDoc = doc(db, 'cadets', id);
     await deleteDoc(cadetDoc);
+    revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
+}
+
+export async function deleteCadets(ids: string[], institutionName: string) {
+    if (!ids || ids.length === 0) return;
+    const batch = writeBatch(db);
+    ids.forEach(id => {
+        const cadetDoc = doc(db, 'cadets', id);
+        batch.delete(cadetDoc);
+    });
+    await batch.commit();
     revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
 }
