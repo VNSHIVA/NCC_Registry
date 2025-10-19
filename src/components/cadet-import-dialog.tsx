@@ -5,9 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Loader2, FileWarning } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
@@ -16,7 +25,6 @@ import { importCadets } from '@/lib/import-service';
 
 const REQUIRED_FIELDS = ['regNo', 'name', 'batch'];
 
-// Field mapping from common spreadsheet headers to our Firestore schema
 const FIELD_MAPPING: { [key: string]: string } = {
     'regimental no': 'regNo',
     'regimental number': 'regNo',
@@ -63,32 +71,32 @@ type CadetImportDialogProps = {
 export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutionName }: CadetImportDialogProps) {
     const [file, setFile] = useState<File | null>(null);
     const [csvUrl, setCsvUrl] = useState('');
-    const [parsedData, setParsedData] = useState<any[]>([]);
-    const [tableHeaders, setTableHeaders] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [parsedData, setParsedData] = useState<any[] | null>(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const { toast } = useToast();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             setFile(e.target.files[0]);
-            setCsvUrl(''); // Reset URL if file is selected
+            setCsvUrl('');
             setError(null);
-            setParsedData([]);
+            setParsedData(null);
         }
     };
 
     const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCsvUrl(e.target.value);
-        setFile(null); // Reset file if URL is entered
+        setFile(null);
         setError(null);
-        setParsedData([]);
+        setParsedData(null);
     };
 
-    const processData = (data: any[]) => {
+    const processAndValidateData = (data: any[]): any[] | null => {
         if (data.length === 0) {
             setError("The file is empty or could not be parsed.");
-            return;
+            return null;
         }
 
         const normalizedData = data.map(row => {
@@ -101,93 +109,92 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         });
 
         const headers = Object.keys(normalizedData[0]);
-        setTableHeaders(headers);
+        const missingFields = REQUIRED_FIELDS.filter(field => !headers.includes(field));
+
+        if (missingFields.length > 0) {
+            setError(`The imported data is missing required columns: ${missingFields.join(', ')}.`);
+            return null;
+        }
         
-        let missingFields = false;
-        for (const field of REQUIRED_FIELDS) {
-            if (!headers.includes(field)) {
-                missingFields = true;
-                break;
-            }
-        }
-
-        if (missingFields) {
-            setError(`The imported data is missing one or more required columns. Please ensure your file has columns for: ${REQUIRED_FIELDS.join(', ')}.`);
-        } else {
-             setError(null);
-        }
-
-        setParsedData(normalizedData);
+        setError(null);
+        return normalizedData;
     };
-
-    const handleParse = async () => {
+    
+    const handleInitiateImport = async () => {
+        if (!file && !csvUrl) {
+            setError("Please select a file or provide a URL.");
+            return;
+        }
+        
         setIsLoading(true);
         setError(null);
-        setParsedData([]);
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = e.target?.result;
-                    if (typeof data !== 'string' && !data) return;
-                    const workbook = XLSX.read(data, { type: 'binary' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-                    processData(json);
-                } catch (err) {
-                    setError("Failed to parse the file. Please ensure it is a valid Excel or CSV file.");
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            reader.onerror = () => {
-                setError("Error reading the file.");
-                setIsLoading(false);
-            };
-            reader.readAsBinaryString(file);
-        } else if (csvUrl) {
-            Papa.parse(csvUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: (results) => {
-                    processData(results.data);
-                    setIsLoading(false);
-                },
-                error: (err) => {
-                    setError(`Failed to fetch or parse the Google Sheet URL. ${err.message}`);
-                    setIsLoading(false);
-                }
-            });
-        } else {
-            setError("Please select a file or provide a URL.");
+        const parsePromise = new Promise<any[]>((resolve, reject) => {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = e.target?.result;
+                        if (typeof data !== 'string' && !data) return reject(new Error("File is empty."));
+                        const workbook = XLSX.read(data, { type: 'binary' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const json = XLSX.utils.sheet_to_json(worksheet);
+                        resolve(json);
+                    } catch (err) {
+                        reject(new Error("Failed to parse the file. Ensure it's a valid Excel or CSV."));
+                    }
+                };
+                reader.onerror = () => reject(new Error("Error reading the file."));
+                reader.readAsBinaryString(file);
+            } else if (csvUrl) {
+                Papa.parse(csvUrl, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => resolve(results.data),
+                    error: (err) => reject(new Error(`Failed to parse Google Sheet URL: ${err.message}`)),
+                });
+            }
+        });
+
+        try {
+            const rawData = await parsePromise;
+            const validatedData = processAndValidateData(rawData);
+            if (validatedData) {
+                setParsedData(validatedData);
+                setShowConfirmDialog(true);
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
             setIsLoading(false);
         }
     };
 
+
     const handleImportConfirm = async () => {
-        if (error || parsedData.length === 0) {
+        if (!parsedData || parsedData.length === 0) {
              toast({
                 title: 'Import Failed',
-                description: 'Cannot import due to errors or no data. Please fix the issues and try again.',
+                description: 'No valid data to import.',
                 variant: 'destructive'
             });
             return;
         }
+
         setIsLoading(true);
         try {
             const result = await importCadets(parsedData, institutionName);
             if(result.success) {
                 toast({
                     title: 'Import Successful',
-                    description: `${result.count} cadet records have been successfully imported/updated.`,
+                    description: `${result.count} cadet records have been imported/updated.`,
                 });
                 onImportSuccess();
                 handleClose();
             } else {
-                 throw new Error(result.error || 'An unknown error occurred.');
+                 throw new Error(result.error || 'An unknown error occurred during import.');
             }
         } catch (err: any) {
             toast({
@@ -203,16 +210,16 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
     const handleClose = () => {
         setFile(null);
         setCsvUrl('');
-        setParsedData([]);
-        setTableHeaders([]);
         setError(null);
+        setParsedData(null);
         setIsLoading(false);
+        setShowConfirmDialog(false);
         onClose();
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-4xl bg-card/90 backdrop-blur-lg">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+            <DialogContent className="max-w-xl bg-card/90 backdrop-blur-lg">
                 <DialogHeader>
                     <DialogTitle>Import Cadet Details</DialogTitle>
                     <DialogDescription>
@@ -221,7 +228,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs defaultValue="file">
+                <Tabs defaultValue="file" className="mt-4">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="file">Upload File</TabsTrigger>
                         <TabsTrigger value="url">From Google Sheet URL</TabsTrigger>
@@ -240,11 +247,6 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     </TabsContent>
                 </Tabs>
                 
-                <Button onClick={handleParse} disabled={isLoading || (!file && !csvUrl)}>
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Parse and Preview
-                </Button>
-
                 {error && (
                     <Alert variant="destructive" className="mt-4">
                         <FileWarning className="h-4 w-4" />
@@ -252,35 +254,30 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 )}
-
-                {parsedData.length > 0 && !error && (
-                    <div className="mt-4">
-                        <h4 className="font-semibold mb-2">Data Preview ({parsedData.length} records)</h4>
-                        <ScrollArea className="h-64 w-full rounded-md border bg-black/10">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        {tableHeaders.map(header => <TableHead key={header}>{header}</TableHead>)}
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {parsedData.slice(0, 20).map((row, rowIndex) => (
-                                        <TableRow key={rowIndex}>
-                                            {tableHeaders.map(header => <TableCell key={`${rowIndex}-${header}`}>{String(row[header] ?? '')}</TableCell>)}
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </ScrollArea>
-                        {parsedData.length > 20 && <p className="text-sm text-muted-foreground mt-2">Showing first 20 records for preview.</p>}
-                    </div>
-                )}
                 
+                <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm Import</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {`Ready to import ${parsedData?.length || 0} cadet records. Do you want to proceed?`}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleImportConfirm} disabled={isLoading}>
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Confirm & Import
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
                 <DialogFooter>
                     <Button variant="outline" onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleImportConfirm} disabled={isLoading || parsedData.length === 0 || !!error}>
+                    <Button onClick={handleInitiateImport} disabled={isLoading || (!file && !csvUrl)}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Confirm and Import
+                        Import Cadets
                     </Button>
                 </DialogFooter>
             </DialogContent>
