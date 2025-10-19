@@ -26,14 +26,11 @@ const initialCamp = {
     certificateUrl: '',
 };
 
-// Simplified migration, can be improved.
+// Simplified migration to ensure `camps` is an array.
 const migrateCampsData = (data: any) => {
-    if (!data.camps || Array.isArray(data.camps.map)) {
-        if (!data.camps) data.camps = [];
-        return data;
+    if (!data.camps || !Array.isArray(data.camps)) {
+        data.camps = [];
     }
-    const newCamps: any[] = [];
-    data.camps = newCamps;
     return data;
 };
 
@@ -53,9 +50,6 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
             let data = await getCadet(cadetId);
             if(data) {
                 data = migrateCampsData(data);
-                if (!Array.isArray(data.camps)) {
-                    data.camps = [];
-                }
                 setFormData(data);
             }
             setLoading(false);
