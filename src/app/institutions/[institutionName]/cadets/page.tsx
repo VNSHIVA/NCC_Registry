@@ -26,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 export default function CadetsPage({ params }: { params: { institutionName: string } }) {
     const resolvedParams = React.use(params);
@@ -90,34 +90,45 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     };
 
     const handleToggleAll = () => {
-        if (selectedCadets.length === currentCadets.length) {
+        if (selectedCadets.length === currentCadets.length && currentCadets.length > 0) {
             setSelectedCadets([]);
         } else {
             setSelectedCadets(currentCadets.map(c => c.id));
         }
     };
 
+    const formatDateForExport = (dateString: string) => {
+        if (!dateString) return '';
+        try {
+            //Handles both yyyy-mm-dd and other date formats that parseISO can handle
+            return format(parseISO(dateString), 'dd/MM/yyyy');
+        } catch (e) {
+            // If parseISO fails, maybe it's already in a different format or invalid
+            return dateString;
+        }
+    }
+
     const formatDataForExport = (data: any[]) => {
         const maxCamps = Math.max(0, ...data.map(c => c.camps?.length || 0));
 
         return data.map(cadet => {
             const formattedCadet: {[key: string]: any} = {
-                'Regimental No': cadet.regNo,
-                'Rank': cadet.rank,
-                'CDT Name': cadet.name,
-                'Batch': cadet.batch,
-                'Institution': cadet.institution,
-                'Date of Birth': cadet.dob ? format(new Date(cadet.dob), 'dd/MM/yyyy') : '',
-                'Mobile': cadet.mobile,
-                'Email': cadet.email,
-                'Educational Qualification': cadet.education,
-                'Blood Group': cadet.bloodGroup,
-                'Aadhaar No': cadet.adhaar,
-                'Home Address': cadet.homeAddress,
-                'Any Sports / Culturals': cadet.sportsCulturals,
-                'NOK Name': cadet.nokName,
-                'NOK Relation': cadet.nokRelation,
-                'NOK Contact': cadet.nokContact,
+                'Regimental No': cadet.regNo || '',
+                'Rank': cadet.rank || '',
+                'CDT Name': cadet.name || '',
+                'Batch': cadet.batch || '',
+                'Institution': cadet.institution || '',
+                'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
+                'Mobile': cadet.mobile || '',
+                'Email': cadet.email || '',
+                'Educational Qualification': cadet.education || '',
+                'Blood Group': cadet.bloodGroup || '',
+                'Aadhaar No': cadet.adhaar || '',
+                'Home Address': cadet.homeAddress || '',
+                'Any Sports / Culturals': cadet.sportsCulturals || '',
+                'NOK Name': cadet.nokName || '',
+                'NOK Relation': cadet.nokRelation || '',
+                'NOK Contact': cadet.nokContact || '',
             };
 
             for (let i = 0; i < maxCamps; i++) {
@@ -126,8 +137,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 formattedCadet[`${campPrefix} - Type`] = camp?.campType || '';
                 formattedCadet[`${campPrefix} - Level`] = camp?.level || '';
                 formattedCadet[`${campPrefix} - Location`] = camp?.location || '';
-                formattedCadet[`${campPrefix} - Start Date`] = camp?.startDate ? format(new Date(camp.startDate), 'dd/MM/yyyy') : '';
-                formattedCadet[`${campPrefix} - End Date`] = camp?.endDate ? format(new Date(camp.endDate), 'dd/MM/yyyy') : '';
+                formattedCadet[`${campPrefix} - Start Date`] = camp?.startDate ? formatDateForExport(camp.startDate) : '';
+                formattedCadet[`${campPrefix} - End Date`] = camp?.endDate ? formatDateForExport(camp.endDate) : '';
                 formattedCadet[`${campPrefix} - Duration (Days)`] = camp?.durationDays || '';
                 formattedCadet[`${campPrefix} - Reward`] = camp?.reward || '';
                 formattedCadet[`${campPrefix} - Certificate URL`] = camp?.certificateUrl || '';
@@ -261,7 +272,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                          <div className="flex items-center space-x-2">
                             <Checkbox
                                 id="select-all-toggle"
-                                checked={selectedCadets.length > 0 && selectedCadets.length === currentCadets.length && currentCadets.length > 0}
+                                checked={selectedCadets.length > 0 && currentCadets.length > 0 && selectedCadets.length === currentCadets.length}
                                 onCheckedChange={handleToggleAll}
                                 aria-label="Select all cadets on current page"
                             />
