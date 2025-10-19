@@ -65,10 +65,14 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            if (start <= end) {
-                return differenceInDays(end, start) + 1;
+            try {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                 if (start <= end) {
+                    return differenceInDays(end, start) + 1;
+                }
+            } catch(e) {
+                return 0;
             }
         }
         return 0;
@@ -153,6 +157,11 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
             console.error("Failed to update cadet", error);
             setIsSubmitting(false);
         }
+    }
+
+    const getCampLabel = (typeValue: string) => {
+        const camp = campTypes.find(c => c.value === typeValue);
+        return camp ? camp.label : typeValue;
     }
 
     return (
@@ -344,9 +353,4 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
             </Card>
         </div>
     );
-}
-
-const getCampLabel = (typeValue: string) => {
-    const camp = campTypes.find(c => c.value === typeValue);
-    return camp ? camp.label : typeValue;
 }
