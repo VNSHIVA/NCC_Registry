@@ -43,8 +43,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     
     const [cadetsData, setCadetsData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all' });
+    const [searchTerm, setSearchTerm = useState('');
+    const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all' });
     const [showActiveOnly, setShowActiveOnly] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const cadetsPerPage = 9;
@@ -74,6 +74,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             (filters.batch === 'all' || cadet.batch?.toString() === filters.batch) &&
             (filters.rank === 'all' || cadet.rank === filters.rank) &&
             (filters.bloodGroup === 'all' || cadet.bloodGroup === filters.bloodGroup) &&
+            (filters.division === 'all' || cadet.division === filters.division) &&
             (!showActiveOnly || isActive) 
         );
     });
@@ -86,7 +87,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
     const handleReset = () => {
         setSearchTerm('');
-        setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all' });
+        setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all' });
         setShowActiveOnly(true);
         setCurrentPage(1);
         setSelectedCadets([]);
@@ -121,44 +122,15 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     }
     
     const formatDataForExport = (data: any[]) => {
-        // Step 1: Find all unique camp types and levels across all cadets to create dynamic headers
-        const uniqueCamps = new Set<string>();
-        data.forEach(cadet => {
-            if (cadet.camps && cadet.camps.length > 0) {
-                cadet.camps.forEach((camp: any) => {
-                    const campName = `${getCampLabel(camp.campType)}${camp.level ? ` - ${camp.level}` : ''}`;
-                    if (campName) uniqueCamps.add(campName);
-                });
-            }
-        });
-        const sortedUniqueCamps = Array.from(uniqueCamps).sort();
-
-        // Step 2: Build the list of headers
-        const baseHeaders = [
-            'Regimental No', 'Rank', 'CDT Name', 'Batch', 'Institution', 'Date of Birth',
-            'Mobile', 'Email', 'Educational Qualification', 'Blood Group', 'Aadhaar No',
-            'Home Address', 'Any Sports / Culturals', 'NOK Name', 'NOK Relation', 'NOK Contact'
-        ];
+        const exportData: any[] = [];
         
-        const campHeaders: string[] = [];
-        sortedUniqueCamps.forEach(campName => {
-            campHeaders.push(
-                `${campName} - Location`,
-                `${campName} - Start Date`,
-                `${campName} - End Date`,
-                `${campName} - Duration (Days)`,
-                `${campName} - Reward`,
-                `${campName} - Certificate URL`
-            );
-        });
-
-        // Step 3: Process each cadet into a single row object
-        const exportData = data.map(cadet => {
-            const row: { [key: string]: any } = {
+        data.forEach(cadet => {
+            const baseCadetData = {
                 'Regimental No': cadet.regNo || '',
                 'Rank': cadet.rank || '',
                 'CDT Name': cadet.name || '',
                 'Batch': cadet.batch || '',
+                'Division': cadet.division || '',
                 'Institution': cadet.institution || '',
                 'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
                 'Mobile': cadet.mobile || '',
@@ -173,35 +145,44 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'NOK Contact': cadet.nokContact || '',
             };
 
-            // Initialize all possible camp columns to empty
-            campHeaders.forEach(header => {
-                row[header] = '';
-            });
-
-            // Populate the camp data for the current cadet
             if (cadet.camps && cadet.camps.length > 0) {
-                cadet.camps.forEach((camp: any) => {
-                    const campName = `${getCampLabel(camp.campType)}${camp.level ? ` - ${camp.level}` : ''}`;
-                     if (uniqueCamps.has(campName)) {
-                        const duration = (camp.startDate && camp.endDate)
-                            ? differenceInDays(new Date(camp.endDate), new Date(camp.startDate)) + 1
-                            : camp.durationDays || '';
-
-                        row[`${campName} - Location`] = camp.location || '';
-                        row[`${campName} - Start Date`] = camp.startDate ? formatDateForExport(camp.startDate) : '';
-                        row[`${campName} - End Date`] = camp.endDate ? formatDateForExport(camp.endDate) : '';
-                        row[`${campName} - Duration (Days)`] = duration;
-                        row[`${campName} - Reward`] = camp.reward || '';
-                        row[`${campName} - Certificate URL`] = camp.certificateUrl || '';
-                    }
+                cadet.camps.forEach((camp: any, index: number) => {
+                    const duration = (camp.startDate && camp.endDate)
+                        ? differenceInDays(new Date(camp.endDate), new Date(camp.startDate)) + 1
+                        : (camp.durationDays || '');
+                    
+                    exportData.push({
+                        ...baseCadetData,
+                        'Camp #': index + 1,
+                        'Camp Type': getCampLabel(camp.campType) || '',
+                        'Camp Level': camp.level || '',
+                        'Location': camp.location || '',
+                        'Start Date': camp.startDate ? formatDateForExport(camp.startDate) : '',
+                        'End Date': camp.endDate ? formatDateForExport(camp.endDate) : '',
+                        'Duration (Days)': duration,
+                        'Reward / Distinction': camp.reward || '',
+                        'Certificate URL': camp.certificateUrl || '',
+                    });
+                });
+            } else {
+                exportData.push({
+                    ...baseCadetData,
+                    'Camp #': '',
+                    'Camp Type': '',
+                    'Camp Level': '',
+                    'Location': '',
+                    'Start Date': '',
+                    'End Date': '',
+                    'Duration (Days)': '',
+                    'Reward / Distinction': '',
+                    'Certificate URL': '',
                 });
             }
-            
-            return row;
         });
 
         return exportData;
     };
+
 
     const exportToExcel = (data: any[], fileName: string) => {
         if (data.length === 0) {
@@ -271,11 +252,13 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
             <Card className="mb-8 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                        <div className="relative">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        <div className="lg:col-span-2">
                             <Label htmlFor="search-name">Search by Name</Label>
-                            <Search className="absolute left-3 top-10 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input id="search-name" type="search" placeholder="Search..." className="pl-10 mt-1 bg-white/20" onChange={e => setSearchTerm(e.target.value)} value={searchTerm} />
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input id="search-name" type="search" placeholder="Search..." className="pl-10 mt-1 bg-white/20" onChange={e => setSearchTerm(e.target.value)} value={searchTerm} />
+                            </div>
                         </div>
                         <div>
                             <Label htmlFor="batch-filter">Batch / Year</Label>
@@ -288,22 +271,25 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                             </Select>
                         </div>
                         <div>
+                            <Label htmlFor="division-filter">Division</Label>
+                            <Select onValueChange={value => setFilters(f => ({ ...f, division: value }))} value={filters.division}>
+                                <SelectTrigger id="division-filter" className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All</SelectItem>
+                                    <SelectItem value="SD">Senior Division (SD)</SelectItem>
+                                    <SelectItem value="SW">Senior Wing (SW)</SelectItem>
+                                    <SelectItem value="JD">Junior Division (JD)</SelectItem>
+                                    <SelectItem value="JW">Junior Wing (JW)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
                             <Label htmlFor="rank-filter">Rank</Label>
                             <Select onValueChange={value => setFilters(f => ({ ...f, rank: value }))} value={filters.rank}>
                                 <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All</SelectItem>
                                     {['CDT', 'LCPL', 'CPL', 'SGT', 'CSM', 'JUO', 'SUO'].map(rank => <SelectItem key={rank} value={rank}>{rank}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label htmlFor="blood-group-filter">Blood Group</Label>
-                            <Select onValueChange={value => setFilters(f => ({ ...f, bloodGroup: value }))} value={filters.bloodGroup}>
-                                <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All</SelectItem>
-                                    {['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -433,4 +419,3 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             </div>
         </div>
     );
-}
