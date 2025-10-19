@@ -220,14 +220,14 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                             <Accordion type="multiple" className="w-full" defaultValue={formData.camps.map((_:any, i:number) => `item-${i}`)}>
                                 {formData.camps.map((camp, index) => (
                                     <AccordionItem value={`item-${index}`} key={index}>
-                                        <AccordionTrigger>
-                                            <div className="flex justify-between w-full pr-4">
+                                        <div className="flex items-center">
+                                            <AccordionTrigger className="flex-1">
                                                 <span>{camp.campType ? `${getCampLabel(camp.campType)} ${camp.level ? `- ${camp.level}`: ''}` : `Camp #${index + 1}`}</span>
-                                                <Button type="button" variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); removeCamp(index);}} className="text-destructive hover:bg-destructive/10 h-8 w-8">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </AccordionTrigger>
+                                            </AccordionTrigger>
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCamp(index)} className="ml-2 text-destructive hover:bg-destructive/10 h-8 w-8">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                         <AccordionContent>
                                             <div className="p-4 bg-white/10 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 space-y-4">
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -308,4 +308,3 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         </div>
     );
 }
-
