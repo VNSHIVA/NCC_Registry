@@ -48,31 +48,19 @@ const processCampData = (row: any) => {
     const camps = [];
     const campTypeValues = campTypes.map(c => c.value);
 
-    // Simple camp fields like 'TSC' or 'RDC'
-    for (const type of campTypeValues) {
-        if (row[type.toLowerCase()]) {
-            camps.push({
-                type: type,
-                level: row[type.toLowerCase()],
-                location: row[`${type.toLowerCase()}_location`] || '',
-                startDate: row[`${type.toLowerCase()}_start_date`] || '',
-                endDate: row[`${type.toLowerCase()}_end_date`] || '',
-                reward: row[`${type.toLowerCase()}_reward`] || '',
-            });
-        }
-    }
-    
     // Iterative camp fields like 'camp1_type', 'camp1_location', etc.
     for (let i = 1; i <= 10; i++) { // Check for up to 10 camps
         const campType = row[`camp${i}_type`];
         if (campType && campTypeValues.includes(campType.toUpperCase())) {
             camps.push({
-                type: campType.toUpperCase(),
+                campType: campType.toUpperCase(),
                 level: row[`camp${i}_level`] || '',
                 location: row[`camp${i}_location`] || '',
-                startDate: row[`camp${i}_start_date`] || '',
-                endDate: row[`camp${i}_end_date`] || '',
+                startDate: row[`camp${i}_startDate`] || '',
+                endDate: row[`camp${i}_endDate`] || '',
                 reward: row[`camp${i}_reward`] || '',
+                durationDays: 0, // Should be calculated on front-end or here if dates are valid
+                certificateUrl: row[`camp${i}_certificateUrl`] || '',
             });
         }
     }

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,17 +9,20 @@ import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
 import { addCadet } from '@/lib/cadet-service';
 import { useRouter } from 'next/navigation';
-import { campTypes, nationalCampTypes } from '@/lib/constants';
-import { Trash2 } from 'lucide-react';
+import { campTypes, campWithLevels } from '@/lib/constants';
+import { Trash2, Upload } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { differenceInDays } from 'date-fns';
 
 const initialCamp = {
-    type: '',
+    campType: '',
     level: '',
     location: '',
     startDate: '',
     endDate: '',
-    days: 0,
-    reward: ''
+    durationDays: 0,
+    reward: '',
+    certificateUrl: '',
 };
 
 export default function NewCadetPage({ params }: { params: { institutionName: string } }) {
@@ -48,6 +51,17 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const calculateDuration = useCallback((startDate: string, endDate: string) => {
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (start <= end) {
+                return differenceInDays(end, start) + 1;
+            }
+        }
+        return 0;
+    }, []);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
         setFormData(prev => ({ ...prev, [id]: value }));
@@ -60,6 +74,16 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     const handleCampChange = (index: number, field: string, value: string | number) => {
         const updatedCamps = [...formData.camps];
         updatedCamps[index] = { ...updatedCamps[index], [field]: value };
+        
+        if (field === 'startDate' || field === 'endDate') {
+            const { startDate, endDate } = updatedCamps[index];
+            updatedCamps[index].durationDays = calculateDuration(startDate, endDate);
+        }
+
+        if (field === 'campType') {
+            updatedCamps[index].level = '';
+        }
+
         setFormData(prev => ({ ...prev, camps: updatedCamps }));
     };
 
@@ -87,6 +111,11 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
             console.error("Failed to add cadet", error);
             setIsSubmitting(false);
         }
+    }
+    
+    const getCampLabel = (typeValue: string) => {
+        const camp = campTypes.find(c => c.value === typeValue);
+        return camp ? camp.label : typeValue;
     }
 
     return (
@@ -188,58 +217,83 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                         {/* Camp Details */}
                         <section>
                             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camp Details</h3>
-                            <div className="space-y-6">
+                            <Accordion type="multiple" className="w-full" defaultValue={formData.camps.map((_:any, i:number) => `item-${i}`)}>
                                 {formData.camps.map((camp, index) => (
-                                    <div key={index} className="p-4 bg-white/10 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <h4 className="font-semibold text-primary/90">Camp #{index + 1}</h4>
-                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCamp(index)} className="text-destructive hover:bg-destructive/10">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <Label htmlFor={`camp-type-${index}`}>Camp Type</Label>
-                                                <Select value={camp.type} onValueChange={(value) => handleCampChange(index, 'type', value)}>
-                                                    <SelectTrigger id={`camp-type-${index}`} className="w-full mt-1 bg-white/20"><SelectValue placeholder="Select Camp Type" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        {campTypes.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                                                    </SelectContent>
-                                                </Select>
+                                    <AccordionItem value={`item-${index}`} key={index}>
+                                        <AccordionTrigger>
+                                            <div className="flex justify-between w-full pr-4">
+                                                <span>{camp.campType ? `${getCampLabel(camp.campType)} ${camp.level ? `- ${camp.level}`: ''}` : `Camp #${index + 1}`}</span>
+                                                <Button type="button" variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); removeCamp(index);}} className="text-destructive hover:bg-destructive/10 h-8 w-8">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
                                             </div>
-                                            <div>
-                                                <Label htmlFor={`camp-location-${index}`}>Location</Label>
-                                                <Input id={`camp-location-${index}`} placeholder="e.g., Trichy, Tamil Nadu" value={camp.location} onChange={(e) => handleCampChange(index, 'location', e.target.value)} className="mt-1 bg-white/20"/>
-                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <div className="p-4 bg-white/10 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 space-y-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label htmlFor={`camp-type-${index}`}>Camp Type</Label>
+                                                        <Select value={camp.campType} onValueChange={(value) => handleCampChange(index, 'campType', value)}>
+                                                            <SelectTrigger id={`camp-type-${index}`} className="w-full mt-1 bg-white/20"><SelectValue placeholder="Select Camp Type" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                {campTypes.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    
+                                                    { (campWithLevels as any)[camp.campType] && (
+                                                        <div>
+                                                            <Label htmlFor={`camp-level-${index}`}>Level</Label>
+                                                             <Select value={camp.level} onValueChange={(value) => handleCampChange(index, 'level', value)}>
+                                                                <SelectTrigger id={`camp-level-${index}`} className="w-full mt-1 bg-white/20"><SelectValue placeholder="Select Level" /></SelectTrigger>
+                                                                <SelectContent>
+                                                                    { (campWithLevels as any)[camp.campType].map((lvl: string) => <SelectItem key={lvl} value={lvl}>{lvl}</SelectItem>)}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    )}
 
-                                            {nationalCampTypes.includes(camp.type) && (
-                                                <div>
-                                                    <Label htmlFor={`camp-level-${index}`}>Level</Label>
-                                                    <Input id={`camp-level-${index}`} placeholder="e.g. Directorate / All-India" value={camp.level} onChange={(e) => handleCampChange(index, 'level', e.target.value)} className="mt-1 bg-white/20"/>
+                                                    <div className={ (campWithLevels as any)[camp.campType] ? "md:col-span-2" : ""}>
+                                                        <Label htmlFor={`camp-location-${index}`}>Location</Label>
+                                                        <Input id={`camp-location-${index}`} placeholder="e.g., Trichy, Tamil Nadu" value={camp.location} onChange={(e) => handleCampChange(index, 'location', e.target.value)} className="mt-1 bg-white/20"/>
+                                                    </div>
+
+                                                    <div>
+                                                        <Label htmlFor={`camp-start-date-${index}`}>Start Date</Label>
+                                                        <Input id={`camp-start-date-${index}`} type="date" value={camp.startDate} onChange={(e) => handleCampChange(index, 'startDate', e.target.value)} className="mt-1 bg-white/20"/>
+                                                    </div>
+                                                    <div>
+                                                        <Label htmlFor={`camp-end-date-${index}`}>End Date</Label>
+                                                        <Input id={`camp-end-date-${index}`} type="date" value={camp.endDate} onChange={(e) => handleCampChange(index, 'endDate', e.target.value)} className="mt-1 bg-white/20"/>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-end">
+                                                        <Label>Duration: {camp.durationDays || 0} days</Label>
+                                                    </div>
+
+                                                    <div className="md:col-span-2">
+                                                        <Label htmlFor={`camp-reward-${index}`}>Reward / Distinction (Optional)</Label>
+                                                        <Input id={`camp-reward-${index}`} placeholder="e.g., Best Cadet – Army Wing" value={camp.reward} onChange={(e) => handleCampChange(index, 'reward', e.target.value)} className="mt-1 bg-white/20"/>
+                                                    </div>
+                                                     <div className="md:col-span-2">
+                                                        <Label htmlFor={`camp-certificate-${index}`}>Certificate</Label>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <Input id={`camp-certificate-url-${index}`} placeholder="Certificate URL" value={camp.certificateUrl} onChange={(e) => handleCampChange(index, 'certificateUrl', e.target.value)} className="bg-white/20"/>
+                                                            <Button type="button" variant="outline" size="icon" className="bg-transparent" onClick={() => alert("File upload coming soon!")}>
+                                                                <Upload className="h-4 w-4"/>
+                                                            </Button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            )}
-
-                                            <div>
-                                                <Label htmlFor={`camp-start-date-${index}`}>Start Date</Label>
-                                                <Input id={`camp-start-date-${index}`} type="date" value={camp.startDate} onChange={(e) => handleCampChange(index, 'startDate', e.target.value)} className="mt-1 bg-white/20"/>
                                             </div>
-                                            <div>
-                                                <Label htmlFor={`camp-end-date-${index}`}>End Date</Label>
-                                                <Input id={`camp-end-date-${index}`} type="date" value={camp.endDate} onChange={(e) => handleCampChange(index, 'endDate', e.target.value)} className="mt-1 bg-white/20"/>
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <Label htmlFor={`camp-reward-${index}`}>Reward / Distinction (Optional)</Label>
-                                                <Input id={`camp-reward-${index}`} placeholder="e.g., Best Cadet – Army Wing" value={camp.reward} onChange={(e) => handleCampChange(index, 'reward', e.target.value)} className="mt-1 bg-white/20"/>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
                                 ))}
+                            </Accordion>
 
-                                <Button type="button" variant="outline" onClick={addCamp} className="bg-transparent hover:bg-black/10">
-                                    Add Another Camp
-                                </Button>
-                            </div>
+                            <Button type="button" variant="outline" onClick={addCamp} className="bg-transparent hover:bg-black/10 mt-4">
+                                Add Another Camp
+                            </Button>
                         </section>
 
                         <div className="flex justify-end gap-4 mt-8">
@@ -254,3 +308,4 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         </div>
     );
 }
+

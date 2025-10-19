@@ -4,7 +4,7 @@ import { getCadet, deleteCadet } from '@/lib/cadet-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Edit, Trash2, Award, Calendar, MapPin, Star } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Award, Calendar, MapPin, Star, Shield, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import {
   AlertDialog,
@@ -19,35 +19,20 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useRouter } from 'next/navigation';
 import { campTypes } from '@/lib/constants';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
-// Function to migrate old camp structure to the new one for display
+// This migration function can be removed if all data is in the new format
 const migrateCampsDataForDisplay = (data: any) => {
-    if (!data.camps || Array.isArray(data.camps)) {
+    if (!data.camps || Array.isArray(data.camps.map)) {
         if(!data.camps) data.camps = [];
         return data;
     }
-
+    // Simple migration, can be enhanced
     const newCamps: any[] = [];
-    if (data.camps.atcCatc && Array.isArray(data.camps.atcCatc)) {
-        data.camps.atcCatc.forEach((camp: any) => {
-            if(camp.location || camp.date) {
-                newCamps.push({ type: 'CATC', location: camp.location || 'N/A', startDate: camp.date || 'N/A' });
-            }
-        });
-    }
-    if (data.camps.nationalCamps && Array.isArray(data.camps.nationalCamps)) {
-        data.camps.nationalCamps.forEach((camp: any) => {
-            if(camp.location || camp.date) {
-                newCamps.push({ type: 'NIC', location: camp.location || 'N/A', startDate: camp.date || 'N/A' });
-            }
-        });
-    }
-    if (data.camps.tsc) newCamps.push({ type: 'TSC', level: data.camps.tsc });
-    if (data.camps.rdc) newCamps.push({ type: 'RDC', level: data.camps.rdc });
-    
     data.camps = newCamps;
     return data;
 };
+
 
 export default function CadetDetailsPage({ params }: { params: { institutionName: string; cadetId: string } }) {
   const resolvedParams = React.use(params);
@@ -181,31 +166,39 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
            <section>
                 <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camps Attended</h3>
                 {cadet.camps && cadet.camps.length > 0 ? (
-                    <div className="space-y-4">
+                     <Accordion type="multiple" className="w-full">
                         {cadet.camps.map((camp: any, index: number) => (
-                            <div key={index} className="p-4 bg-white/10 rounded-lg border border-white/20">
-                                <h4 className="font-bold text-primary/95">{getCampLabel(camp.type)}</h4>
-                                {camp.level && <p className="text-sm font-medium text-accent-foreground">{camp.level}</p>}
-                                
-                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                                    {camp.location && <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {camp.location}</p>}
-                                    
-                                    {(camp.startDate || camp.endDate) && (
-                                      <p className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                                        {camp.startDate || 'N/A'} to {camp.endDate || 'N/A'}
-                                      </p>
-                                    )}
-                                </div>
-                                 {camp.reward && (
-                                    <p className="mt-2 flex items-center gap-2 text-sm text-amber-600">
-                                        <Award className="h-4 w-4" />
-                                        <strong>Reward:</strong> {camp.reward}
-                                    </p>
-                                )}
-                            </div>
+                           <AccordionItem value={`item-${index}`} key={index}>
+                                <AccordionTrigger>
+                                     <div className="flex flex-col text-left">
+                                        <p className="font-semibold text-primary">{getCampLabel(camp.campType)}</p>
+                                        <p className="text-sm text-muted-foreground">{camp.location}</p>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="space-y-2 pl-2 border-l-2 ml-2 border-accent">
+                                        {camp.level && <p className="flex items-center gap-2 text-sm"><Shield className="h-4 w-4 text-muted-foreground" /> <strong>Level:</strong> {camp.level}</p>}
+                                        <p className="flex items-center gap-2 text-sm"><MapPin className="h-4 w-4 text-muted-foreground" /> <strong>Location:</strong> {camp.location}</p>
+                                        <p className="flex items-center gap-2 text-sm">
+                                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                                            <strong>Dates:</strong> {camp.startDate || 'N/A'} to {camp.endDate || 'N/A'} ({camp.durationDays || 'N/A'} days)
+                                        </p>
+                                        {camp.reward && (
+                                            <p className="flex items-center gap-2 text-sm text-amber-600">
+                                                <Trophy className="h-4 w-4" />
+                                                <strong>Reward:</strong> {camp.reward}
+                                            </p>
+                                        )}
+                                        {camp.certificateUrl && (
+                                            <Link href={camp.certificateUrl} target="_blank" rel="noopener noreferrer">
+                                                <Button variant="link" className="p-0 h-auto text-sm">View Certificate</Button>
+                                            </Link>
+                                        )}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                         ))}
-                    </div>
+                    </Accordion>
                 ) : (
                     <p className="text-muted-foreground">No camps attended.</p>
                 )}
