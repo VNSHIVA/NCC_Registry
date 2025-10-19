@@ -29,7 +29,7 @@ export default function RootLayout({
         <div className="container mx-auto px-6 py-3 flex justify-between items-center">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2 text-xl font-bold">
-              <img src="/ncc_logo0.png" width={40} height={40} alt="NCC Logo" className="bg-white rounded-full"/>
+              <img src="/ncc_logo0.png" width={40} height={40} alt="NCC Logo" className=" rounded-full"/>
               <span className="hidden sm:inline font-headline">2(TN) ARMD SQN NCC</span>
             </Link>
           </div>
