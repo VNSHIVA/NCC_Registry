@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -15,7 +16,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Loader2, FileWarning } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -204,6 +204,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             });
         } finally {
             setIsLoading(false);
+            setShowConfirmDialog(false);
         }
     };
 
@@ -264,7 +265,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel disabled={isLoading} onClick={() => setParsedData(null)}>Cancel</AlertDialogCancel>
                             <AlertDialogAction onClick={handleImportConfirm} disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Confirm & Import
