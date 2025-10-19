@@ -217,7 +217,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All</SelectItem>
-                                    {batchYears.map(year => <SelectItem key={year} value={String(year)}>{year}</SelectItem>)}
+                                    {batchYears.map((year, index) => <SelectItem key={`${year}-${index}`} value={String(year)}>{year}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -261,7 +261,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                          <div className="flex items-center space-x-2">
                             <Checkbox
                                 id="select-all-toggle"
-                                checked={selectedCadets.length > 0 && selectedCadets.length === currentCadets.length}
+                                checked={selectedCadets.length > 0 && selectedCadets.length === currentCadets.length && currentCadets.length > 0}
                                 onCheckedChange={handleToggleAll}
                                 aria-label="Select all cadets on current page"
                             />
@@ -359,5 +359,3 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         </div>
     );
 }
-
-    
