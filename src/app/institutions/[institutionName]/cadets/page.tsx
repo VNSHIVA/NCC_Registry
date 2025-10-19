@@ -122,74 +122,69 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     }
     
     const formatDataForExport = (data: any[]) => {
-        const exportData: any[] = [];
-        
+        // First, find all unique camps across all cadets to create dynamic headers
+        const allCamps = new Set<string>();
         data.forEach(cadet => {
             if (cadet.camps && cadet.camps.length > 0) {
-                cadet.camps.forEach((camp: any, index: number) => {
-                    const duration = (camp.startDate && camp.endDate)
-                        ? differenceInDays(new Date(camp.endDate), new Date(camp.startDate)) + 1
-                        : (camp.durationDays || '');
-                    
-                    exportData.push({
-                        'Regimental No': cadet.regNo || '',
-                        'Rank': cadet.rank || '',
-                        'CDT Name': cadet.name || '',
-                        'Batch': cadet.batch || '',
-                        'Division': cadet.division || '',
-                        'Institution': cadet.institution || '',
-                        'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
-                        'Mobile': cadet.mobile || '',
-                        'Email': cadet.email || '',
-                        'Educational Qualification': cadet.education || '',
-                        'Blood Group': cadet.bloodGroup || '',
-                        'Aadhaar No': cadet.adhaar || '',
-                        'Home Address': cadet.homeAddress || '',
-                        'Any Sports / Culturals': cadet.sportsCulturals || '',
-                        'NOK Name': cadet.nokName || '',
-                        'NOK Relation': cadet.nokRelation || '',
-                        'NOK Contact': cadet.nokContact || '',
-                        'Camp #': index + 1,
-                        'Camp Type': getCampLabel(camp.campType) || '',
-                        'Camp Level': camp.level || '',
-                        'Location': camp.location || '',
-                        'Start Date': camp.startDate ? formatDateForExport(camp.startDate) : '',
-                        'End Date': camp.endDate ? formatDateForExport(camp.endDate) : '',
-                        'Duration (Days)': duration,
-                        'Reward / Distinction': camp.reward || '',
-                        'Certificate URL': camp.certificateUrl || '',
-                    });
-                });
-            } else {
-                 exportData.push({
-                    'Regimental No': cadet.regNo || '',
-                    'Rank': cadet.rank || '',
-                    'CDT Name': cadet.name || '',
-                    'Batch': cadet.batch || '',
-                    'Division': cadet.division || '',
-                    'Institution': cadet.institution || '',
-                    'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
-                    'Mobile': cadet.mobile || '',
-                    'Email': cadet.email || '',
-                    'Educational Qualification': cadet.education || '',
-                    'Blood Group': cadet.bloodGroup || '',
-                    'Aadhaar No': cadet.adhaar || '',
-                    'Home Address': cadet.homeAddress || '',
-                    'Any Sports / Culturals': cadet.sportsCulturals || '',
-                    'NOK Name': cadet.nokName || '',
-                    'NOK Relation': cadet.nokRelation || '',
-                    'NOK Contact': cadet.nokContact || '',
-                    'Camp #': '',
-                    'Camp Type': '',
-                    'Camp Level': '',
-                    'Location': '',
-                    'Start Date': '',
-                    'End Date': '',
-                    'Duration (Days)': '',
-                    'Reward / Distinction': '',
-                    'Certificate URL': '',
+                cadet.camps.forEach((camp: any) => {
+                    const campIdentifier = `${getCampLabel(camp.campType)}${camp.level ? ` - ${camp.level}` : ''}`;
+                    if (campIdentifier) allCamps.add(campIdentifier);
                 });
             }
+        });
+        const uniqueCamps = Array.from(allCamps);
+
+        const baseHeaders = [
+            'Regimental No', 'Rank', 'CDT Name', 'Batch', 'Division', 'Institution', 'Date of Birth',
+            'Mobile', 'Email', 'Educational Qualification', 'Blood Group', 'Aadhaar No', 'Home Address',
+            'Any Sports / Culturals', 'NOK Name', 'NOK Relation', 'NOK Contact'
+        ];
+
+        const campHeaders: string[] = [];
+        uniqueCamps.forEach(campName => {
+            campHeaders.push(`${campName} - Location`, `${campName} - Start Date`, `${campName} - End Date`, `${campName} - Duration`, `${campName} - Reward`);
+        });
+
+        const headers = [...baseHeaders, ...campHeaders];
+        
+        const exportData = data.map(cadet => {
+            const row: any = {
+                'Regimental No': cadet.regNo || '',
+                'Rank': cadet.rank || '',
+                'CDT Name': cadet.name || '',
+                'Batch': cadet.batch || '',
+                'Division': cadet.division || '',
+                'Institution': cadet.institution || '',
+                'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
+                'Mobile': cadet.mobile || '',
+                'Email': cadet.email || '',
+                'Educational Qualification': cadet.education || '',
+                'Blood Group': cadet.bloodGroup || '',
+                'Aadhaar No': cadet.adhaar || '',
+                'Home Address': cadet.homeAddress || '',
+                'Any Sports / Culturals': cadet.sportsCulturals || '',
+                'NOK Name': cadet.nokName || '',
+                'NOK Relation': cadet.nokRelation || '',
+                'NOK Contact': cadet.nokContact || '',
+            };
+
+            if (cadet.camps && cadet.camps.length > 0) {
+                cadet.camps.forEach((camp: any) => {
+                    const campIdentifier = `${getCampLabel(camp.campType)}${camp.level ? ` - ${camp.level}` : ''}`;
+                    if (campIdentifier) {
+                        const duration = (camp.startDate && camp.endDate)
+                            ? differenceInDays(new Date(camp.endDate), new Date(camp.startDate)) + 1
+                            : (camp.durationDays || '');
+                        
+                        row[`${campIdentifier} - Location`] = camp.location || '';
+                        row[`${campIdentifier} - Start Date`] = camp.startDate ? formatDateForExport(camp.startDate) : '';
+                        row[`${campIdentifier} - End Date`] = camp.endDate ? formatDateForExport(camp.endDate) : '';
+                        row[`${campIdentifier} - Duration`] = duration;
+                        row[`${campIdentifier} - Reward`] = camp.reward || '';
+                    }
+                });
+            }
+            return row;
         });
 
         return exportData;
@@ -264,7 +259,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
             <Card className="mb-8 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
                         <div className="lg:col-span-2">
                             <Label htmlFor="search-name">Search by Name</Label>
                             <div className="relative">
@@ -302,6 +297,16 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 <SelectContent>
                                     <SelectItem value="all">All</SelectItem>
                                     {['CDT', 'LCPL', 'CPL', 'SGT', 'CSM', 'JUO', 'SUO'].map(rank => <SelectItem key={rank} value={rank}>{rank}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div>
+                            <Label htmlFor="blood-group-filter">Blood Group</Label>
+                            <Select onValueChange={value => setFilters(f => ({ ...f, bloodGroup: value }))} value={filters.bloodGroup}>
+                                <SelectTrigger id="blood-group-filter" className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All</SelectItem>
+                                    {['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -431,3 +436,5 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             </div>
         </div>
     );
+
+    
