@@ -4,7 +4,7 @@ import { getCadet, deleteCadet } from '@/lib/cadet-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Award, Calendar, MapPin, Star } from 'lucide-react';
 import Link from 'next/link';
 import {
   AlertDialog,
@@ -18,6 +18,36 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useRouter } from 'next/navigation';
+import { campTypes } from '@/lib/constants';
+
+// Function to migrate old camp structure to the new one for display
+const migrateCampsDataForDisplay = (data: any) => {
+    if (!data.camps || Array.isArray(data.camps)) {
+        if(!data.camps) data.camps = [];
+        return data;
+    }
+
+    const newCamps: any[] = [];
+    if (data.camps.atcCatc && Array.isArray(data.camps.atcCatc)) {
+        data.camps.atcCatc.forEach((camp: any) => {
+            if(camp.location || camp.date) {
+                newCamps.push({ type: 'CATC', location: camp.location || 'N/A', startDate: camp.date || 'N/A' });
+            }
+        });
+    }
+    if (data.camps.nationalCamps && Array.isArray(data.camps.nationalCamps)) {
+        data.camps.nationalCamps.forEach((camp: any) => {
+            if(camp.location || camp.date) {
+                newCamps.push({ type: 'NIC', location: camp.location || 'N/A', startDate: camp.date || 'N/A' });
+            }
+        });
+    }
+    if (data.camps.tsc) newCamps.push({ type: 'TSC', level: data.camps.tsc });
+    if (data.camps.rdc) newCamps.push({ type: 'RDC', level: data.camps.rdc });
+    
+    data.camps = newCamps;
+    return data;
+};
 
 export default function CadetDetailsPage({ params }: { params: { institutionName: string; cadetId: string } }) {
   const resolvedParams = React.use(params);
@@ -31,7 +61,10 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
   useEffect(() => {
     async function fetchCadet() {
       setLoading(true);
-      const data = await getCadet(cadetId);
+      let data = await getCadet(cadetId);
+      if (data) {
+        data = migrateCampsDataForDisplay(data);
+      }
       setCadet(data);
       setLoading(false);
     }
@@ -42,12 +75,15 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     try {
       await deleteCadet(cadetId, institutionName);
       router.push(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
-      // Optionally, show a success toast
     } catch (error) {
       console.error("Failed to delete cadet", error);
-      // Optionally, show an error toast
     }
   };
+  
+  const getCampLabel = (typeValue: string) => {
+    const camp = campTypes.find(c => c.value === typeValue);
+    return camp ? camp.label : typeValue;
+  }
 
   if (loading) {
     return (
@@ -142,35 +178,38 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
           </section>
 
           {/* Camp Details */}
-          <section>
-            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camp Details</h3>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">ATC / CATC</h4>
-                {cadet.camps?.atcCatc?.length > 0 ? (
-                  <ul className="list-disc list-inside space-y-1">
-                    {cadet.camps.atcCatc.map((camp: any, index: number) => (
-                      <li key={index}>{camp.location} on {camp.date}</li>
-                    ))}
-                  </ul>
-                ) : <p className="text-muted-foreground">No camps attended.</p>}
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">National Camps</h4>
-                {cadet.camps?.nationalCamps?.length > 0 ? (
-                  <ul className="list-disc list-inside space-y-1">
-                    {cadet.camps.nationalCamps.map((camp: any, index: number) => (
-                      <li key={index}>{camp.location} on {camp.date}</li>
-                    ))}
-                  </ul>
-                ) : <p className="text-muted-foreground">No camps attended.</p>}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><strong className="font-medium text-muted-foreground">TSC Level:</strong> {cadet.camps?.tsc || 'None'}</div>
-                <div><strong className="font-medium text-muted-foreground">RDC Level:</strong> {cadet.camps?.rdc || 'None'}</div>
-              </div>
-            </div>
-          </section>
+           <section>
+                <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camps Attended</h3>
+                {cadet.camps && cadet.camps.length > 0 ? (
+                    <div className="space-y-4">
+                        {cadet.camps.map((camp: any, index: number) => (
+                            <div key={index} className="p-4 bg-white/10 rounded-lg border border-white/20">
+                                <h4 className="font-bold text-primary/95">{getCampLabel(camp.type)}</h4>
+                                {camp.level && <p className="text-sm font-medium text-accent-foreground">{camp.level}</p>}
+                                
+                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                    {camp.location && <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {camp.location}</p>}
+                                    
+                                    {(camp.startDate || camp.endDate) && (
+                                      <p className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        {camp.startDate || 'N/A'} to {camp.endDate || 'N/A'}
+                                      </p>
+                                    )}
+                                </div>
+                                 {camp.reward && (
+                                    <p className="mt-2 flex items-center gap-2 text-sm text-amber-600">
+                                        <Award className="h-4 w-4" />
+                                        <strong>Reward:</strong> {camp.reward}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-muted-foreground">No camps attended.</p>
+                )}
+            </section>
         </CardContent>
       </Card>
     </div>

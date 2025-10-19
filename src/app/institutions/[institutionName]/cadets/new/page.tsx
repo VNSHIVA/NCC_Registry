@@ -9,13 +9,17 @@ import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
 import { addCadet } from '@/lib/cadet-service';
 import { useRouter } from 'next/navigation';
+import { campTypes, nationalCampTypes } from '@/lib/constants';
+import { Trash2 } from 'lucide-react';
 
-const initialCamp = { date: '', location: '' };
-const initialCamps = {
-    atcCatc: [],
-    nationalCamps: [],
-    tsc: null,
-    rdc: null,
+const initialCamp = {
+    type: '',
+    level: '',
+    location: '',
+    startDate: '',
+    endDate: '',
+    days: 0,
+    reward: ''
 };
 
 export default function NewCadetPage({ params }: { params: { institutionName: string } }) {
@@ -40,7 +44,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         sportsCulturals: '',
         homeAddress: '',
         adhaar: '',
-        camps: initialCamps
+        camps: [] as any[],
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,53 +54,37 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     }
 
     const handleSelectChange = (id: string, value: string) => {
-        const updatedValue = value === 'none' ? null : value;
-        if (id === 'tsc' || id === 'rdc') {
-            setFormData(prev => ({
-                ...prev,
-                camps: { ...prev.camps, [id]: updatedValue }
-            }));
-        } else {
-            setFormData(prev => ({ ...prev, [id]: value }));
-        }
+        setFormData(prev => ({ ...prev, [id]: value }));
     };
     
-    const handleCampChange = (campType: 'atcCatc' | 'nationalCamps', index: number, field: 'date' | 'location', value: string) => {
-        setFormData(prev => {
-            const newCamps = { ...prev.camps };
-            const updatedCamps = [...newCamps[campType]];
-            updatedCamps[index] = { ...updatedCamps[index], [field]: value };
-            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
-        });
-    }
+    const handleCampChange = (index: number, field: string, value: string | number) => {
+        const updatedCamps = [...formData.camps];
+        updatedCamps[index] = { ...updatedCamps[index], [field]: value };
+        setFormData(prev => ({ ...prev, camps: updatedCamps }));
+    };
 
-    const addCamp = (campType: 'atcCatc' | 'nationalCamps') => {
-        setFormData(prev => {
-            const newCamps = { ...prev.camps };
-            const updatedCamps = [...newCamps[campType], { date: '', location: '' }];
-            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
-        });
-    }
+    const addCamp = () => {
+        setFormData(prev => ({
+            ...prev,
+            camps: [...prev.camps, { ...initialCamp }]
+        }));
+    };
 
-    const removeCamp = (campType: 'atcCatc' | 'nationalCamps', index: number) => {
-        setFormData(prev => {
-            const newCamps = { ...prev.camps };
-            const updatedCamps = [...newCamps[campType]];
-            updatedCamps.splice(index, 1);
-            return { ...prev, camps: { ...newCamps, [campType]: updatedCamps } };
-        });
-    }
+    const removeCamp = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            camps: prev.camps.filter((_, i) => i !== index)
+        }));
+    };
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
             await addCadet(formData, institutionName);
-            // Optionally, show a success toast
             router.push(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
         } catch (error) {
             console.error("Failed to add cadet", error);
-            // Optionally, show an error toast
             setIsSubmitting(false);
         }
     }
@@ -200,68 +188,57 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                         {/* Camp Details */}
                         <section>
                             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camp Details</h3>
-                             {/* ATC/CATC */}
-                            <div className="mb-6">
-                                <h4 className="font-semibold mb-2">ATC / CATC</h4>
-                                {(formData.camps.atcCatc as any[]).map((camp, index) => (
-                                    <div key={index} className="flex items-end gap-4 mb-2 p-2 border rounded-md">
-                                        <div className="flex-1">
-                                            <Label htmlFor={`atcDate-${index}`}>Date Attended</Label>
-                                            <Input id={`atcDate-${index}`} type="date" value={camp.date} onChange={(e) => handleCampChange('atcCatc', index, 'date', e.target.value)} className="mt-1 bg-white/20" />
+                            <div className="space-y-6">
+                                {formData.camps.map((camp, index) => (
+                                    <div key={index} className="p-4 bg-white/10 backdrop-blur-sm rounded-xl shadow-sm border border-white/20 space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <h4 className="font-semibold text-primary/90">Camp #{index + 1}</h4>
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCamp(index)} className="text-destructive hover:bg-destructive/10">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
                                         </div>
-                                        <div className="flex-1">
-                                            <Label htmlFor={`atcLocation-${index}`}>Location</Label>
-                                            <Input id={`atcLocation-${index}`} value={camp.location} onChange={(e) => handleCampChange('atcCatc', index, 'location', e.target.value)} className="mt-1 bg-white/20" />
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Label htmlFor={`camp-type-${index}`}>Camp Type</Label>
+                                                <Select value={camp.type} onValueChange={(value) => handleCampChange(index, 'type', value)}>
+                                                    <SelectTrigger id={`camp-type-${index}`} className="w-full mt-1 bg-white/20"><SelectValue placeholder="Select Camp Type" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {campTypes.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label htmlFor={`camp-location-${index}`}>Location</Label>
+                                                <Input id={`camp-location-${index}`} placeholder="e.g., Trichy, Tamil Nadu" value={camp.location} onChange={(e) => handleCampChange(index, 'location', e.target.value)} className="mt-1 bg-white/20"/>
+                                            </div>
+
+                                            {nationalCampTypes.includes(camp.type) && (
+                                                <div>
+                                                    <Label htmlFor={`camp-level-${index}`}>Level</Label>
+                                                    <Input id={`camp-level-${index}`} placeholder="e.g. Directorate / All-India" value={camp.level} onChange={(e) => handleCampChange(index, 'level', e.target.value)} className="mt-1 bg-white/20"/>
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <Label htmlFor={`camp-start-date-${index}`}>Start Date</Label>
+                                                <Input id={`camp-start-date-${index}`} type="date" value={camp.startDate} onChange={(e) => handleCampChange(index, 'startDate', e.target.value)} className="mt-1 bg-white/20"/>
+                                            </div>
+                                            <div>
+                                                <Label htmlFor={`camp-end-date-${index}`}>End Date</Label>
+                                                <Input id={`camp-end-date-${index}`} type="date" value={camp.endDate} onChange={(e) => handleCampChange(index, 'endDate', e.target.value)} className="mt-1 bg-white/20"/>
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <Label htmlFor={`camp-reward-${index}`}>Reward / Distinction (Optional)</Label>
+                                                <Input id={`camp-reward-${index}`} placeholder="e.g., Best Cadet – Army Wing" value={camp.reward} onChange={(e) => handleCampChange(index, 'reward', e.target.value)} className="mt-1 bg-white/20"/>
+                                            </div>
                                         </div>
-                                        <Button type="button" variant="destructive" size="sm" onClick={() => removeCamp('atcCatc', index)}>Remove</Button>
                                     </div>
                                 ))}
-                                <Button type="button" variant="outline" size="sm" onClick={() => addCamp('atcCatc')}>Add ATC/CATC</Button>
-                            </div>
-                            {/* National Camps */}
-                             <div className="mb-6">
-                                <h4 className="font-semibold mb-2">National Camps</h4>
-                                {(formData.camps.nationalCamps as any[]).map((camp, index) => (
-                                    <div key={index} className="flex items-end gap-4 mb-2 p-2 border rounded-md">
-                                        <div className="flex-1">
-                                            <Label htmlFor={`nationalDate-${index}`}>Date Attended</Label>
-                                            <Input id={`nationalDate-${index}`} type="date" value={camp.date} onChange={(e) => handleCampChange('nationalCamps', index, 'date', e.target.value)} className="mt-1 bg-white/20" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <Label htmlFor={`nationalLocation-${index}`}>Location</Label>
-                                            <Input id={`nationalLocation-${index}`} value={camp.location} onChange={(e) => handleCampChange('nationalCamps', index, 'location', e.target.value)} className="mt-1 bg-white/20" />
-                                        </div>
-                                         <Button type="button" variant="destructive" size="sm" onClick={() => removeCamp('nationalCamps', index)}>Remove</Button>
-                                    </div>
-                                ))}
-                                <Button type="button" variant="outline" size="sm" onClick={() => addCamp('nationalCamps')}>Add National Camp</Button>
-                            </div>
-                            {/* TSC / RDC */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <Label htmlFor="tsc">TSC - Levels</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('tsc', value)} value={formData.camps.tsc || 'none'}>
-                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="None" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none">None</SelectItem>
-                                            <SelectItem value="TSC-I">TSC - I</SelectItem>
-                                            <SelectItem value="TSC-II">TSC - II</SelectItem>
-                                            <SelectItem value="TSC-F">TSC - Finals</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <Label htmlFor="rdc">RDC - Levels</Label>
-                                     <Select onValueChange={(value) => handleSelectChange('rdc', value)} value={formData.camps.rdc || 'none'}>
-                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="None" /></SelectTrigger>
-                                        <SelectContent>
-                                             <SelectItem value="none">None</SelectItem>
-                                            <SelectItem value="RDC-I">RDC - I</SelectItem>
-                                            <SelectItem value="RDC-II">RDC - II</SelectItem>
-                                            <SelectItem value="RDC-F">RDC - Finals</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+
+                                <Button type="button" variant="outline" onClick={addCamp} className="bg-transparent hover:bg-black/10">
+                                    Add Another Camp
+                                </Button>
                             </div>
                         </section>
 
