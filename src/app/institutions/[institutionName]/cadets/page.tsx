@@ -16,6 +16,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { format } from 'date-fns';
 
 export default function CadetsPage({ params }: { params: { institutionName: string } }) {
     const resolvedParams = React.use(params);
@@ -31,6 +42,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const [isImporting, setIsImporting] = useState(false);
     const [selectedCadets, setSelectedCadets] = useState<string[]>([]);
     const { toast } = useToast();
+    const [exportConfirm, setExportConfirm] = useState<{ show: boolean, type: 'selected' | 'all' }>({ show: false, type: 'all' });
+
 
     async function fetchCadets() {
         setLoading(true);
@@ -76,23 +89,51 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         );
     };
 
+    const handleToggleAll = () => {
+        if (selectedCadets.length === currentCadets.length) {
+            setSelectedCadets([]);
+        } else {
+            setSelectedCadets(currentCadets.map(c => c.id));
+        }
+    };
+
     const formatDataForExport = (data: any[]) => {
+        const maxCamps = Math.max(0, ...data.map(c => c.camps?.length || 0));
+
         return data.map(cadet => {
-            const { camps, id, ...rest } = cadet;
-            const basicInfo = { ...rest };
-            if (camps && camps.length > 0) {
-                camps.forEach((camp: any, index: number) => {
-                    const campPrefix = `camp${index + 1}`;
-                    basicInfo[`${campPrefix}_type`] = camp.campType;
-                    basicInfo[`${campPrefix}_level`] = camp.level;
-                    basicInfo[`${campPrefix}_location`] = camp.location;
-                    basicInfo[`${campPrefix}_startDate`] = camp.startDate;
-                    basicInfo[`${campPrefix}_endDate`] = camp.endDate;
-                    basicInfo[`${campPrefix}_duration`] = camp.durationDays;
-                    basicInfo[`${campPrefix}_reward`] = camp.reward;
-                });
+            const formattedCadet: {[key: string]: any} = {
+                'Regimental No': cadet.regNo,
+                'Rank': cadet.rank,
+                'CDT Name': cadet.name,
+                'Batch': cadet.batch,
+                'Institution': cadet.institution,
+                'Date of Birth': cadet.dob ? format(new Date(cadet.dob), 'dd/MM/yyyy') : '',
+                'Mobile': cadet.mobile,
+                'Email': cadet.email,
+                'Educational Qualification': cadet.education,
+                'Blood Group': cadet.bloodGroup,
+                'Aadhaar No': cadet.adhaar,
+                'Home Address': cadet.homeAddress,
+                'Any Sports / Culturals': cadet.sportsCulturals,
+                'NOK Name': cadet.nokName,
+                'NOK Relation': cadet.nokRelation,
+                'NOK Contact': cadet.nokContact,
+            };
+
+            for (let i = 0; i < maxCamps; i++) {
+                const camp = cadet.camps?.[i];
+                const campPrefix = `Camp #${i + 1}`;
+                formattedCadet[`${campPrefix} - Type`] = camp?.campType || '';
+                formattedCadet[`${campPrefix} - Level`] = camp?.level || '';
+                formattedCadet[`${campPrefix} - Location`] = camp?.location || '';
+                formattedCadet[`${campPrefix} - Start Date`] = camp?.startDate ? format(new Date(camp.startDate), 'dd/MM/yyyy') : '';
+                formattedCadet[`${campPrefix} - End Date`] = camp?.endDate ? format(new Date(camp.endDate), 'dd/MM/yyyy') : '';
+                formattedCadet[`${campPrefix} - Duration (Days)`] = camp?.durationDays || '';
+                formattedCadet[`${campPrefix} - Reward`] = camp?.reward || '';
+                formattedCadet[`${campPrefix} - Certificate URL`] = camp?.certificateUrl || '';
             }
-            return basicInfo;
+
+            return formattedCadet;
         });
     };
 
@@ -112,20 +153,26 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
         const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
         const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-        saveAs(blob, `${fileName}.xlsx`);
+        
+        const finalFileName = `${fileName}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+        saveAs(blob, finalFileName);
+        
         toast({
             title: "Export Successful",
-            description: `${data.length} cadet records exported to ${fileName}.xlsx`,
+            description: `${data.length} cadet records exported to ${finalFileName}`,
         });
     };
 
-    const handleExportSelected = () => {
-        const selectedData = cadetsData.filter(c => selectedCadets.includes(c.id));
-        exportToExcel(selectedData, 'Selected_Cadets');
-    };
+    const handleConfirmExport = () => {
+        const { type } = exportConfirm;
+        setExportConfirm({ show: false, type: 'all' });
     
-    const handleExportAll = () => {
-        exportToExcel(cadetsData, 'All_Cadets');
+        if (type === 'selected') {
+            const selectedData = cadetsData.filter(c => selectedCadets.includes(c.id));
+            exportToExcel(selectedData, `Selected_Cadets_${institutionName.replace(/\s+/g, '_')}`);
+        } else {
+            exportToExcel(filteredCadets, `All_Cadets_${institutionName.replace(/\s+/g, '_')}`);
+        }
     };
 
     const batchYears = [2027, 2026, 2025, 2024, 2023, 2022, 2021, 2020];
@@ -138,6 +185,23 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 onImportSuccess={fetchCadets}
                 institutionName={institutionName}
             />
+
+            <AlertDialog open={exportConfirm.show} onOpenChange={(open) => !open && setExportConfirm({show: false, type: 'all'})}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Export</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Do you want to export the {exportConfirm.type === 'selected' ? `${selectedCadets.length} selected` : 'filtered'} cadet details to Excel?
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleConfirmExport}>Confirm & Export</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+
             <Card className="mb-8 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardContent className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
@@ -193,17 +257,26 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                     </div>
                     <div className="border-t border-white/20 my-6"></div>
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="text-sm font-medium">
-                            {selectedCadets.length > 0 ? `${selectedCadets.length} cadet(s) selected` : "Select cadets to export"}
+                         <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="select-all-toggle"
+                                checked={selectedCadets.length > 0 && selectedCadets.length === currentCadets.length}
+                                onCheckedChange={handleToggleAll}
+                                aria-label="Select all cadets on current page"
+                            />
+                            <Label htmlFor="select-all-toggle" className="text-sm font-medium">
+                                {selectedCadets.length > 0 ? `${selectedCadets.length} cadet(s) selected` : "Select cadets to export"}
+                            </Label>
                         </div>
+
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                            <Button variant="outline" onClick={() => setIsImporting(true)} className="w-full sm:w-auto bg-transparent hover:bg-black/10">
                                 <Upload className="mr-2 h-4 w-4" /> Import Cadets
                             </Button>
-                            <Button onClick={handleExportSelected} disabled={selectedCadets.length === 0} className="w-full sm:w-auto">
+                            <Button onClick={() => setExportConfirm({ show: true, type: 'selected' })} disabled={selectedCadets.length === 0} className="w-full sm:w-auto">
                                 <Download className="mr-2 h-4 w-4" /> Export Selected
                             </Button>
-                             <Button onClick={handleExportAll} variant="outline" className="w-full sm:w-auto bg-transparent hover:bg-black/10">
+                             <Button onClick={() => setExportConfirm({ show: true, type: 'all' })} variant="outline" className="w-full sm:w-auto bg-transparent hover:bg-black/10">
                                 <Download className="mr-2 h-4 w-4" /> Export All
                             </Button>
                         </div>
@@ -283,5 +356,5 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 )}
             </div>
         </div>
-    );
-}
+    
+    
