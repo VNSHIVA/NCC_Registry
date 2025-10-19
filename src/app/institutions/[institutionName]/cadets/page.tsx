@@ -416,7 +416,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                              <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="destructive" className="w-full sm:w-auto" disabled={selectedCadets.length === 0 && filteredCadets.length === 0}>
-                                        <Trash2 className="mr-2 h-4 w-4" /> Bulk Actions
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete Cadets
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -511,3 +511,4 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     
 
     
+
