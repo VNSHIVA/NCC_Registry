@@ -27,6 +27,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { format, parseISO } from 'date-fns';
+import { campTypes } from '@/lib/constants';
+
 
 export default function CadetsPage({ params }: { params: { institutionName: string } }) {
     const resolvedParams = React.use(params);
@@ -107,10 +109,14 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             return dateString;
         }
     }
+    
+    const getCampLabel = (typeValue: string) => {
+        const camp = campTypes.find(c => c.value === typeValue);
+        return camp ? camp.label : typeValue;
+    }
+
 
     const formatDataForExport = (data: any[]) => {
-        const maxCamps = Math.max(0, ...data.map(c => c.camps?.length || 0));
-
         return data.map(cadet => {
             const formattedCadet: {[key: string]: any} = {
                 'Regimental No': cadet.regNo || '',
@@ -131,17 +137,18 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'NOK Contact': cadet.nokContact || '',
             };
 
-            for (let i = 0; i < maxCamps; i++) {
-                const camp = cadet.camps?.[i];
-                const campPrefix = `Camp #${i + 1}`;
-                formattedCadet[`${campPrefix} - Type`] = camp?.campType || '';
-                formattedCadet[`${campPrefix} - Level`] = camp?.level || '';
-                formattedCadet[`${campPrefix} - Location`] = camp?.location || '';
-                formattedCadet[`${campPrefix} - Start Date`] = camp?.startDate ? formatDateForExport(camp.startDate) : '';
-                formattedCadet[`${campPrefix} - End Date`] = camp?.endDate ? formatDateForExport(camp.endDate) : '';
-                formattedCadet[`${campPrefix} - Duration (Days)`] = camp?.durationDays || '';
-                formattedCadet[`${campPrefix} - Reward`] = camp?.reward || '';
-                formattedCadet[`${campPrefix} - Certificate URL`] = camp?.certificateUrl || '';
+            if (cadet.camps && cadet.camps.length > 0) {
+                cadet.camps.forEach((camp: any, index: number) => {
+                    const campPrefix = `Camp #${index + 1}`;
+                    formattedCadet[`${campPrefix} - Type`] = camp?.campType ? getCampLabel(camp.campType) : '';
+                    formattedCadet[`${campPrefix} - Level`] = camp?.level || '';
+                    formattedCadet[`${campPrefix} - Location`] = camp?.location || '';
+                    formattedCadet[`${campPrefix} - Start Date`] = camp?.startDate ? formatDateForExport(camp.startDate) : '';
+                    formattedCadet[`${campPrefix} - End Date`] = camp?.endDate ? formatDateForExport(camp.endDate) : '';
+                    formattedCadet[`${campPrefix} - Duration (Days)`] = camp?.durationDays || '';
+                    formattedCadet[`${campPrefix} - Reward`] = camp?.reward || '';
+                    formattedCadet[`${campPrefix} - Certificate URL`] = camp?.certificateUrl || '';
+                });
             }
 
             return formattedCadet;
