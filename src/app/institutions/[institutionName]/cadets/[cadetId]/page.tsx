@@ -23,7 +23,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 
 // This migration function can be removed if all data is in the new format
 const migrateCampsDataForDisplay = (data: any) => {
-    if (!data.camps || Array.isArray(data.camps.map)) {
+    if (!data.camps || Array.isArray(data.camps)) {
         if(!data.camps) data.camps = [];
         return data;
     }
@@ -166,12 +166,12 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
            <section>
                 <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camps Attended</h3>
                 {cadet.camps && cadet.camps.length > 0 ? (
-                     <Accordion type="multiple" className="w-full">
+                     <Accordion type="multiple" className="w-full" defaultValue={cadet.camps.map((_:any, i:number) => `item-${i}`)}>
                         {cadet.camps.map((camp: any, index: number) => (
                            <AccordionItem value={`item-${index}`} key={index}>
                                 <AccordionTrigger>
                                      <div className="flex flex-col text-left">
-                                        <p className="font-semibold text-primary">{getCampLabel(camp.campType)}</p>
+                                        <p className="font-semibold text-primary">{getCampLabel(camp.campType)} {camp.level ? ` - ${camp.level}` : ''}</p>
                                         <p className="text-sm text-muted-foreground">{camp.location}</p>
                                     </div>
                                 </AccordionTrigger>
