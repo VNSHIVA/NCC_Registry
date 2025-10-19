@@ -7,11 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Search, ChevronLeft, ChevronRight, PlusCircle, Upload } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, PlusCircle, Upload, Download } from 'lucide-react';
 import Link from 'next/link';
 import { getCadets } from '@/lib/cadet-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CadetImportDialog } from '@/components/cadet-import-dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 export default function CadetsPage({ params }: { params: { institutionName: string } }) {
     const resolvedParams = React.use(params);
@@ -25,6 +29,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const [currentPage, setCurrentPage] = useState(1);
     const cadetsPerPage = 9;
     const [isImporting, setIsImporting] = useState(false);
+    const [selectedCadets, setSelectedCadets] = useState<string[]>([]);
+    const { toast } = useToast();
 
     async function fetchCadets() {
         setLoading(true);
@@ -61,8 +67,67 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all' });
         setShowActiveOnly(true);
         setCurrentPage(1);
+        setSelectedCadets([]);
     }
     
+    const toggleSelectCadet = (id: string) => {
+        setSelectedCadets(prev =>
+            prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id]
+        );
+    };
+
+    const formatDataForExport = (data: any[]) => {
+        return data.map(cadet => {
+            const { camps, id, ...rest } = cadet;
+            const basicInfo = { ...rest };
+            if (camps && camps.length > 0) {
+                camps.forEach((camp: any, index: number) => {
+                    const campPrefix = `camp${index + 1}`;
+                    basicInfo[`${campPrefix}_type`] = camp.campType;
+                    basicInfo[`${campPrefix}_level`] = camp.level;
+                    basicInfo[`${campPrefix}_location`] = camp.location;
+                    basicInfo[`${campPrefix}_startDate`] = camp.startDate;
+                    basicInfo[`${campPrefix}_endDate`] = camp.endDate;
+                    basicInfo[`${campPrefix}_duration`] = camp.durationDays;
+                    basicInfo[`${campPrefix}_reward`] = camp.reward;
+                });
+            }
+            return basicInfo;
+        });
+    };
+
+    const exportToExcel = (data: any[], fileName: string) => {
+        if (data.length === 0) {
+            toast({
+                title: "Export Failed",
+                description: "No data available to export.",
+                variant: "destructive"
+            });
+            return;
+        }
+        const formattedData = formatDataForExport(data);
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Cadets");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(blob, `${fileName}.xlsx`);
+        toast({
+            title: "Export Successful",
+            description: `${data.length} cadet records exported to ${fileName}.xlsx`,
+        });
+    };
+
+    const handleExportSelected = () => {
+        const selectedData = cadetsData.filter(c => selectedCadets.includes(c.id));
+        exportToExcel(selectedData, 'Selected_Cadets');
+    };
+    
+    const handleExportAll = () => {
+        exportToExcel(cadetsData, 'All_Cadets');
+    };
+
     const batchYears = [2027, 2026, 2025, 2024, 2023, 2022, 2021, 2020];
 
     return (
@@ -119,14 +184,28 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                         </div>
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <Button variant="outline" onClick={handleReset} className="bg-transparent hover:bg-black/10">Reset</Button>
-                            <Button variant="outline" onClick={() => setIsImporting(true)} className="w-full sm:w-auto">
-                                <Upload className="mr-2 h-4 w-4" /> Import Cadets
-                            </Button>
                              <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/new`} className="w-full sm:w-auto">
                                 <Button className="w-full">
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Add New Cadet
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Add New
                                 </Button>
                             </Link>
+                        </div>
+                    </div>
+                    <div className="border-t border-white/20 my-6"></div>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="text-sm font-medium">
+                            {selectedCadets.length > 0 ? `${selectedCadets.length} cadet(s) selected` : "Select cadets to export"}
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                           <Button variant="outline" onClick={() => setIsImporting(true)} className="w-full sm:w-auto bg-transparent hover:bg-black/10">
+                                <Upload className="mr-2 h-4 w-4" /> Import Cadets
+                            </Button>
+                            <Button onClick={handleExportSelected} disabled={selectedCadets.length === 0} className="w-full sm:w-auto">
+                                <Download className="mr-2 h-4 w-4" /> Export Selected
+                            </Button>
+                             <Button onClick={handleExportAll} variant="outline" className="w-full sm:w-auto bg-transparent hover:bg-black/10">
+                                <Download className="mr-2 h-4 w-4" /> Export All
+                            </Button>
                         </div>
                     </div>
                 </CardContent>
@@ -154,7 +233,13 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 ) : currentCadets.map(cadet => (
                     <Card key={cadet.id} className="bg-card/80 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/20 overflow-hidden">
                         <CardContent className="p-4 flex flex-col items-center text-center">
-                            
+                             <div className="absolute top-4 left-4">
+                                <Checkbox
+                                    checked={selectedCadets.includes(cadet.id)}
+                                    onCheckedChange={() => toggleSelectCadet(cadet.id)}
+                                    aria-label={`Select ${cadet.name}`}
+                                />
+                            </div>
                             <h3 className="text-lg font-semibold text-primary pt-4">{cadet.name}</h3>
                             <p className="text-sm text-muted-foreground">{cadet.regNo}</p>
                             <div className="flex justify-center gap-4 my-3 text-sm">
