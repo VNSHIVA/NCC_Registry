@@ -212,7 +212,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-4xl bg-card/90 backdrop-blur-lg">
                 <DialogHeader>
                     <DialogTitle>Import Cadet Details</DialogTitle>
                     <DialogDescription>
@@ -229,13 +229,13 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     <TabsContent value="file">
                         <div className="grid gap-2 py-4">
                             <Label htmlFor="file-upload">Select File</Label>
-                            <Input id="file-upload" type="file" accept=".xlsx, .xls, .csv" onChange={handleFileChange} />
+                            <Input id="file-upload" type="file" accept=".xlsx, .xls, .csv" onChange={handleFileChange} className="bg-white/20"/>
                         </div>
                     </TabsContent>
                     <TabsContent value="url">
                         <div className="grid gap-2 py-4">
                             <Label htmlFor="csv-url">Google Sheets CSV URL</Label>
-                            <Input id="csv-url" type="url" placeholder="Paste published CSV link here" value={csvUrl} onChange={handleUrlChange} />
+                            <Input id="csv-url" type="url" placeholder="Paste published CSV link here" value={csvUrl} onChange={handleUrlChange} className="bg-white/20"/>
                         </div>
                     </TabsContent>
                 </Tabs>
@@ -256,8 +256,8 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                 {parsedData.length > 0 && !error && (
                     <div className="mt-4">
                         <h4 className="font-semibold mb-2">Data Preview ({parsedData.length} records)</h4>
-                        <ScrollArea className="h-64 w-full rounded-md border">
-                            <Table>
+                        <ScrollArea className="h-64 w-full rounded-md border bg-black/10">
+                            <Table className="whitespace-nowrap">
                                 <TableHeader>
                                     <TableRow>
                                         {tableHeaders.map(header => <TableHead key={header}>{header}</TableHead>)}
