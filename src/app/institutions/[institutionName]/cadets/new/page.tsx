@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         name: '',
         regNo: '',
         rank: 'CDT',
+        division: 'SD',
         batch: new Date().getFullYear(),
         bloodGroup: 'O+',
         dob: '',
@@ -150,6 +152,18 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                                  <div>
                                     <Label htmlFor="batch">Batch</Label>
                                     <Input id="batch" type="number" value={formData.batch} onChange={handleInputChange} className="mt-1 bg-white/20" required/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="division">Division</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('division', value)} value={formData.division}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="SD">Senior Division (SD)</SelectItem>
+                                            <SelectItem value="SW">Senior Wing (SW)</SelectItem>
+                                            <SelectItem value="JD">Junior Division (JD)</SelectItem>
+                                            <SelectItem value="JW">Junior Wing (JW)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
                                     <Label htmlFor="institution">Institution</Label>

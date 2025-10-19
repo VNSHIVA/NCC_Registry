@@ -5,7 +5,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import Link from 'next/link';
-import { Building, Home, Users, Menu, X } from 'lucide-react';
+import { Building, Home, Users, Menu, X, LayoutDashboard } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +38,10 @@ export default function RootLayout({
               <Home className="h-5 w-5" />
               <span>Home</span>
             </Link>
+             <Link href="/dashboard" className="flex items-center space-x-2 hover:text-accent font-semibold">
+              <LayoutDashboard className="h-5 w-5" />
+              <span>Dashboard</span>
+            </Link>
             <Link href="/institutions" className="flex items-center space-x-2 hover:text-accent font-semibold">
               <Building className="h-5 w-5" />
               <span>Institutions</span>
@@ -54,6 +58,10 @@ export default function RootLayout({
             <Link href="/" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
               <Home className="h-5 w-5" />
               <span>Home</span>
+            </Link>
+            <Link href="/dashboard" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
+              <LayoutDashboard className="h-5 w-5" />
+              <span>Dashboard</span>
             </Link>
             <Link href="/institutions" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
               <Building className="h-5 w-5" />

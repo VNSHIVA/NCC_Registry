@@ -1,10 +1,11 @@
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import { getCadet, deleteCadet } from '@/lib/cadet-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Edit, Trash2, Award, Calendar, MapPin, Star, Shield, Trophy } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Award, Calendar, MapPin, Star, Shield, Trophy, Users } from 'lucide-react';
 import Link from 'next/link';
 import {
   AlertDialog,
@@ -140,6 +141,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Personal Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
               <div><strong className="font-medium text-muted-foreground">Rank:</strong> {cadet.rank}</div>
+              <div><strong className="font-medium text-muted-foreground">Division:</strong> {cadet.division}</div>
               <div><strong className="font-medium text-muted-foreground">Institution:</strong> {cadet.institution}</div>
               <div><strong className="font-medium text-muted-foreground">Date of Birth:</strong> {cadet.dob}</div>
               <div><strong className="font-medium text-muted-foreground">Mobile:</strong> {cadet.mobile}</div>

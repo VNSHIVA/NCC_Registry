@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
@@ -190,6 +191,18 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 <div>
                                     <Label htmlFor="batch">Batch</Label>
                                     <Input id="batch" type="number" value={formData.batch || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="division">Division</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('division', value)} value={formData.division || 'SD'}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="SD">Senior Division (SD)</SelectItem>
+                                            <SelectItem value="SW">Senior Wing (SW)</SelectItem>
+                                            <SelectItem value="JD">Junior Division (JD)</SelectItem>
+                                            <SelectItem value="JW">Junior Wing (JW)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
                                     <Label htmlFor="institution">Institution</Label>
