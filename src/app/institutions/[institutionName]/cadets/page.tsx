@@ -43,7 +43,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     
     const [cadetsData, setCadetsData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all' });
     const [showActiveOnly, setShowActiveOnly] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -125,26 +125,6 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         const exportData: any[] = [];
         
         data.forEach(cadet => {
-            const baseCadetData = {
-                'Regimental No': cadet.regNo || '',
-                'Rank': cadet.rank || '',
-                'CDT Name': cadet.name || '',
-                'Batch': cadet.batch || '',
-                'Division': cadet.division || '',
-                'Institution': cadet.institution || '',
-                'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
-                'Mobile': cadet.mobile || '',
-                'Email': cadet.email || '',
-                'Educational Qualification': cadet.education || '',
-                'Blood Group': cadet.bloodGroup || '',
-                'Aadhaar No': cadet.adhaar || '',
-                'Home Address': cadet.homeAddress || '',
-                'Any Sports / Culturals': cadet.sportsCulturals || '',
-                'NOK Name': cadet.nokName || '',
-                'NOK Relation': cadet.nokRelation || '',
-                'NOK Contact': cadet.nokContact || '',
-            };
-
             if (cadet.camps && cadet.camps.length > 0) {
                 cadet.camps.forEach((camp: any, index: number) => {
                     const duration = (camp.startDate && camp.endDate)
@@ -152,7 +132,23 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                         : (camp.durationDays || '');
                     
                     exportData.push({
-                        ...baseCadetData,
+                        'Regimental No': cadet.regNo || '',
+                        'Rank': cadet.rank || '',
+                        'CDT Name': cadet.name || '',
+                        'Batch': cadet.batch || '',
+                        'Division': cadet.division || '',
+                        'Institution': cadet.institution || '',
+                        'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
+                        'Mobile': cadet.mobile || '',
+                        'Email': cadet.email || '',
+                        'Educational Qualification': cadet.education || '',
+                        'Blood Group': cadet.bloodGroup || '',
+                        'Aadhaar No': cadet.adhaar || '',
+                        'Home Address': cadet.homeAddress || '',
+                        'Any Sports / Culturals': cadet.sportsCulturals || '',
+                        'NOK Name': cadet.nokName || '',
+                        'NOK Relation': cadet.nokRelation || '',
+                        'NOK Contact': cadet.nokContact || '',
                         'Camp #': index + 1,
                         'Camp Type': getCampLabel(camp.campType) || '',
                         'Camp Level': camp.level || '',
@@ -165,8 +161,24 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                     });
                 });
             } else {
-                exportData.push({
-                    ...baseCadetData,
+                 exportData.push({
+                    'Regimental No': cadet.regNo || '',
+                    'Rank': cadet.rank || '',
+                    'CDT Name': cadet.name || '',
+                    'Batch': cadet.batch || '',
+                    'Division': cadet.division || '',
+                    'Institution': cadet.institution || '',
+                    'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
+                    'Mobile': cadet.mobile || '',
+                    'Email': cadet.email || '',
+                    'Educational Qualification': cadet.education || '',
+                    'Blood Group': cadet.bloodGroup || '',
+                    'Aadhaar No': cadet.adhaar || '',
+                    'Home Address': cadet.homeAddress || '',
+                    'Any Sports / Culturals': cadet.sportsCulturals || '',
+                    'NOK Name': cadet.nokName || '',
+                    'NOK Relation': cadet.nokRelation || '',
+                    'NOK Contact': cadet.nokContact || '',
                     'Camp #': '',
                     'Camp Type': '',
                     'Camp Level': '',
