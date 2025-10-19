@@ -143,7 +143,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'NOK Contact': cadet.nokContact || '',
             };
     
-            if (cadet.camps && cadet.camps.length > 0) {
+             if (cadet.camps && cadet.camps.length > 0) {
                 cadet.camps.forEach((camp: any, index: number) => {
                     const duration = (camp.startDate && camp.endDate) 
                         ? differenceInDays(new Date(camp.endDate), new Date(camp.startDate)) + 1
@@ -163,7 +163,6 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                     });
                 });
             } else {
-                // Add one row for cadet with no camps
                 exportData.push({
                     ...baseDetails,
                     'Camp #': '',
