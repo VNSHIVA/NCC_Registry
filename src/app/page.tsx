@@ -14,7 +14,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-[calc(100vh-68px)] flex-col items-center justify-center overflow-hidden">
-      <div className="flex flex-col items-center justify-center space-y-16 text-center bg-card/70 backdrop-blur-sm p-8 md:p-16 rounded-xl shadow-2xl border border-white/20">
+      <div className="flex flex-col items-center justify-center space-y-16 text-center p-8 md:p-16 rounded-xl">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -55,10 +55,10 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9, ease: 'easeOut' }}
-          className="flex flex-col items-center space-y-2"
+          className="flex items-center mr-32 justify-center flex-col items-center space-y-2"
         >
           <ArrowDown className="h-8 w-8 text-primary animate-bounce" />
-          <Link href="/institutions">
+          <Link href="/dashboard">
             <Button size="lg" className="text-lg bg-accent text-accent-foreground hover:bg-accent/90">
               Dashboard
             </Button>
