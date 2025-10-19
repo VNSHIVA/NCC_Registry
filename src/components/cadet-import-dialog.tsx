@@ -257,7 +257,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     <div className="mt-4">
                         <h4 className="font-semibold mb-2">Data Preview ({parsedData.length} records)</h4>
                         <ScrollArea className="h-64 w-full rounded-md border bg-black/10">
-                            <Table className="whitespace-nowrap">
+                            <Table>
                                 <TableHeader>
                                     <TableRow>
                                         {tableHeaders.map(header => <TableHead key={header}>{header}</TableHead>)}
