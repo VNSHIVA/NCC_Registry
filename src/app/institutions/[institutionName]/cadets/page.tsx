@@ -33,7 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInDays } from 'date-fns';
 import { campTypes } from '@/lib/constants';
 
 
@@ -121,22 +121,10 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     }
 
     const formatDataForExport = (data: any[]) => {
-        // First, find all unique camp type/level combinations to create headers
-        const allCampHeaders = new Set<string>();
+        const exportData: any[] = [];
+    
         data.forEach(cadet => {
-            if (cadet.camps && Array.isArray(cadet.camps)) {
-                cadet.camps.forEach((camp: any) => {
-                    const campName = getCampLabel(camp.campType);
-                    const header = camp.level ? `${campName} - ${camp.level}` : campName;
-                    if(header) allCampHeaders.add(header);
-                });
-            }
-        });
-    
-        const uniqueCampHeaders = Array.from(allCampHeaders);
-    
-        return data.map(cadet => {
-            const formattedCadet: { [key: string]: any } = {
+            const baseDetails = {
                 'Regimental No': cadet.regNo || '',
                 'Rank': cadet.rank || '',
                 'CDT Name': cadet.name || '',
@@ -155,35 +143,43 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'NOK Contact': cadet.nokContact || '',
             };
     
-            // Initialize all possible camp headers for this cadet
-            uniqueCampHeaders.forEach(header => {
-                formattedCadet[`${header} - Location`] = '';
-                formattedCadet[`${header} - Start Date`] = '';
-                formattedCadet[`${header} - End Date`] = '';
-                formattedCadet[`${header} - Duration (Days)`] = '';
-                formattedCadet[`${header} - Reward`] = '';
-                formattedCadet[`${header} - Certificate URL`] = '';
-            });
-    
-            // Populate the camp details for the camps this cadet attended
-            if (cadet.camps && Array.isArray(cadet.camps)) {
-                cadet.camps.forEach((camp: any) => {
-                    const campName = getCampLabel(camp.campType);
-                    const header = camp.level ? `${campName} - ${camp.level}` : campName;
-    
-                    if (uniqueCampHeaders.includes(header)) {
-                        formattedCadet[`${header} - Location`] = camp.location || '';
-                        formattedCadet[`${header} - Start Date`] = camp.startDate ? formatDateForExport(camp.startDate) : '';
-                        formattedCadet[`${header} - End Date`] = camp.endDate ? formatDateForExport(camp.endDate) : '';
-                        formattedCadet[`${header} - Duration (Days)`] = camp.durationDays || '';
-                        formattedCadet[`${header} - Reward`] = camp.reward || '';
-                        formattedCadet[`${header} - Certificate URL`] = camp.certificateUrl || '';
-                    }
+            if (cadet.camps && cadet.camps.length > 0) {
+                cadet.camps.forEach((camp: any, index: number) => {
+                    const duration = (camp.startDate && camp.endDate) 
+                        ? differenceInDays(new Date(camp.endDate), new Date(camp.startDate)) + 1
+                        : camp.durationDays || '';
+
+                    exportData.push({
+                        ...baseDetails,
+                        'Camp #': index + 1,
+                        'Camp Type': getCampLabel(camp.campType) || '',
+                        'Level': camp.level || '',
+                        'Location': camp.location || '',
+                        'Start Date': camp.startDate ? formatDateForExport(camp.startDate) : '',
+                        'End Date': camp.endDate ? formatDateForExport(camp.endDate) : '',
+                        'Duration (Days)': duration,
+                        'Reward / Distinction': camp.reward || '',
+                        'Certificate URL': camp.certificateUrl || '',
+                    });
+                });
+            } else {
+                // Add one row for cadet with no camps
+                exportData.push({
+                    ...baseDetails,
+                    'Camp #': '',
+                    'Camp Type': '',
+                    'Level': '',
+                    'Location': '',
+                    'Start Date': '',
+                    'End Date': '',
+                    'Duration (Days)': '',
+                    'Reward / Distinction': '',
+                    'Certificate URL': '',
                 });
             }
-    
-            return formattedCadet;
         });
+    
+        return exportData;
     };
 
     const exportToExcel = (data: any[], fileName: string) => {
@@ -208,7 +204,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         
         toast({
             title: "Export Successful",
-            description: `${data.length} cadet records exported to ${finalFileName}`,
+            description: `${data.length} cadet records are being exported to ${finalFileName}`,
         });
     };
 
