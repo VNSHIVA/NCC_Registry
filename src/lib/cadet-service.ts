@@ -1,3 +1,4 @@
+
 'use server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, getDoc, updateDoc, addDoc, deleteDoc, query, where, writeBatch } from 'firebase/firestore';
@@ -7,7 +8,7 @@ import { revalidatePath } from 'next/cache';
 
 export async function getCadets(institutionName: string) {
     const cadetsCol = collection(db, 'cadets');
-    const q = query(cadetsCol, where("institution", "==", institutionName));
+    const q = query(cadetsCol, where("institutionName", "==", institutionName));
     const cadetSnapshot = await getDocs(q);
     const cadetsList = cadetSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return cadetsList;

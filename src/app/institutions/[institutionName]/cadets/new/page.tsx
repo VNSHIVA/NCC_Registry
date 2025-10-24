@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
 import { addCadet } from '@/lib/cadet-service';
+import { getInstitutionByName } from '@/lib/institution-service';
 import { useRouter } from 'next/navigation';
 import { campTypes, campWithLevels } from '@/lib/constants';
 import { Trash2, Upload } from 'lucide-react';
@@ -39,8 +40,10 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     const router = useRouter();
     const resolvedParams = React.use(params);
     const institutionName = decodeURIComponent(resolvedParams.institutionName);
+    const [institutionType, setInstitutionType] = useState<'School' | 'College' | null>(null);
 
     const [formData, setFormData] = useState({
+        institutionName: institutionName,
         institution: 'College',
         regNo: '',
         rank: 'CDT',
@@ -101,22 +104,29 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     useEffect(() => {
-        const { institutetype, Cadet_Gender } = formData;
-        let newDivision = '';
-        if (institutetype && Cadet_Gender) {
-            const typeLower = institutetype.toLowerCase();
-            if (typeLower === 'school') {
-                newDivision = Cadet_Gender === 'MALE' ? 'JD' : 'JW';
-            } else if (typeLower === 'college') {
-                newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
-            } else {
-                newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
+        async function fetchInstitutionType() {
+            const institution = await getInstitutionByName(institutionName);
+            if (institution) {
+                setInstitutionType(institution.type as 'School' | 'College');
             }
         }
+        fetchInstitutionType();
+    }, [institutionName]);
+    
+    useEffect(() => {
+        if (!institutionType) return;
+        const { Cadet_Gender } = formData;
+        let newDivision = '';
+        if (institutionType === 'School') {
+            newDivision = Cadet_Gender === 'MALE' ? 'JD' : 'JW';
+        } else if (institutionType === 'College') {
+            newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
+        }
+        
         if (newDivision !== formData.division) {
             setFormData(prev => ({ ...prev, division: newDivision }));
         }
-    }, [formData.institutetype, formData.Cadet_Gender, formData.division]);
+    }, [institutionType, formData.Cadet_Gender, formData.division]);
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
@@ -618,3 +628,4 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         </div>
     );
 }
+

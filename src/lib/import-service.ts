@@ -1,4 +1,5 @@
 
+
 'use server';
 import { db } from '@/lib/firebase';
 import { collection, writeBatch, query, where, getDocs, doc } from 'firebase/firestore';
@@ -38,6 +39,7 @@ const FIELD_MAPPING: { [key: string]: string } = {
     'permanent_address_nrs': 'Permanent_Address_Nrs',
 
     'education_qualification': 'Education_Qualification',
+    'institution': 'institution',
     'institutetype': 'institutetype',
 
     'medical_complaint_if_any': 'Medical_Complaint_if_any',
@@ -104,7 +106,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
     let updatedCount = 0;
     const missingFieldsTracker = new Set<string>();
 
-    const q = query(cadetsCollection, where('institution', '==', institutionName));
+    const q = query(cadetsCollection, where('institutionName', '==', institutionName));
     const querySnapshot = await getDocs(q);
 
     // Create maps for efficient lookups based on different criteria
@@ -174,12 +176,13 @@ export async function importCadets(cadets: any[], institutionName: string) {
             // UPDATE: Merge new non-empty data with existing record
             const cadetRef = doc(db, 'cadets', existingCadet.id);
             // `dataForFirestore` already contains only non-empty values.
-            batch.set(cadetRef, dataForFirestore, { merge: true });
+            batch.set(cadetRef, {...dataForFirestore, institutionName: institutionName}, { merge: true });
             updatedCount++;
         } else {
             // CREATE: Add a new record
             const dataToSave = {
-                institution: institutionName,
+                institutionName: institutionName,
+                institution: 'College', // Default value
                 ...dataForFirestore,
                 // Ensure array fields exist even if not in the import
                 certificates: dataForFirestore.certificates || [],
@@ -188,9 +191,9 @@ export async function importCadets(cadets: any[], institutionName: string) {
 
             // Auto-assign division logic if not provided
             if (!dataToSave.division && dataToSave.institutetype && dataToSave.Cadet_Gender) {
-                if (dataToSave.institutetype === 'School') {
+                if (safeToString(dataToSave.institutetype).toLowerCase() === 'school') {
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'JD' : 'JW';
-                } else if (dataToSave.institutetype === 'College') {
+                } else {
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'SD' : 'SW';
                 }
             }

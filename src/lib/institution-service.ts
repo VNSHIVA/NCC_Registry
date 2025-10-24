@@ -11,7 +11,7 @@ export async function getInstitutions() {
     const institutionList = await Promise.all(institutionSnapshot.docs.map(async (doc) => {
         const institutionData = doc.data();
         const cadetsCol = collection(db, 'cadets');
-        const q = query(cadetsCol, where("institution", "==", institutionData.name));
+        const q = query(cadetsCol, where("institutionName", "==", institutionData.name));
         const cadetsSnapshot = await getCountFromServer(q);
         const cadetCount = cadetsSnapshot.data().count;
 
@@ -24,6 +24,20 @@ export async function getInstitutions() {
 
     return institutionList;
 }
+
+export async function getInstitutionByName(name: string) {
+    const institutionsCol = collection(db, 'institutions');
+    const q = query(institutionsCol, where("name", "==", name));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+}
+
 
 export async function addInstitution(data: { name: string; anoName: string; type: 'School' | 'College' }) {
     const docRef = await addDoc(collection(db, "institutions"), {

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
 import { getCadet, updateCadet } from '@/lib/cadet-service';
+import { getInstitutionByName } from '@/lib/institution-service';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { campTypes, campWithLevels } from '@/lib/constants';
@@ -55,47 +56,50 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     const [formData, setFormData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [institutionType, setInstitutionType] = useState<'School' | 'College' | null>(null);
 
     useEffect(() => {
-        async function fetchCadet() {
+        async function fetchCadetAndInstitution() {
             setLoading(true);
-            let data = await getCadet(cadetId);
-            if(data) {
-                data = migrateCadetData(data);
-                // Ensure institutetype is set
-                if (!data.institutetype) {
-                    data.institutetype = 'College';
+            const [cadetData, institution] = await Promise.all([
+                getCadet(cadetId),
+                getInstitutionByName(institutionName)
+            ]);
+
+            if (cadetData) {
+                const migratedData = migrateCadetData(cadetData);
+                if (!migratedData.institution) {
+                    migratedData.institution = 'College';
                 }
-                 if (!data.institution) {
-                    data.institution = 'College';
-                }
-                setFormData(data);
+                setFormData(migratedData);
             }
+
+            if (institution) {
+                 setInstitutionType(institution.type as 'School' | 'College');
+            }
+            
             setLoading(false);
         }
-        fetchCadet();
-    }, [cadetId]);
+        fetchCadetAndInstitution();
+    }, [cadetId, institutionName]);
 
     // Effect for auto-assigning division
     useEffect(() => {
-        if (!formData) return;
-        const { institutetype, Cadet_Gender } = formData;
+        if (!formData || !institutionType) return;
+        const { Cadet_Gender } = formData;
         let newDivision = '';
-        if (institutetype && Cadet_Gender) {
-            const typeLower = institutetype.toLowerCase();
-            if (typeLower === 'school') {
+        if (institutionType && Cadet_Gender) {
+            if (institutionType === 'School') {
                 newDivision = Cadet_Gender === 'MALE' ? 'JD' : 'JW';
-            } else if (typeLower === 'college') {
+            } else if (institutionType === 'College') {
                 newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
-            } else {
-                 newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
             }
         }
         // Only update if it's different to avoid infinite loops
         if (newDivision && newDivision !== formData.division) {
            setFormData((prev: any) => ({ ...prev, division: newDivision }));
         }
-    }, [formData?.institutetype, formData?.Cadet_Gender, formData?.division]);
+    }, [formData?.Cadet_Gender, institutionType, formData?.division]);
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
@@ -205,7 +209,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         try {
             // Firestore doesn't like the 'id' field in the data object
             const { id, ...dataToUpdate } = formData;
-            await updateCadet(cadetId, dataToUpdate, institutionName);
+            await updateCadet(cadetId, {...dataToUpdate, institutionName: institutionName}, institutionName);
             router.push(`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadetId}`);
         } catch (error) {
             console.error("Failed to update cadet", error);
@@ -630,3 +634,4 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         </div>
     );
 }
+

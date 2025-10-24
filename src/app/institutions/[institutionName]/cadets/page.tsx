@@ -1,4 +1,5 @@
 
+
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -170,7 +171,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         const uniqueCamps = Array.from(allCamps);
 
         const baseHeaders = [
-            'Regimental No', 'Rank', 'Cadet Name', 'Batch', 'Division', 'Institution', 'Date of Birth',
+            'Regimental No', 'Rank', 'Cadet Name', 'Batch', 'Division', 'Institution Name', 'Institution', 'Date of Birth',
             'Mobile', 'Email', 'Educational Qualification', 'Blood Group', 'Aadhaar No', 'Home Address',
             'Any Sports / Culturals', 'NOK Name', 'NOK Relation', 'NOK Contact'
         ];
@@ -189,6 +190,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'Cadet Name': cadet.Cadet_Name || '',
                 'Batch': cadet.batch || '',
                 'Division': cadet.division || '',
+                'Institution Name': cadet.institutionName || '',
                 'Institution': cadet.institution || '',
                 'Date of Birth': cadet.Date_of_Birth ? formatDateForExport(cadet.Date_of_Birth) : '',
                 'Mobile': cadet.Cadet_Mobile_No || '',
