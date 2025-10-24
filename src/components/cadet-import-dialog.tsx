@@ -123,8 +123,20 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             setError("The file is empty or could not be parsed.");
             return null;
         }
+
+        // Sanitize the data to ensure it's an array of plain objects
+        const sanitizedData = data.map(row => {
+            const plainObject: {[key: string]: any} = {};
+            for (const key in row) {
+                if (Object.prototype.hasOwnProperty.call(row, key)) {
+                    plainObject[key] = row[key];
+                }
+            }
+            return plainObject;
+        });
+
         setError(null);
-        return data; // Return raw data, normalization will happen on server
+        return sanitizedData;
     };
     
     const handleInitiateImport = async () => {
@@ -160,7 +172,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     header: true,
                     skipEmptyLines: true,
                     complete: (results) => resolve(results.data),
-                    error: (err) => reject(new Error(`Failed to parse Google Sheet URL: ${err.message}`)),
+                    error: (err) => reject(new Error(`Failed to parse Google Sheet URL: ${\'\'\'.message}`)),
                 });
             }
         });
@@ -196,7 +208,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             if(result.success) {
                 let description = `${result.added || 0} new cadets added. ${result.updated || 0} existing cadets updated.`;
                 if (result.missingFields && result.missingFields.length > 0) {
-                    description += ` Missing required fields were found for: ${result.missingFields.join(', ')}. Please complete these records.`;
+                    description += ` Some required fields were missing: ${result.missingFields.join(', ')}. Please complete these records.`;
                 }
 
                 toast({
@@ -297,3 +309,5 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         </Dialog>
     );
 }
+
+    
