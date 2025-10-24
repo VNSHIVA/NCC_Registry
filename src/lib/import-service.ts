@@ -88,7 +88,6 @@ export async function importCadets(cadets: any[], institutionName: string) {
             }
         }
         
-        // Ensure required fields are checked, even if they end up being empty
         REQUIRED_FIELDS.forEach(field => {
             if (!normalizedRow[field]) {
                 missingFieldsTracker.add(field);
@@ -97,7 +96,6 @@ export async function importCadets(cadets: any[], institutionName: string) {
         
         const { regNo } = normalizedRow;
         
-        // Skip row if regNo is missing after normalization, as it's the primary key
         if (!regNo) {
             continue; 
         }
@@ -108,7 +106,8 @@ export async function importCadets(cadets: any[], institutionName: string) {
             // Update existing record: merge new data, keeping existing values for blank fields
             const dataToUpdate = { ...existingCadet.data, ...normalizedRow };
             const cadetRef = doc(db, 'cadets', existingCadet.id);
-            batch.update(cadetRef, dataToUpdate);
+            // Using set with merge is equivalent to a smart update.
+            batch.set(cadetRef, dataToUpdate, { merge: true });
             updatedCount++;
         } else {
             // Create a new record
