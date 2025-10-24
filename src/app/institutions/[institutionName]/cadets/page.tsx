@@ -46,7 +46,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const [cadetsData, setCadetsData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all' });
+    const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all', camp: 'all', attendance: 'attended' });
     const [showActiveOnly, setShowActiveOnly] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const cadetsPerPage = 9;
@@ -73,12 +73,24 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         const batchNumber = parseInt(cadet.batch);
         const isActive = batchNumber ? (new Date().getFullYear() - batchNumber) < 3 : false;
         
+        const hasAttendedCamp = (campType: string) => {
+            if (!campType || campType === 'all') return true;
+            return cadet.camps?.some((c: any) => c.campType === campType);
+        };
+        
+        const campFilterMatch = filters.camp === 'all' 
+            ? true 
+            : filters.attendance === 'attended' 
+                ? hasAttendedCamp(filters.camp) 
+                : !hasAttendedCamp(filters.camp);
+
         return (
             (cadet.Cadet_Name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) &&
             (filters.batch === 'all' || cadet.batch?.toString() === filters.batch) &&
             (filters.rank === 'all' || cadet.rank === filters.rank) &&
             (filters.bloodGroup === 'all' || cadet.Blood_Group === filters.bloodGroup) &&
             (filters.division === 'all' || cadet.division === filters.division) &&
+            campFilterMatch &&
             (!showActiveOnly || isActive) 
         );
     });
@@ -102,7 +114,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
     const handleReset = () => {
         setSearchTerm('');
-        setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all' });
+        setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all', camp: 'all', attendance: 'attended' });
         setShowActiveOnly(true);
         setCurrentPage(1);
         setSelectedCadets([]);
@@ -351,7 +363,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
             <Card className="mb-8 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                         <div className="lg:col-span-2">
                             <Label htmlFor="search-name">Search by Name</Label>
                             <div className="relative">
@@ -382,6 +394,16 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 </SelectContent>
                             </Select>
                         </div>
+                         <div>
+                            <Label htmlFor="blood-group-filter">Blood Group</Label>
+                            <Select onValueChange={value => setFilters(f => ({ ...f, bloodGroup: value }))} value={filters.bloodGroup}>
+                                <SelectTrigger id="blood-group-filter" className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All</SelectItem>
+                                    {['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div>
                             <Label htmlFor="rank-filter">Rank</Label>
                             <Select onValueChange={value => setFilters(f => ({ ...f, rank: value }))} value={filters.rank}>
@@ -392,15 +414,27 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 </SelectContent>
                             </Select>
                         </div>
-                         <div>
-                            <Label htmlFor="blood-group-filter">Blood Group</Label>
-                            <Select onValueChange={value => setFilters(f => ({ ...f, bloodGroup: value }))} value={filters.bloodGroup}>
-                                <SelectTrigger id="blood-group-filter" className="mt-1 bg-white/20"><SelectValue placeholder="All" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All</SelectItem>
-                                    {['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
+                         <div className="grid grid-cols-2 gap-2">
+                             <div>
+                                <Label htmlFor="camp-filter">Camp Attended</Label>
+                                <Select onValueChange={value => setFilters(f => ({ ...f, camp: value }))} value={filters.camp}>
+                                    <SelectTrigger id="camp-filter" className="mt-1 bg-white/20"><SelectValue placeholder="Any" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Any Camp</SelectItem>
+                                        {campTypes.map(camp => <SelectItem key={camp.value} value={camp.value}>{camp.label}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label htmlFor="attendance-filter">Status</Label>
+                                <Select onValueChange={value => setFilters(f => ({ ...f, attendance: value }))} value={filters.attendance} disabled={filters.camp === 'all'}>
+                                    <SelectTrigger id="attendance-filter" className="mt-1 bg-white/20"><SelectValue/></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="attended">Attended</SelectItem>
+                                        <SelectItem value="not-attended">Not Attended</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </div>
                      <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
@@ -568,5 +602,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         </div>
     );
 }
+
+    
 
     
