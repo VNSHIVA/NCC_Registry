@@ -1,4 +1,5 @@
 
+
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
@@ -75,9 +76,9 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         let newDivision = '';
         if (institutetype && Cadet_Gender) {
             if (institutetype === 'School') {
-                newDivision = Cadet_Gender === 'Male' ? 'JD' : 'JW';
+                newDivision = Cadet_Gender === 'MALE' ? 'JD' : 'JW';
             } else if (institutetype === 'College') {
-                newDivision = Cadet_Gender === 'Male' ? 'SD' : 'SW';
+                newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
             }
         }
         // Only update if it's different to avoid infinite loops
@@ -351,9 +352,9 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                     <Select onValueChange={(value) => handleSelectChange('Cadet_Gender', value)} value={formData.Cadet_Gender}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Male">Male</SelectItem>
-                                            <SelectItem value="Female">Female</SelectItem>
-                                            <SelectItem value="Other">Other</SelectItem>
+                                            <SelectItem value="MALE">MALE</SelectItem>
+                                            <SelectItem value="FEMALE">FEMALE</SelectItem>
+                                            <SelectItem value="OTHER">OTHER</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -629,3 +630,4 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     
 
     
+

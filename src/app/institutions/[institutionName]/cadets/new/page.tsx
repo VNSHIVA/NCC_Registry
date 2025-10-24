@@ -1,4 +1,5 @@
 
+
 'use client';
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -49,7 +50,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
 
         Cadet_Name: '',
         Date_of_Birth: '',
-        Cadet_Gender: 'Male',
+        Cadet_Gender: 'MALE',
         Cadet_Mobile_No: '',
         Email_Address: '',
         Nationality: 'Indian',
@@ -104,9 +105,9 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         let newDivision = '';
         if (institutetype && Cadet_Gender) {
             if (institutetype === 'School') {
-                newDivision = Cadet_Gender === 'Male' ? 'JD' : 'JW';
+                newDivision = Cadet_Gender === 'MALE' ? 'JD' : 'JW';
             } else if (institutetype === 'College') {
-                newDivision = Cadet_Gender === 'Male' ? 'SD' : 'SW';
+                newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
             }
         }
         if (newDivision !== formData.division) {
@@ -346,9 +347,9 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                                     <Select onValueChange={(value) => handleSelectChange('Cadet_Gender', value)} value={formData.Cadet_Gender}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Male">Male</SelectItem>
-                                            <SelectItem value="Female">Female</SelectItem>
-                                            <SelectItem value="Other">Other</SelectItem>
+                                            <SelectItem value="MALE">MALE</SelectItem>
+                                            <SelectItem value="FEMALE">FEMALE</SelectItem>
+                                            <SelectItem value="OTHER">OTHER</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -624,3 +625,4 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     
 
     
+
