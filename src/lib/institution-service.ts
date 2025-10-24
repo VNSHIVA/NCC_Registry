@@ -1,7 +1,7 @@
 
 'use server';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, getCountFromServer, query, where, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, getCountFromServer, query, where, addDoc, doc, updateDoc, deleteDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
 export async function getInstitutions() {
@@ -55,9 +55,36 @@ export async function updateInstitution(id: string, data: { name: string; anoNam
 }
 
 export async function deleteInstitution(id: string) {
-    const institutionDoc = doc(db, 'institutions', id);
-    await deleteDoc(institutionDoc);
+    const institutionDocRef = doc(db, 'institutions', id);
+    
+    // First, get the institution's data to find its name
+    const institutionSnap = await getDoc(institutionDocRef);
+    if (!institutionSnap.exists()) {
+        console.error("Institution to delete does not exist.");
+        return;
+    }
+    const institutionName = institutionSnap.data().name;
+
+    // Find all cadets belonging to this institution
+    const cadetsCol = collection(db, 'cadets');
+    const q = query(cadetsCol, where("institutionName", "==", institutionName));
+    const cadetsSnapshot = await getDocs(q);
+
+    // Create a batch to delete all associated cadets
+    const batch = writeBatch(db);
+    cadetsSnapshot.docs.forEach((cadetDoc) => {
+        batch.delete(cadetDoc.ref);
+    });
+
+    // Add the institution itself to the batch for deletion
+    batch.delete(institutionDocRef);
+
+    // Commit the batch
+    await batch.commit();
+
     revalidatePath('/institutions');
+    // Also revalidate the specific cadets page in case the user navigates back
+    revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
 }
 
     
