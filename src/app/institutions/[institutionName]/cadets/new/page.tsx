@@ -618,13 +618,3 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         </div>
     );
 }
-
-    
-
-    
-
-
-
-
-
-
