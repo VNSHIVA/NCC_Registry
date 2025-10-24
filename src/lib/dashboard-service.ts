@@ -30,6 +30,21 @@ export interface FilteredCampStats {
     totalCadetCount: number;
 }
 
+const isActiveCadet = (cadet: any) => {
+    const currentYear = new Date().getFullYear();
+    const batchYear = parseInt(cadet.batch, 10);
+    if (isNaN(batchYear)) return false;
+
+    const division = cadet.division?.toUpperCase();
+    if (division === 'SD' || division === 'SW') {
+        return (currentYear - batchYear) < 3;
+    }
+    if (division === 'JD' || division === 'JW') {
+        return (currentYear - batchYear) < 1;
+    }
+    return false; // Default to inactive if division is unknown
+};
+
 export async function getDashboardStats(
     filters: {
         campType?: string | null;
@@ -46,17 +61,19 @@ export async function getDashboardStats(
         getDocs(institutionsCol)
     ]);
     
-    const cadets = cadetSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const allCadets = cadetSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const activeCadets = allCadets.filter(isActiveCadet);
+
     const institutions = institutionsSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-    const totalCadets = cadets.length;
+    const totalCadets = activeCadets.length;
     const totalInstitutions = institutions.length;
 
     // Initialize counters
     const divisionCounts: DivisionCounts = { SD: 0, SW: 0, JD: 0, JW: 0 };
     const batchCounts: BatchCounts = {};
 
-    // Process each cadet
-    for (const cadet of cadets) {
+    // Process each active cadet
+    for (const cadet of activeCadets) {
         // Count divisions
         const division = cadet.division?.toUpperCase() || 'SD'; // Default to SD if not specified
         if (division in divisionCounts) {
@@ -116,14 +133,15 @@ export async function getFilteredCampStats(
     }
     
     const cadetSnapshot = await getDocs(q);
-    const cadets = cadetSnapshot.docs.map(doc => doc.data());
+    const allCadetsInFilter = cadetSnapshot.docs.map(doc => doc.data());
+    const activeCadetsInFilter = allCadetsInFilter.filter(isActiveCadet);
 
-    const filteredCadets = cadets.filter(cadet => 
+    const attendedCadets = activeCadetsInFilter.filter(cadet => 
         cadet.camps && Array.isArray(cadet.camps) && cadet.camps.some(camp => camp.campType === filters.campType)
     );
 
     return {
-        filteredCadetCount: filteredCadets.length,
-        totalCadetCount: cadets.length,
+        filteredCadetCount: attendedCadets.length,
+        totalCadetCount: activeCadetsInFilter.length, // Total is now the number of active cadets matching the filter
     };
 }

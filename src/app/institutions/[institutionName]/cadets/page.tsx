@@ -47,7 +47,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all', camp: 'all', attendance: 'attended' });
-    const [showActiveOnly, setShowActiveOnly] = useState(true);
+    const [showInactive, setShowInactive] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const cadetsPerPage = 9;
     const [isImporting, setIsImporting] = useState(false);
@@ -69,10 +69,23 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         fetchCadets();
     }, [institutionName]);
 
+    const isActiveCadet = (cadet: any) => {
+        const currentYear = new Date().getFullYear();
+        const batchYear = parseInt(cadet.batch, 10);
+        if (isNaN(batchYear)) return false;
+    
+        const division = cadet.division?.toUpperCase();
+        if (division === 'SD' || division === 'SW') {
+            return (currentYear - batchYear) < 3;
+        }
+        if (division === 'JD' || division === 'JW') {
+            return (currentYear - batchYear) < 1;
+        }
+        return false;
+    };
+
+
     const filteredCadets = cadetsData.filter(cadet => {
-        const batchNumber = parseInt(cadet.batch);
-        const isActive = batchNumber ? (new Date().getFullYear() - batchNumber) < 3 : false;
-        
         const hasAttendedCamp = (campType: string) => {
             if (!campType || campType === 'all') return true;
             return cadet.camps?.some((c: any) => c.campType === campType);
@@ -91,7 +104,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             (filters.bloodGroup === 'all' || cadet.Blood_Group === filters.bloodGroup) &&
             (filters.division === 'all' || cadet.division === filters.division) &&
             campFilterMatch &&
-            (!showActiveOnly || isActive) 
+            (showInactive || isActiveCadet(cadet)) 
         );
     });
     
@@ -105,7 +118,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     useEffect(() => {
         setSelectedCadets([]);
         setIsSelectionMode(false);
-    }, [searchTerm, filters, showActiveOnly]);
+    }, [searchTerm, filters, showInactive]);
     
     useEffect(() => {
         setSelectedCadets([]);
@@ -115,7 +128,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const handleReset = () => {
         setSearchTerm('');
         setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all', camp: 'all', attendance: 'attended' });
-        setShowActiveOnly(true);
+        setShowInactive(false);
         setCurrentPage(1);
         setSelectedCadets([]);
         setIsSelectionMode(false);
@@ -446,8 +459,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                     </div>
                      <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
                          <div className="flex items-center space-x-2">
-                            <Switch id="active-cadets" checked={showActiveOnly} onCheckedChange={setShowActiveOnly} />
-                            <Label htmlFor="active-cadets">Show Active Cadets Only (3 years)</Label>
+                            <Switch id="active-cadets" checked={showInactive} onCheckedChange={setShowInactive} />
+                            <Label htmlFor="active-cadets">Show Course-Completed Cadets</Label>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <Button variant="outline" onClick={handleReset} className="bg-transparent hover:bg-black/10">Reset</Button>
@@ -571,12 +584,13 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 <div><span className="font-semibold">Batch:</span> {cadet.batch}</div>
                                 <div><span className="font-semibold">Blood:</span> {cadet.Blood_Group}</div>
                             </div>
+                             {!isActiveCadet(cadet) && <div className="text-xs font-bold text-accent-foreground bg-accent/20 px-2 py-1 rounded-full mb-2">Course Completed</div>}
                             <div className="flex gap-2 w-full mt-2">
                                 <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}`} className="flex-1">
                                     <Button variant="outline" className="w-full bg-transparent hover:bg-black/10">View</Button>
                                 </Link>
                                 <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}/edit`} className="flex-1">
-                                    <Button variant="default" className="w-full">Edit</Button>
+                                    <Button variant="default" className="w-full" disabled={!isActiveCadet(cadet)}>Edit</Button>
                                 </Link>
                             </div>
                         </CardContent>
@@ -609,7 +623,3 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         </div>
     );
 }
-
-    
-
-    

@@ -4,6 +4,21 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, getCountFromServer, query, where, addDoc, doc, updateDoc, deleteDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
+const isActiveCadet = (cadet: any) => {
+    const currentYear = new Date().getFullYear();
+    const batchYear = parseInt(cadet.batch, 10);
+    if (isNaN(batchYear)) return false;
+
+    const division = cadet.division?.toUpperCase();
+    if (division === 'SD' || division === 'SW') {
+        return (currentYear - batchYear) < 3;
+    }
+    if (division === 'JD' || division === 'JW') {
+        return (currentYear - batchYear) < 1;
+    }
+    return false; // Default to inactive if division is unknown
+};
+
 export async function getInstitutions() {
     const institutionsCol = collection(db, 'institutions');
     const institutionSnapshot = await getDocs(institutionsCol);
@@ -13,7 +28,9 @@ export async function getInstitutions() {
         const cadetsCol = collection(db, 'cadets');
         const q = query(cadetsCol, where("institutionName", "==", institutionData.name));
         const cadetsSnapshot = await getDocs(q);
-        const cadets = cadetsSnapshot.docs.map(d => d.data());
+        
+        const allCadets = cadetsSnapshot.docs.map(d => d.data());
+        const activeCadets = allCadets.filter(isActiveCadet);
 
         const divisionCounts = { SD: 0, SW: 0, JD: 0, JW: 0 };
         const yearCounts = {
@@ -22,7 +39,7 @@ export async function getInstitutions() {
         };
         const currentYear = new Date().getFullYear();
 
-        for (const cadet of cadets) {
+        for (const cadet of activeCadets) {
             const division = cadet.division?.toUpperCase();
             if (division in divisionCounts) {
                 divisionCounts[division as keyof typeof divisionCounts]++;
@@ -46,7 +63,7 @@ export async function getInstitutions() {
         return { 
             id: doc.id, 
             ...institutionData,
-            cadetCount: cadets.length,
+            cadetCount: activeCadets.length, // Count only active cadets
             divisionCounts,
             yearCounts,
         };

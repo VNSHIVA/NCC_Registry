@@ -17,7 +17,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useRouter } from 'next/navigation';
 import { campTypes } from '@/lib/constants';
@@ -32,6 +31,22 @@ const migrateCadetDataForDisplay = (data: any) => {
         if(!data.certificates) data.certificates = [];
     }
     return data;
+};
+
+const isActiveCadet = (cadet: any) => {
+    if (!cadet) return false;
+    const currentYear = new Date().getFullYear();
+    const batchYear = parseInt(cadet.batch, 10);
+    if (isNaN(batchYear)) return false;
+
+    const division = cadet.division?.toUpperCase();
+    if (division === 'SD' || division === 'SW') {
+        return (currentYear - batchYear) < 3;
+    }
+    if (division === 'JD' || division === 'JW') {
+        return (currentYear - batchYear) < 1;
+    }
+    return false;
 };
 
 
@@ -71,6 +86,8 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     return camp ? camp.label : typeValue;
   }
 
+  const isCadetActive = isActiveCadet(cadet);
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -108,12 +125,15 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-2xl font-bold text-primary">{cadet.Cadet_Name}</CardTitle>
+              <CardTitle className="text-2xl font-bold text-primary flex items-center gap-2">
+                {cadet.Cadet_Name}
+                {!isCadetActive && <span className="text-sm font-semibold text-accent-foreground bg-accent/20 px-3 py-1 rounded-full">Course Completed</span>}
+              </CardTitle>
               <p className="text-muted-foreground">{cadet.regNo}</p>
             </div>
             <div className="flex gap-2">
               <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}/edit`}>
-                <Button variant="outline"><Edit className="mr-2 h-4 w-4" /> Edit</Button>
+                <Button variant="outline" disabled={!isCadetActive}><Edit className="mr-2 h-4 w-4" /> Edit</Button>
               </Link>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
