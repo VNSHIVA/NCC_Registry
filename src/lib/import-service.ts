@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, writeBatch, query, where, getDocs, doc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { format } from 'date-fns';
+import { getInstitutionByName } from './institution-service';
 
 
 const FIELD_MAPPING: { [key: string]: string } = {
@@ -100,6 +101,13 @@ export async function importCadets(cadets: any[], institutionName: string) {
         return { success: false, error: 'No cadet data provided.' };
     }
 
+    const institution = await getInstitutionByName(institutionName);
+    if (!institution) {
+        return { success: false, error: `Institution named "${institutionName}" not found.` };
+    }
+    const institutionType = institution.type;
+
+
     const cadetsCollection = collection(db, 'cadets');
     const batch = writeBatch(db);
     let addedCount = 0;
@@ -190,10 +198,10 @@ export async function importCadets(cadets: any[], institutionName: string) {
             };
 
             // Auto-assign division logic if not provided
-            if (!dataToSave.division && dataToSave.institutetype && dataToSave.Cadet_Gender) {
-                if (safeToString(dataToSave.institutetype).toLowerCase() === 'school') {
+            if (!dataToSave.division && institutionType && dataToSave.Cadet_Gender) {
+                if (institutionType === 'School') {
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'JD' : 'JW';
-                } else {
+                } else { // Default to College logic
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'SD' : 'SW';
                 }
             }
