@@ -355,7 +355,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                     <Input id="Date_of_Birth" type="date" value={formData.Date_of_Birth || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="Cadet_Gender">Cadet_Gender</Label>
+                                    <Label htmlFor="Cadet_Gender">Cadet Gender</Label>
                                     <Select onValueChange={(value) => handleSelectChange('Cadet_Gender', value)} value={formData.Cadet_Gender}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
                                         <SelectContent>
@@ -631,6 +631,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     
 
     
+
 
 
 
