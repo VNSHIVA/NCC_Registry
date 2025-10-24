@@ -144,7 +144,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
               <div><strong className="font-medium text-muted-foreground">Division:</strong> {cadet.division}</div>
               <div><strong className="font-medium text-muted-foreground">Batch:</strong> {cadet.batch}</div>
               <div><strong className="font-medium text-muted-foreground">Army Type:</strong> {cadet.armytype}</div>
-              <div><strong className="font-medium text-muted-foreground">Institution:</strong> {cadet.institution}</div>
+              <div><strong className="font-medium text-muted-foreground">Institution:</strong> {institutionName}</div>
                <div><strong className="font-medium text-muted-foreground">Willing to undergo Military Training:</strong> {cadet.Willingness_to_undergo_Military_Training}</div>
                 <div><strong className="font-medium text-muted-foreground">Willing to serve in NCC:</strong> {cadet.Willingness_to_serve_in_NCC}</div>
                 <div><strong className="font-medium text-muted-foreground">Previously Applied:</strong> {cadet.Previously_Applied_for_enrollment}</div>
@@ -212,6 +212,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Education & Medical</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <div><strong className="font-medium text-muted-foreground">Education:</strong> {cadet.Education_Qualification}</div>
+                 <div><strong className="font-medium text-muted-foreground">Institution:</strong> {cadet.institution}</div>
                 <div><strong className="font-medium text-muted-foreground">Institution Type:</strong> {cadet.institutetype}</div>
                 <div className="md:col-span-2"><strong className="font-medium text-muted-foreground">Medical Complaint:</strong> {cadet.Medical_Complaint_if_any}</div>
             </div>
@@ -287,8 +288,3 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     </div>
   );
 }
-
-    
-
-    
-

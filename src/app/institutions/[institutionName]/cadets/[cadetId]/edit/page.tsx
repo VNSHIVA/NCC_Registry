@@ -66,6 +66,9 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                 if (!data.institutetype) {
                     data.institutetype = 'College';
                 }
+                 if (!data.institution) {
+                    data.institution = 'College';
+                }
                 setFormData(data);
             }
             setLoading(false);
@@ -454,7 +457,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="institution">Institution</Label>
-                                    <Input id="institution" value={formData.institution || ''} disabled className="mt-1 bg-gray-100/20"/>
+                                    <Textarea id="institution" value={formData.institution || ''} onChange={handleInputChange} rows={1} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
                                     <Label htmlFor="institutetype">Institution Type</Label>

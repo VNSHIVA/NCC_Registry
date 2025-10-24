@@ -41,7 +41,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     const institutionName = decodeURIComponent(resolvedParams.institutionName);
 
     const [formData, setFormData] = useState({
-        institution: institutionName,
+        institution: 'College',
         regNo: '',
         rank: 'CDT',
         batch: new Date().getFullYear(),
@@ -193,7 +193,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await addCadet(formData, institutionName);
+            await addCadet({...formData, institution: institutionName}, institutionName);
             router.push(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
         } catch (error) {
             console.error("Failed to add cadet", error);
@@ -210,7 +210,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         <div className="container mx-auto px-4 py-8">
             <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-primary">Add New Cadet</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-primary">Add New Cadet to {institutionName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-8">
@@ -445,7 +445,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                                 </div>
                                 <div>
                                     <Label htmlFor="institution">Institution</Label>
-                                    <Input id="institution" value={formData.institution} disabled className="mt-1 bg-gray-100/20"/>
+                                    <Textarea id="institution" value={formData.institution} onChange={handleInputChange} rows={1} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
                                     <Label htmlFor="institutetype">Institution Type</Label>
