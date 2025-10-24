@@ -172,7 +172,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     header: true,
                     skipEmptyLines: true,
                     complete: (results) => resolve(results.data),
-                    error: (err) => reject(new Error(`Failed to parse Google Sheet URL: ${\'\'\'.message}`)),
+                    error: (err) => reject(new Error(`Failed to parse Google Sheet URL: ${err.message}`)),
                 });
             }
         });
@@ -309,5 +309,3 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         </Dialog>
     );
 }
-
-    
