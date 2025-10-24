@@ -75,7 +75,8 @@ const safeToString = (value: any): string => {
         try {
             return format(value, 'yyyy-MM-dd');
         } catch {
-            return value.toISOString().split('T')[0];
+            // Fallback for invalid date objects
+            return '';
         }
     }
     return String(value);
@@ -85,7 +86,8 @@ const safeToString = (value: any): string => {
 // Helper to create a composite key for name + DOB matching
 const createNameDobKey = (name: any, dob: any) => {
     const safeName = safeToString(name).toLowerCase().trim();
-    const safeDob = safeToString(dob).trim();
+    // DOB format should be consistent for matching, YYYY-MM-DD from safeToString is good
+    const safeDob = safeToString(dob).trim(); 
     if (!safeName || !safeDob) return null;
     return `${safeName}|${safeDob}`;
 };
@@ -113,8 +115,8 @@ export async function importCadets(cadets: any[], institutionName: string) {
     querySnapshot.docs.forEach(doc => {
         const data = doc.data();
         const record = { id: doc.id, data };
-        if (data.regNo) existingByRegNo.set(safeToString(data.regNo), record);
-        if (data.adhaarnumber) existingByAadhaar.set(safeToString(data.adhaarnumber), record);
+        if (data.regNo) existingByRegNo.set(safeToString(data.regNo).toLowerCase(), record);
+        if (data.adhaarnumber) existingByAadhaar.set(safeToString(data.adhaarnumber).toLowerCase(), record);
         const nameDobKey = createNameDobKey(data.Cadet_Name, data.Date_of_Birth);
         if (nameDobKey) existingByNameDob.set(nameDobKey, record);
     });
@@ -126,14 +128,20 @@ export async function importCadets(cadets: any[], institutionName: string) {
         const normalizedRow: { [key: string]: any } = {};
         for (const key in rawRow) {
             const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/[ _-]/g, '_').trim()] || key.trim();
-            normalizedRow[normalizedKey] = safeToString(rawRow[key]);
+            normalizedRow[normalizedKey] = rawRow[key]; // Keep original type for now
         }
 
-        // Clean object for Firestore: contains only fields with actual values
+        // Clean object for Firestore: contains only fields with actual non-empty string values
         const dataForFirestore: { [key:string]: any } = {};
         for (const key in normalizedRow) {
-            if (normalizedRow[key] !== '') {
-                dataForFirestore[key] = normalizedRow[key];
+            const stringValue = safeToString(normalizedRow[key]);
+            if (stringValue !== '') {
+                // We store the original normalized value, not the stringified one, unless it's a date
+                 if (normalizedRow[key] instanceof Date) {
+                    dataForFirestore[key] = stringValue;
+                } else {
+                    dataForFirestore[key] = normalizedRow[key];
+                }
             }
         }
         
@@ -146,8 +154,8 @@ export async function importCadets(cadets: any[], institutionName: string) {
         
         // Find existing cadet using prioritized criteria
         let existingCadet = null;
-        const regNoStr = dataForFirestore.regNo ? safeToString(dataForFirestore.regNo) : '';
-        const aadhaarStr = dataForFirestore.adhaarnumber ? safeToString(dataForFirestore.adhaarnumber) : '';
+        const regNoStr = dataForFirestore.regNo ? safeToString(dataForFirestore.regNo).toLowerCase() : '';
+        const aadhaarStr = dataForFirestore.adhaarnumber ? safeToString(dataForFirestore.adhaarnumber).toLowerCase() : '';
 
         if (regNoStr) {
             existingCadet = existingByRegNo.get(regNoStr);
@@ -165,6 +173,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
         if (existingCadet) {
             // UPDATE: Merge new non-empty data with existing record
             const cadetRef = doc(db, 'cadets', existingCadet.id);
+            // `dataForFirestore` already contains only non-empty values.
             batch.set(cadetRef, dataForFirestore, { merge: true });
             updatedCount++;
         } else {
@@ -180,9 +189,9 @@ export async function importCadets(cadets: any[], institutionName: string) {
             // Auto-assign division logic if not provided
             if (!dataToSave.division && dataToSave.institutetype && dataToSave.Cadet_Gender) {
                 if (dataToSave.institutetype === 'School') {
-                    dataToSave.division = dataToSave.Cadet_Gender === 'Male' ? 'JD' : 'JW';
+                    dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'JD' : 'JW';
                 } else if (dataToSave.institutetype === 'College') {
-                    dataToSave.division = dataToSave.Cadet_Gender === 'Male' ? 'SD' : 'SW';
+                    dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'SD' : 'SW';
                 }
             }
             
