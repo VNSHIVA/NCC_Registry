@@ -45,7 +45,7 @@ const isActiveCadet = (cadet: any) => {
         return (currentYear - batchYear) < 3;
     }
     if (division === 'JD' || division === 'JW') {
-        return (currentYear - batchYear) < 1;
+        return (currentYear - batchYear) < 2; // Junior is 2 years
     }
     return false;
 };
@@ -133,9 +133,11 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
               <p className="text-muted-foreground">{cadet.regNo}</p>
             </div>
             <div className="flex gap-2">
-              <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}/edit`}>
-                <Button variant="outline" disabled={!isCadetActive}><Edit className="mr-2 h-4 w-4" /> Edit</Button>
-              </Link>
+              {isCadetActive && (
+                <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}/edit`}>
+                  <Button variant="outline"><Edit className="mr-2 h-4 w-4" /> Edit</Button>
+                </Link>
+              )}
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete</Button>
