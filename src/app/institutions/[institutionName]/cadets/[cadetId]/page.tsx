@@ -5,7 +5,7 @@ import { getCadet, deleteCadet } from '@/lib/cadet-service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Edit, Trash2, Award, Calendar, MapPin, Star, Shield, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Award, Calendar, MapPin, Star, Shield, Trophy, Users, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import {
   AlertDialog,
@@ -23,14 +23,13 @@ import { campTypes } from '@/lib/constants';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // This migration function can be removed if all data is in the new format
-const migrateCampsDataForDisplay = (data: any) => {
-    if (!data.camps || Array.isArray(data.camps)) {
+const migrateCadetDataForDisplay = (data: any) => {
+    if (!data.camps || !Array.isArray(data.camps)) {
         if(!data.camps) data.camps = [];
-        return data;
     }
-    // Simple migration, can be enhanced
-    const newCamps: any[] = [];
-    data.camps = newCamps;
+     if (!data.certificates || !Array.isArray(data.certificates)) {
+        if(!data.certificates) data.certificates = [];
+    }
     return data;
 };
 
@@ -49,7 +48,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
       setLoading(true);
       let data = await getCadet(cadetId);
       if (data) {
-        data = migrateCampsDataForDisplay(data);
+        data = migrateCadetDataForDisplay(data);
       }
       setCadet(data);
       setLoading(false);
@@ -153,15 +152,24 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
           </section>
 
           <section>
-            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">NCC Certificate Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                {cadet.ncc_year && <div><strong className="font-medium text-muted-foreground">NCC Year:</strong> {cadet.ncc_year}</div>}
-                <div><strong className="font-medium text-muted-foreground">Current Certificate:</strong> {cadet.current_certificate}</div>
-                {cadet.appearing_for_certificate && <div><strong className="font-medium text-muted-foreground">Appearing for:</strong> {cadet.appearing_for_certificate}</div>}
-                {cadet.certificate_exam_year && <div><strong className="font-medium text-muted-foreground">Exam Year:</strong> {cadet.certificate_exam_year}</div>}
-                {cadet.certificate_status && <div><strong className="font-medium text-muted-foreground">Exam Status:</strong> {cadet.certificate_status}</div>}
-                {cadet.certificate_grade && <div><strong className="font-medium text-muted-foreground">Grade Obtained:</strong> {cadet.certificate_grade}</div>}
-            </div>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">NCC Certificates Obtained</h3>
+            {cadet.certificates && cadet.certificates.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {cadet.certificates.map((cert: any, index: number) => (
+                        <div key={index} className="p-4 bg-white/10 rounded-lg border border-white/20 flex items-center gap-4">
+                            <Award className="h-8 w-8 text-accent"/>
+                            <div>
+                                <p className="font-semibold">{cert.certificate_type}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Grade: {cert.certificate_grade} | Year: {cert.certificate_year}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-muted-foreground">No certificates obtained.</p>
+            )}
           </section>
 
           <section>
