@@ -59,6 +59,24 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         fetchCadet();
     }, [cadetId]);
 
+    useEffect(() => {
+        if (!formData) return;
+        const { institutetype, Cadet_Gender } = formData;
+        let newDivision = '';
+        if (institutetype && Cadet_Gender) {
+            if (institutetype === 'School') {
+                newDivision = Cadet_Gender === 'Male' ? 'JD' : 'JW';
+            } else if (institutetype === 'College') {
+                newDivision = Cadet_Gender === 'Male' ? 'SD' : 'SW';
+            }
+        }
+        // Only update if it's different to avoid infinite loops
+        if (newDivision && newDivision !== formData.division) {
+           setFormData((prev: any) => ({ ...prev, division: newDivision }));
+        }
+    }, [formData?.institutetype, formData?.Cadet_Gender, formData]);
+
+
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
             try {
@@ -202,15 +220,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="division">Division</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('division', value)} value={formData.division}>
-                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="SD">Senior Division (SD)</SelectItem>
-                                            <SelectItem value="SW">Senior Wing (SW)</SelectItem>
-                                            <SelectItem value="JD">Junior Division (JD)</SelectItem>
-                                            <SelectItem value="JW">Junior Wing (JW)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Input id="division" value={formData.division || ''} disabled className="mt-1 bg-gray-100/20" placeholder="Auto-assigned"/>
                                 </div>
                                  <div className="space-y-2">
                                     <Label>Willingness to undergo Military Training?</Label>

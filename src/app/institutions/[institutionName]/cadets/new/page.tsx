@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,7 +38,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         regNo: '',
         rank: 'CDT',
         batch: new Date().getFullYear(),
-        division: 'SD',
+        division: '',
         armytype: 'Army',
 
         Cadet_Name: '',
@@ -91,6 +91,19 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         camps: [] as any[],
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+     useEffect(() => {
+        const { institutetype, Cadet_Gender } = formData;
+        let newDivision = '';
+        if (institutetype && Cadet_Gender) {
+            if (institutetype === 'School') {
+                newDivision = Cadet_Gender === 'Male' ? 'JD' : 'JW';
+            } else if (institutetype === 'College') {
+                newDivision = Cadet_Gender === 'Male' ? 'SD' : 'SW';
+            }
+        }
+        setFormData(prev => ({ ...prev, division: newDivision }));
+    }, [formData.institutetype, formData.Cadet_Gender]);
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
@@ -201,15 +214,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                                 </div>
                                 <div>
                                     <Label htmlFor="division">Division</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('division', value)} value={formData.division}>
-                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="SD">Senior Division (SD)</SelectItem>
-                                            <SelectItem value="SW">Senior Wing (SW)</SelectItem>
-                                            <SelectItem value="JD">Junior Division (JD)</SelectItem>
-                                            <SelectItem value="JW">Junior Wing (JW)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Input id="division" value={formData.division} disabled className="mt-1 bg-gray-100/20" placeholder="Auto-assigned"/>
                                 </div>
                                  <div className="space-y-2">
                                     <Label>Willingness to undergo Military Training?</Label>
