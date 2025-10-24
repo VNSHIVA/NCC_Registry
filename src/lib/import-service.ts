@@ -1,3 +1,4 @@
+
 'use server';
 import { db } from '@/lib/firebase';
 import { collection, writeBatch, query, where, getDocs, doc } from 'firebase/firestore';
@@ -5,43 +6,67 @@ import { revalidatePath } from 'next/cache';
 import { campTypes } from './constants';
 
 const validateCadetData = (cadet: any) => {
-    return cadet.regNo && cadet.name && cadet.batch;
+    return cadet.regNo && cadet.Cadet_Name && cadet.batch;
 };
 
-// Maps variations of header names to our standardized camelCase field names
 const FIELD_MAPPING: { [key: string]: string } = {
     'regimental no': 'regNo',
     'regimental number': 'regNo',
     'reg no': 'regNo',
     'rank': 'rank',
-    'full name': 'name',
-    'name': 'name',
     'batch': 'batch',
     'year': 'batch',
-    'dob': 'dob',
-    'date of birth': 'dob',
-    'mobile': 'mobile',
-    'mobile no': 'mobile',
-    'mobile number': 'mobile',
-    'email': 'email',
-    'email id': 'email',
-    'blood group': 'bloodGroup',
-    'home address': 'homeAddress',
-    'address': 'homeAddress',
-    'nok name': 'nokName',
-    'next of kin name': 'nokName',
-    'nok relation': 'nokRelation',
-    'next of kin relation': 'nokRelation',
-    'nok contact': 'nokContact',
-    'next of kin contact': 'nokContact',
-    'adhaar': 'adhaar',
-    'adhaar no': 'adhaar',
-    'aadhar': 'adhaar',
-    'education': 'education',
-    'education qualification': 'education',
-    'sports/culturals': 'sportsCulturals',
-    'sports': 'sportsCulturals',
+    'division': 'division',
+    'armytype': 'armytype',
+
+    'cadet_mobile_no': 'Cadet_Mobile_No',
+    'cadet_name': 'Cadet_Name',
+    'date_of_birth': 'Date_of_Birth',
+    'cadet_gender': 'Cadet_Gender',
+    'email_address': 'Email_Address',
+    'nationality': 'Nationality',
+    'identification_mark': 'Identification_Mark',
+    'blood_group': 'Blood_Group',
+    'adhaarnumber': 'adhaarnumber',
+
+    'father_s_name': "Father_s_Name",
+    'mother_s_name': "Mother_s_Name",
+
+    'house_no': 'House_No',
+    'building_name': 'Building_Name',
+    'area': 'Area',
+    'permanent_address_pin_code': 'Permanent_Address_Pin_code',
+    'city': 'city',
+    'state': 'state',
+    'permanent_address_nrs': 'Permanent_Address_Nrs',
+
+    'education_qualification': 'Education_Qualification',
+    'institutetype': 'institutetype',
+
+    'medical_complaint_if_any': 'Medical_Complaint_if_any',
+    
+    'nok_name': 'NOK_Name',
+    'nok_relationship': 'NOK_Relationship',
+    'nok_contact_number': 'NOK_Contact_Number',
+    'nok_house_no': 'NOK_House_No',
+    'nok_building_name': 'NOK_Building_Name',
+    'nok_area': 'NOK_Area',
+    'nok_pincode': 'NOK_Pincode',
+    'nokcity': 'nokcity',
+    'nokstate': 'nokstate',
+    'noknrs': 'noknrs',
+    
+    'sports_games': 'Sports_Games',
+    'co_curricular_activity': 'Co_Curricular_Activity',
+    
+    'willingness_to_undergo_military_training': 'Willingness_to_undergo_Military_Training',
+    'willingness_to_serve_in_ncc': 'Willingness_to_serve_in_NCC',
+    'previously_applied_for_enrollment': 'Previously_Applied_for_enrollment',
+    'dismissed_from_ncc_ta_af': 'Dismissed_from_NCC_TA_AF',
+
+    'criminal_court': 'Criminal_Court'
 };
+
 
 // Function to process and structure camp details from a flat row
 const processCampData = (row: any) => {
@@ -85,27 +110,35 @@ export async function importCadets(cadets: any[], institutionName: string) {
     for (const rawRow of cadets) {
         const normalizedRow: { [key: string]: any } = {};
         for (const key in rawRow) {
-            const normalizedKey = FIELD_MAPPING[key.toLowerCase().trim()] || key.trim();
+            const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/ /g, '_').trim()] || key.trim();
             normalizedRow[normalizedKey] = rawRow[key];
         }
-
+        
         if (!validateCadetData(normalizedRow)) {
             continue;
         }
         
-        const { regNo, name, batch: batchYear, ...rest } = normalizedRow;
+        const { regNo, Cadet_Name, batch: batchYear, ...rest } = normalizedRow;
 
         const camps = processCampData(normalizedRow);
         
         const dataToSave = {
             institution: institutionName,
             regNo,
-            name,
+            Cadet_Name,
             batch: Number(batchYear) || new Date().getFullYear(),
-            rank: rest.rank || 'CDT',
             camps: camps, // Add the structured camps array
             ...rest // Add all other normalized fields
         };
+        
+        // Ensure default values for radio button fields if they are missing
+        dataToSave.Willingness_to_undergo_Military_Training = dataToSave.Willingness_to_undergo_Military_Training || 'No';
+        dataToSave.Willingness_to_serve_in_NCC = dataToSave.Willingness_to_serve_in_NCC || 'No';
+        dataToSave.Previously_Applied_for_enrollment = dataToSave.Previously_Applied_for_enrollment || 'No';
+        dataToSave.Dismissed_from_NCC_TA_AF = dataToSave.Dismissed_from_NCC_TA_AF || 'No';
+        dataToSave.Criminal_Court = dataToSave.Criminal_Court || 'No';
+        dataToSave.rank = dataToSave.rank || 'CDT';
+
 
         const existingCadetId = existingCadets.get(regNo);
 
@@ -128,3 +161,5 @@ export async function importCadets(cadets: any[], institutionName: string) {
         return { success: false, error: error.message || 'Failed to import data to Firestore.' };
     }
 }
+
+    

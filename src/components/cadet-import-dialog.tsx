@@ -23,43 +23,68 @@ import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 import { importCadets } from '@/lib/import-service';
 
-const REQUIRED_FIELDS = ['regNo', 'name', 'batch'];
+const REQUIRED_FIELDS = ['regNo', 'Cadet_Name', 'batch'];
 
 const FIELD_MAPPING: { [key: string]: string } = {
     'regimental no': 'regNo',
     'regimental number': 'regNo',
     'reg no': 'regNo',
     'rank': 'rank',
-    'full name': 'name',
-    'name': 'name',
     'batch': 'batch',
     'year': 'batch',
-    'dob': 'dob',
-    'date of birth': 'dob',
-    'mobile': 'mobile',
-    'mobile no': 'mobile',
-    'mobile number': 'mobile',
-    'email': 'email',
-    'email id': 'email',
-    'blood group': 'bloodGroup',
-    'home address': 'homeAddress',
-    'address': 'homeAddress',
-    'nok name': 'nokName',
-    'next of kin name': 'nokName',
-    'nok relation': 'nokRelation',
-    'next of kin relation': 'nokRelation',
-    'nok contact': 'nokContact',
-    'next of kin contact': 'nokContact',
-    'adhaar': 'adhaar',
-    'adhaar no': 'adhaar',
-    'aadhar': 'adhaar',
-    'education': 'education',
-    'education qualification': 'education',
-    'sports/culturals': 'sportsCulturals',
-    'sports': 'sportsCulturals',
+    'division': 'division',
+    'armytype': 'armytype',
+
+    'cadet_mobile_no': 'Cadet_Mobile_No',
+    'cadet_name': 'Cadet_Name',
+    'date_of_birth': 'Date_of_Birth',
+    'cadet_gender': 'Cadet_Gender',
+    'email_address': 'Email_Address',
+    'nationality': 'Nationality',
+    'identification_mark': 'Identification_Mark',
+    'blood_group': 'Blood_Group',
+    'adhaarnumber': 'adhaarnumber',
+
+    'father_s_name': "Father_s_Name",
+    'mother_s_name': "Mother_s_Name",
+
+    'house_no': 'House_No',
+    'building_name': 'Building_Name',
+    'area': 'Area',
+    'permanent_address_pin_code': 'Permanent_Address_Pin_code',
+    'city': 'city',
+    'state': 'state',
+    'permanent_address_nrs': 'Permanent_Address_Nrs',
+
+    'education_qualification': 'Education_Qualification',
+    'institutetype': 'institutetype',
+
+    'medical_complaint_if_any': 'Medical_Complaint_if_any',
+    
+    'nok_name': 'NOK_Name',
+    'nok_relationship': 'NOK_Relationship',
+    'nok_contact_number': 'NOK_Contact_Number',
+    'nok_house_no': 'NOK_House_No',
+    'nok_building_name': 'NOK_Building_Name',
+    'nok_area': 'NOK_Area',
+    'nok_pincode': 'NOK_Pincode',
+    'nokcity': 'nokcity',
+    'nokstate': 'nokstate',
+    'noknrs': 'noknrs',
+    
+    'sports_games': 'Sports_Games',
+    'co_curricular_activity': 'Co_Curricular_Activity',
+    
+    'willingness_to_undergo_military_training': 'Willingness_to_undergo_Military_Training',
+    'willingness_to_serve_in_ncc': 'Willingness_to_serve_in_NCC',
+    'previously_applied_for_enrollment': 'Previously_Applied_for_enrollment',
+    'dismissed_from_ncc_ta_af': 'Dismissed_from_NCC_TA_AF',
+
+    'criminal_court': 'Criminal_Court'
 };
 
-const normalizeHeaders = (header: string) => FIELD_MAPPING[header.toLowerCase().trim()] || header.trim();
+
+const normalizeHeaders = (header: string) => FIELD_MAPPING[header.toLowerCase().replace(/ /g, '_').trim()] || header.trim();
 
 type CadetImportDialogProps = {
     isOpen: boolean;
@@ -107,7 +132,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             }
             return newRow;
         });
-
+        
         const headers = Object.keys(normalizedData[0]);
         const missingFields = REQUIRED_FIELDS.filter(field => !headers.includes(field));
 
@@ -225,7 +250,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     <DialogTitle>Import Cadet Details</DialogTitle>
                     <DialogDescription>
                         Upload an Excel (.xlsx, .xls) or CSV file, or provide a public Google Sheets CSV link.
-                        Required columns: {REQUIRED_FIELDS.join(', ')}.
+                        Required columns: regNo, Cadet_Name, batch.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -285,3 +310,5 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         </Dialog>
     );
 }
+
+    

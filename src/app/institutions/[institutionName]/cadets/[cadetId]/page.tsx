@@ -108,7 +108,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-2xl font-bold text-primary">{cadet.name}</CardTitle>
+              <CardTitle className="text-2xl font-bold text-primary">{cadet.Cadet_Name}</CardTitle>
               <p className="text-muted-foreground">{cadet.regNo}</p>
             </div>
             <div className="flex gap-2">
@@ -136,35 +136,91 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
-          {/* Personal Details */}
+
           <section>
-            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Personal Details</h3>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">NCC Specific Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
               <div><strong className="font-medium text-muted-foreground">Rank:</strong> {cadet.rank}</div>
               <div><strong className="font-medium text-muted-foreground">Division:</strong> {cadet.division}</div>
+              <div><strong className="font-medium text-muted-foreground">Batch:</strong> {cadet.batch}</div>
+              <div><strong className="font-medium text-muted-foreground">Army Type:</strong> {cadet.armytype}</div>
               <div><strong className="font-medium text-muted-foreground">Institution:</strong> {cadet.institution}</div>
-              <div><strong className="font-medium text-muted-foreground">Date of Birth:</strong> {cadet.dob}</div>
-              <div><strong className="font-medium text-muted-foreground">Mobile:</strong> {cadet.mobile}</div>
-              <div><strong className="font-medium text-muted-foreground">Email:</strong> {cadet.email}</div>
-              <div><strong className="font-medium text-muted-foreground">Education:</strong> {cadet.education}</div>
-              <div><strong className="font-medium text-muted-foreground">Blood Group:</strong> {cadet.bloodGroup}</div>
-              <div><strong className="font-medium text-muted-foreground">Adhaar No:</strong> {cadet.adhaar}</div>
-              <div><strong className="font-medium text-muted-foreground">Sports/Culturals:</strong> {cadet.sportsCulturals}</div>
-              <div className="md:col-span-2"><strong className="font-medium text-muted-foreground">Home Address:</strong> {cadet.homeAddress}</div>
+               <div><strong className="font-medium text-muted-foreground">Willing to undergo Military Training:</strong> {cadet.Willingness_to_undergo_Military_Training}</div>
+                <div><strong className="font-medium text-muted-foreground">Willing to serve in NCC:</strong> {cadet.Willingness_to_serve_in_NCC}</div>
+                <div><strong className="font-medium text-muted-foreground">Previously Applied:</strong> {cadet.Previously_Applied_for_enrollment}</div>
+                <div><strong className="font-medium text-muted-foreground">Dismissed from NCC/TA/AF:</strong> {cadet.Dismissed_from_NCC_TA_AF}</div>
             </div>
           </section>
 
-          {/* NOK Details */}
+          <section>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Personal Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+              <div><strong className="font-medium text-muted-foreground">Date of Birth:</strong> {cadet.Date_of_Birth}</div>
+              <div><strong className="font-medium text-muted-foreground">Gender:</strong> {cadet.Cadet_Gender}</div>
+              <div><strong className="font-medium text-muted-foreground">Mobile:</strong> {cadet.Cadet_Mobile_No}</div>
+              <div><strong className="font-medium text-muted-foreground">Email:</strong> {cadet.Email_Address}</div>
+              <div><strong className="font-medium text-muted-foreground">Nationality:</strong> {cadet.Nationality}</div>
+              <div><strong className="font-medium text-muted-foreground">Identification Mark:</strong> {cadet.Identification_Mark}</div>
+              <div><strong className="font-medium text-muted-foreground">Blood Group:</strong> {cadet.Blood_Group}</div>
+              <div><strong className="font-medium text-muted-foreground">Aadhaar No:</strong> {cadet.adhaarnumber}</div>
+            </div>
+          </section>
+
+           <section>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Family Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div><strong className="font-medium text-muted-foreground">Father's Name:</strong> {cadet.Father_s_Name}</div>
+              <div><strong className="font-medium text-muted-foreground">Mother's Name:</strong> {cadet.Mother_s_Name}</div>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Permanent Address</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                <div><strong className="font-medium text-muted-foreground">House No:</strong> {cadet.House_No}</div>
+                <div><strong className="font-medium text-muted-foreground">Building:</strong> {cadet.Building_Name}</div>
+                <div><strong className="font-medium text-muted-foreground">Area:</strong> {cadet.Area}</div>
+                <div><strong className="font-medium text-muted-foreground">City:</strong> {cadet.city}</div>
+                <div><strong className="font-medium text-muted-foreground">State:</strong> {cadet.state}</div>
+                <div><strong className="font-medium text-muted-foreground">PIN Code:</strong> {cadet.Permanent_Address_Pin_code}</div>
+                <div className="md:col-span-2"><strong className="font-medium text-muted-foreground">NRS:</strong> {cadet.Permanent_Address_Nrs}</div>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Education & Medical</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div><strong className="font-medium text-muted-foreground">Education:</strong> {cadet.Education_Qualification}</div>
+                <div><strong className="font-medium text-muted-foreground">Institution Type:</strong> {cadet.institutetype}</div>
+                <div className="md:col-span-2"><strong className="font-medium text-muted-foreground">Medical Complaint:</strong> {cadet.Medical_Complaint_if_any}</div>
+            </div>
+          </section>
+
           <section>
             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Next of Kin (NOK) Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-              <div><strong className="font-medium text-muted-foreground">Name:</strong> {cadet.nokName}</div>
-              <div><strong className="font-medium text-muted-foreground">Relation:</strong> {cadet.nokRelation}</div>
-              <div><strong className="font-medium text-muted-foreground">Contact:</strong> {cadet.nokContact}</div>
+              <div><strong className="font-medium text-muted-foreground">Name:</strong> {cadet.NOK_Name}</div>
+              <div><strong className="font-medium text-muted-foreground">Relation:</strong> {cadet.NOK_Relationship}</div>
+              <div><strong className="font-medium text-muted-foreground">Contact:</strong> {cadet.NOK_Contact_Number}</div>
+              <div><strong className="font-medium text-muted-foreground">House No:</strong> {cadet.NOK_House_No}</div>
+              <div><strong className="font-medium text-muted-foreground">Building:</strong> {cadet.NOK_Building_Name}</div>
+              <div><strong className="font-medium text-muted-foreground">Area:</strong> {cadet.NOK_Area}</div>
+              <div><strong className="font-medium text-muted-foreground">City:</strong> {cadet.nokcity}</div>
+              <div><strong className="font-medium text-muted-foreground">State:</strong> {cadet.nokstate}</div>
+              <div><strong className="font-medium text-muted-foreground">Pincode:</strong> {cadet.NOK_Pincode}</div>
+              <div className="md:col-span-2"><strong className="font-medium text-muted-foreground">NRS:</strong> {cadet.noknrs}</div>
             </div>
           </section>
 
-          {/* Camp Details */}
+          <section>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Activities & Background</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div><strong className="font-medium text-muted-foreground">Sports/Games:</strong> {cadet.Sports_Games}</div>
+                <div><strong className="font-medium text-muted-foreground">Co-Curricular:</strong> {cadet.Co_Curricular_Activity}</div>
+                <div><strong className="font-medium text-muted-foreground">Criminal Court Case:</strong> {cadet.Criminal_Court}</div>
+            </div>
+          </section>
+
            <section>
                 <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camps Attended</h3>
                 {cadet.camps && cadet.camps.length > 0 ? (
@@ -210,3 +266,5 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     </div>
   );
 }
+
+    

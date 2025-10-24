@@ -15,6 +15,7 @@ import { campTypes, campWithLevels } from '@/lib/constants';
 import { Trash2, Upload } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { differenceInDays } from 'date-fns';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const initialCamp = {
     campType: '',
@@ -163,13 +164,13 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         <div className="container mx-auto px-4 py-8">
             <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-primary">Edit Cadet: {formData.name}</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-primary">Edit Cadet: {formData.Cadet_Name}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-8">
-                        {/* Personal Details */}
+                        
                         <section>
-                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Personal Details</h3>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">NCC Specific Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
                                     <Label htmlFor="regNo">Regimental No</Label>
@@ -185,16 +186,23 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label htmlFor="name">Name</Label>
-                                    <Input id="name" value={formData.name || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
-                                </div>
-                                <div>
                                     <Label htmlFor="batch">Batch</Label>
                                     <Input id="batch" type="number" value={formData.batch || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
                                 </div>
+                                 <div>
+                                    <Label htmlFor="armytype">Army Type</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('armytype', value)} value={formData.armytype}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Army">Army</SelectItem>
+                                            <SelectItem value="Navy">Navy</SelectItem>
+                                            <SelectItem value="Air Force">Air Force</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <div>
                                     <Label htmlFor="division">Division</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('division', value)} value={formData.division || 'SD'}>
+                                    <Select onValueChange={(value) => handleSelectChange('division', value)} value={formData.division}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="SD">Senior Division (SD)</SelectItem>
@@ -204,29 +212,78 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                         </SelectContent>
                                     </Select>
                                 </div>
+                                 <div className="space-y-2">
+                                    <Label>Willingness to undergo Military Training?</Label>
+                                    <RadioGroup value={formData.Willingness_to_undergo_Military_Training} onValueChange={(value) => handleSelectChange('Willingness_to_undergo_Military_Training', value)} className="flex space-x-4">
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="Yes" id="willing-yes" /><Label htmlFor="willing-yes">Yes</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="No" id="willing-no" /><Label htmlFor="willing-no">No</Label></div>
+                                    </RadioGroup>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Willingness to serve in NCC?</Label>
+                                    <RadioGroup value={formData.Willingness_to_serve_in_NCC} onValueChange={(value) => handleSelectChange('Willingness_to_serve_in_NCC', value)} className="flex space-x-4">
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="Yes" id="serve-yes" /><Label htmlFor="serve-yes">Yes</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="No" id="serve-no" /><Label htmlFor="serve-no">No</Label></div>
+                                    </RadioGroup>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Previously applied for enrollment?</Label>
+                                    <RadioGroup value={formData.Previously_Applied_for_enrollment} onValueChange={(value) => handleSelectChange('Previously_Applied_for_enrollment', value)} className="flex space-x-4">
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="Yes" id="applied-yes" /><Label htmlFor="applied-yes">Yes</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="No" id="applied-no" /><Label htmlFor="applied-no">No</Label></div>
+                                    </RadioGroup>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Dismissed from NCC/TA/AF?</Label>
+                                    <RadioGroup value={formData.Dismissed_from_NCC_TA_AF} onValueChange={(value) => handleSelectChange('Dismissed_from_NCC_TA_AF', value)} className="flex space-x-4">
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="Yes" id="dismissed-yes" /><Label htmlFor="dismissed-yes">Yes</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="No" id="dismissed-no" /><Label htmlFor="dismissed-no">No</Label></div>
+                                    </RadioGroup>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Personal Information</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
-                                    <Label htmlFor="institution">Institution</Label>
-                                    <Input id="institution" value={formData.institution || ''} disabled className="mt-1 bg-gray-100/20"/>
+                                    <Label htmlFor="Cadet_Name">Cadet Name</Label>
+                                    <Input id="Cadet_Name" value={formData.Cadet_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="dob">Date of Birth</Label>
-                                    <Input id="dob" type="date" value={formData.dob || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="Date_of_Birth">Date of Birth</Label>
+                                    <Input id="Date_of_Birth" type="date" value={formData.Date_of_Birth || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="mobile">Mobile</Label>
-                                    <Input id="mobile" value={formData.mobile || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="Cadet_Gender">Gender</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('Cadet_Gender', value)} value={formData.Cadet_Gender}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Male">Male</SelectItem>
+                                            <SelectItem value="Female">Female</SelectItem>
+                                            <SelectItem value="Other">Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" type="email" value={formData.email || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="Cadet_Mobile_No">Mobile No</Label>
+                                    <Input id="Cadet_Mobile_No" type="tel" value={formData.Cadet_Mobile_No || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="education">Education Qualification</Label>
-                                    <Input id="education" value={formData.education || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="Email_Address">Email Address</Label>
+                                    <Input id="Email_Address" type="email" value={formData.Email_Address || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="bloodGroup">Blood Group</Label>
-                                     <Select onValueChange={(value) => handleSelectChange('bloodGroup', value)} value={formData.bloodGroup || 'O+'}>
+                                    <Label htmlFor="Nationality">Nationality</Label>
+                                    <Input id="Nationality" value={formData.Nationality || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="Identification_Mark">Identification Mark</Label>
+                                    <Input id="Identification_Mark" value={formData.Identification_Mark || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="Blood_Group">Blood Group</Label>
+                                     <Select onValueChange={(value) => handleSelectChange('Blood_Group', value)} value={formData.Blood_Group}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue/></SelectTrigger>
                                         <SelectContent>
                                             {['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
@@ -234,40 +291,155 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label htmlFor="adhaar">Adhaar No</Label>
-                                    <Input id="adhaar" value={formData.adhaar || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
-                                </div>
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="homeAddress">Home Address</Label>
-                                    <Textarea id="homeAddress" value={formData.homeAddress || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
-                                </div>
-                                 <div>
-                                    <Label htmlFor="sportsCulturals">Any Sports/Culturals</Label>
-                                    <Input id="sportsCulturals" value={formData.sportsCulturals || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="adhaarnumber">Aadhaar Number</Label>
+                                    <Input id="adhaarnumber" value={formData.adhaarnumber || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                             </div>
                         </section>
 
-                         {/* NOK Details */}
                         <section>
-                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Next of Kin (NOK) Details</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Family Information</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
-                                    <Label htmlFor="nokName">NOK Name</Label>
-                                    <Input id="nokName" value={formData.nokName || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="Father_s_Name">Father's Name</Label>
+                                    <Input id="Father_s_Name" value={formData.Father_s_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="nokRelation">NOK Relation</Label>
-                                    <Input id="nokRelation" value={formData.nokRelation || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="Mother_s_Name">Mother's Name</Label>
+                                    <Input id="Mother_s_Name" value={formData.Mother_s_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Permanent Address</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div>
+                                    <Label htmlFor="House_No">House No</Label>
+                                    <Input id="House_No" value={formData.House_No || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="nokContact">NOK Contact</Label>
-                                    <Input id="nokContact" value={formData.nokContact || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="Building_Name">Building Name</Label>
+                                    <Input id="Building_Name" value={formData.Building_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="Area">Area</Label>
+                                    <Input id="Area" value={formData.Area || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="city">City</Label>
+                                    <Input id="city" value={formData.city || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="state">State</Label>
+                                    <Input id="state" value={formData.state || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="Permanent_Address_Pin_code">PIN Code</Label>
+                                    <Input id="Permanent_Address_Pin_code" value={formData.Permanent_Address_Pin_code || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="Permanent_Address_Nrs">NRS (Near Road/Street)</Label>
+                                    <Input id="Permanent_Address_Nrs" value={formData.Permanent_Address_Nrs || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                             </div>
                         </section>
                         
-                        {/* Camp Details */}
+                        <section>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Education & Medical</h3>
+                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div>
+                                    <Label htmlFor="Education_Qualification">Education Qualification</Label>
+                                    <Input id="Education_Qualification" value={formData.Education_Qualification || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="institution">Institution</Label>
+                                    <Input id="institution" value={formData.institution || ''} disabled className="mt-1 bg-gray-100/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="institutetype">Institution Type</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('institutetype', value)} value={formData.institutetype}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="School">School</SelectItem>
+                                            <SelectItem value="College">College</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="md:col-span-3">
+                                    <Label htmlFor="Medical_Complaint_if_any">Medical Complaint (if any)</Label>
+                                    <Textarea id="Medical_Complaint_if_any" value={formData.Medical_Complaint_if_any || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Next of Kin (NOK) Details</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <Label htmlFor="NOK_Name">NOK Name</Label>
+                                    <Input id="NOK_Name" value={formData.NOK_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="NOK_Relationship">NOK Relation</Label>
+                                    <Input id="NOK_Relationship" value={formData.NOK_Relationship || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="NOK_Contact_Number">NOK Contact</Label>
+                                    <Input id="NOK_Contact_Number" value={formData.NOK_Contact_Number || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="NOK_House_No">NOK House No</Label>
+                                    <Input id="NOK_House_No" value={formData.NOK_House_No || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="NOK_Building_Name">NOK Building Name</Label>
+                                    <Input id="NOK_Building_Name" value={formData.NOK_Building_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="NOK_Area">NOK Area</Label>
+                                    <Input id="NOK_Area" value={formData.NOK_Area || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="nokcity">NOK City</Label>
+                                    <Input id="nokcity" value={formData.nokcity || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="nokstate">NOK State</Label>
+                                    <Input id="nokstate" value={formData.nokstate || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="NOK_Pincode">NOK Pincode</Label>
+                                    <Input id="NOK_Pincode" value={formData.NOK_Pincode || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="noknrs">NOK NRS (Near Road/Street)</Label>
+                                    <Input id="noknrs" value={formData.noknrs || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Activities & Background</h3>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <Label htmlFor="Sports_Games">Sports / Games</Label>
+                                    <Textarea id="Sports_Games" value={formData.Sports_Games || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="Co_Curricular_Activity">Co-Curricular Activity</Label>
+                                    <Textarea id="Co_Curricular_Activity" value={formData.Co_Curricular_Activity || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Any criminal court proceedings?</Label>
+                                    <RadioGroup value={formData.Criminal_Court} onValueChange={(value) => handleSelectChange('Criminal_Court', value)} className="flex space-x-4">
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="Yes" id="criminal-yes" /><Label htmlFor="criminal-yes">Yes</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="No" id="criminal-no" /><Label htmlFor="criminal-no">No</Label></div>
+                                    </RadioGroup>
+                                </div>
+                            </div>
+                        </section>
+
                         <section>
                             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Camp Details</h3>
                              <Accordion type="multiple" className="w-full" defaultValue={formData.camps?.map((_:any, i:number) => `item-${i}`)}>

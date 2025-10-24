@@ -72,10 +72,10 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         const isActive = batchNumber ? (new Date().getFullYear() - batchNumber) < 3 : false;
         
         return (
-            (cadet.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) &&
+            (cadet.Cadet_Name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) &&
             (filters.batch === 'all' || cadet.batch?.toString() === filters.batch) &&
             (filters.rank === 'all' || cadet.rank === filters.rank) &&
-            (filters.bloodGroup === 'all' || cadet.bloodGroup === filters.bloodGroup) &&
+            (filters.bloodGroup === 'all' || cadet.Blood_Group === filters.bloodGroup) &&
             (filters.division === 'all' || cadet.division === filters.division) &&
             (!showActiveOnly || isActive) 
         );
@@ -136,7 +136,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         const uniqueCamps = Array.from(allCamps);
 
         const baseHeaders = [
-            'Regimental No', 'Rank', 'CDT Name', 'Batch', 'Division', 'Institution', 'Date of Birth',
+            'Regimental No', 'Rank', 'Cadet Name', 'Batch', 'Division', 'Institution', 'Date of Birth',
             'Mobile', 'Email', 'Educational Qualification', 'Blood Group', 'Aadhaar No', 'Home Address',
             'Any Sports / Culturals', 'NOK Name', 'NOK Relation', 'NOK Contact'
         ];
@@ -152,21 +152,21 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             const row: any = {
                 'Regimental No': cadet.regNo || '',
                 'Rank': cadet.rank || '',
-                'CDT Name': cadet.name || '',
+                'Cadet Name': cadet.Cadet_Name || '',
                 'Batch': cadet.batch || '',
                 'Division': cadet.division || '',
                 'Institution': cadet.institution || '',
-                'Date of Birth': cadet.dob ? formatDateForExport(cadet.dob) : '',
-                'Mobile': cadet.mobile || '',
-                'Email': cadet.email || '',
-                'Educational Qualification': cadet.education || '',
-                'Blood Group': cadet.bloodGroup || '',
-                'Aadhaar No': cadet.adhaar || '',
-                'Home Address': cadet.homeAddress || '',
-                'Any Sports / Culturals': cadet.sportsCulturals || '',
-                'NOK Name': cadet.nokName || '',
-                'NOK Relation': cadet.nokRelation || '',
-                'NOK Contact': cadet.nokContact || '',
+                'Date of Birth': cadet.Date_of_Birth ? formatDateForExport(cadet.Date_of_Birth) : '',
+                'Mobile': cadet.Cadet_Mobile_No || '',
+                'Email': cadet.Email_Address || '',
+                'Educational Qualification': cadet.Education_Qualification || '',
+                'Blood Group': cadet.Blood_Group || '',
+                'Aadhaar No': cadet.adhaarnumber || '',
+                'Home Address': `${cadet.House_No || ''} ${cadet.Building_Name || ''} ${cadet.Area || ''} ${cadet.city || ''} ${cadet.state || ''} ${cadet.Permanent_Address_Pin_code || ''}`.trim(),
+                'Any Sports / Culturals': cadet.Sports_Games || '',
+                'NOK Name': cadet.NOK_Name || '',
+                'NOK Relation': cadet.NOK_Relationship || '',
+                'NOK Contact': cadet.NOK_Contact_Number || '',
             };
 
             uniqueCamps.forEach(campIdentifier => {
@@ -463,12 +463,12 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                     aria-label={`Select ${cadet.name}`}
                                 />
                             </div>
-                            <h3 className="text-lg font-semibold text-primary pt-4">{cadet.name}</h3>
+                            <h3 className="text-lg font-semibold text-primary pt-4">{cadet.Cadet_Name}</h3>
                             <p className="text-sm text-muted-foreground">{cadet.regNo}</p>
                             <div className="flex justify-center gap-4 my-3 text-sm">
                                 <div><span className="font-semibold">Rank:</span> {cadet.rank}</div>
                                 <div><span className="font-semibold">Batch:</span> {cadet.batch}</div>
-                                <div><span className="font-semibold">Blood:</span> {cadet.bloodGroup}</div>
+                                <div><span className="font-semibold">Blood:</span> {cadet.Blood_Group}</div>
                             </div>
                             <div className="flex gap-2 w-full mt-2">
                                 <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}`} className="flex-1">
@@ -508,3 +508,5 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         </div>
     );
 }
+
+    
