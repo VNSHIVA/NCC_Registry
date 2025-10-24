@@ -89,7 +89,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         if (newDivision && newDivision !== formData.division) {
            setFormData((prev: any) => ({ ...prev, division: newDivision }));
         }
-    }, [formData?.institutetype, formData?.Cadet_Gender]);
+    }, [formData?.institutetype, formData?.Cadet_Gender, formData?.division]);
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
@@ -455,7 +455,13 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="institutetype">Institution Type</Label>
-                                    <Input id="institutetype" value="College" disabled className="mt-1 bg-gray-100/20"/>
+                                    <Select onValueChange={(value) => handleSelectChange('institutetype', value)} value={formData.institutetype}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="College">College</SelectItem>
+                                            <SelectItem value="School">School</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div className="md:col-span-3">
                                     <Label htmlFor="Medical_Complaint_if_any">Medical Complaint (if any)</Label>
@@ -628,5 +634,6 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     
 
     
+
 
 
