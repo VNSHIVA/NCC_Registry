@@ -115,6 +115,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
             const institution = await getInstitutionByName(institutionName);
             if (institution) {
                 setInstitutionType(institution.type as 'School' | 'College');
+                setFormData(prev => ({...prev, institution: institution.type, institutetype: institution.type }));
             }
         }
         fetchInstitutionType();
@@ -461,11 +462,17 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                                     <Input id="Education_Qualification" value={formData.Education_Qualification} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="institution">Institution</Label>
-                                    <Textarea id="institution" value={formData.institution} onChange={handleInputChange} rows={1} className="mt-1 bg-white/20"/>
+                                    <Label htmlFor="institution">Institution Type</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('institution', value)} value={formData.institution}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="College">College</SelectItem>
+                                            <SelectItem value="School">School</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
-                                    <Label htmlFor="institutetype">Institution Type</Label>
+                                    <Label htmlFor="institutetype">Institution Stream</Label>
                                     <Input id="institutetype" value={formData.institutetype} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div className="md:col-span-3">

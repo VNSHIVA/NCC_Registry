@@ -197,7 +197,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
             // CREATE: Add a new record
             const dataToSave = {
                 institutionName: institutionName,
-                institution: 'College', // Default value
+                institution: institutionType || 'College', // Default to college if not specified
                 ...dataForFirestore,
                 // Ensure array fields exist even if not in the import
                 certificates: dataForFirestore.certificates || [],
@@ -206,7 +206,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
 
             // Auto-assign division logic if not provided
             if (!dataToSave.division && institutionType && dataToSave.Cadet_Gender) {
-                if (safeToString(institutionType).toLowerCase() === 'school') {
+                 if (safeToString(institutionType).toLowerCase() === 'school') {
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'JD' : 'JW';
                 } else { // Default to College logic
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'SD' : 'SW';
@@ -222,6 +222,9 @@ export async function importCadets(cadets: any[], institutionName: string) {
     try {
         await batch.commit();
         revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
+        revalidatePath('/dashboard');
+        revalidatePath('/institutions');
+        revalidatePath('/archived');
         return { 
             success: true, 
             added: addedCount,

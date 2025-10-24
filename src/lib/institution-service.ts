@@ -5,6 +5,7 @@ import { collection, getDocs, getCountFromServer, query, where, addDoc, doc, upd
 import { revalidatePath } from 'next/cache';
 
 const isActiveCadet = (cadet: any) => {
+    if (!cadet || !cadet.batch || !cadet.division) return false;
     const currentYear = new Date().getFullYear();
     const batchYear = parseInt(cadet.batch, 10);
     if (isNaN(batchYear)) return false;
@@ -92,6 +93,7 @@ export async function addInstitution(data: { name: string; anoName: string; type
         cadetCount: 0 
     });
     revalidatePath('/institutions');
+    revalidatePath('/dashboard');
     return docRef.id;
 }
 
@@ -127,6 +129,9 @@ export async function updateInstitution(id: string, data: { name: string; anoNam
     await batch.commit();
 
     revalidatePath('/institutions');
+    revalidatePath('/dashboard');
+    revalidatePath(`/institutions/${encodeURIComponent(newInstitutionName)}/cadets`);
+    revalidatePath('/archived');
 }
 
 export async function deleteInstitution(id: string) {
@@ -158,6 +163,8 @@ export async function deleteInstitution(id: string) {
     await batch.commit();
 
     revalidatePath('/institutions');
+    revalidatePath('/dashboard');
     // Also revalidate the specific cadets page in case the user navigates back
     revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
+    revalidatePath('/archived');
 }

@@ -5,7 +5,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import Link from 'next/link';
-import { Building, Home, Users, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Building, Home, Users, Menu, X, LayoutDashboard, Archive } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -46,6 +46,10 @@ export default function RootLayout({
               <Building className="h-5 w-5" />
               <span>Institutions</span>
             </Link>
+            <Link href="/archived" className="flex items-center space-x-2 hover:text-accent font-semibold">
+              <Archive className="h-5 w-5" />
+              <span>Archived</span>
+            </Link>
           </div>
            <div className="md:hidden flex items-center">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="focus:outline-none">
@@ -66,6 +70,10 @@ export default function RootLayout({
             <Link href="/institutions" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
               <Building className="h-5 w-5" />
               <span>Institutions</span>
+            </Link>
+            <Link href="/archived" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
+              <Archive className="h-5 w-5" />
+              <span>Archived</span>
             </Link>
           </div>
         )}
