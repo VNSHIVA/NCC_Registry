@@ -28,7 +28,6 @@
     --chart-3: 43 74% 55%;
     --chart-4: 347 100% 38%;
     --chart-5: 43 74% 65%;
-    --radius: 0.5rem;
     --sidebar-background: 280 4% 15%; /* Graphite Gray */
     --sidebar-foreground: 43 74% 75%;
     --sidebar-primary: 43 74% 45%;
@@ -40,37 +39,37 @@
   }
 
   .dark {
-    --background: 280 6% 10%; /* Deep Black */
+    --background: 260 5% 9%; /* #19171b */
     --foreground: 43 74% 85%; /* Light Gold/Off-white */
-    --card: 280 4% 15%; /* Graphite Gray */
+    --card: 257 3% 15%; /* #252628 */
     --card-foreground: 43 74% 85%;
-    --popover: 280 6% 10%;
+    --popover: 260 5% 9%;
     --popover-foreground: 43 74% 85%;
-    --primary: 43 74% 45%; /* Metallic Gold */
-    --primary-foreground: 280 6% 11%; /* Deep Black for text on gold */
-    --secondary: 347 100% 18%; /* Deep Maroon */
+    --primary: 43 74% 45%; /* #d29f22 */
+    --primary-foreground: 260 5% 9%; /* Deep Black for text on gold */
+    --secondary: 347 100% 18%; /* #5d0018 */
     --secondary-foreground: 43 74% 45%; /* Metallic Gold for text on maroon */
-    --muted: 280 4% 15%;
+    --muted: 257 3% 15%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 347 100% 18%; /* Deep Maroon as accent */
+    --accent: 347 100% 18%; /* #5d0018 */
     --accent-foreground: 43 74% 45%;
     --destructive: 347 100% 28%;
     --destructive-foreground: 0 0% 98%;
-    --border: 280 4% 15%; /* Graphite Gray */
-    --input: 280 4% 15%;
+    --border: 257 3% 15%; /* Graphite Gray */
+    --input: 257 3% 15%;
     --ring: 43 74% 45%; /* Metallic Gold */
     --chart-1: 43 74% 45%;
     --chart-2: 347 100% 28%;
     --chart-3: 43 74% 55%;
     --chart-4: 347 100% 38%;
     --chart-5: 43 74% 65%;
-    --sidebar-background: 280 4% 15%; /* Graphite Gray */
+    --sidebar-background: 257 3% 15%; /* Graphite Gray */
     --sidebar-foreground: 43 74% 75%;
     --sidebar-primary: 43 74% 45%;
-    --sidebar-primary-foreground: 280 6% 11%;
+    --sidebar-primary-foreground: 260 5% 9%;
     --sidebar-accent: 347 100% 18%;
     --sidebar-accent-foreground: 43 74% 45%;
-    --sidebar-border: 280 4% 10%;
+    --sidebar-border: 260 5% 9%;
     --sidebar-ring: 43 74% 45%;
   }
 }
