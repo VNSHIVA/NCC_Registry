@@ -345,9 +345,8 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                                     <div>
                                         <Label htmlFor="appearing_for_certificate">Appearing for Certificate Exam</Label>
                                         <Select onValueChange={(value) => handleSelectChange('appearing_for_certificate', value)} value={formData.appearing_for_certificate}>
-                                            <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="Select Certificate" /></SelectTrigger>
+                                            <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="Select Certificate to Appear For" /></SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="">None</SelectItem>
                                                 {certificateOptions.appearing.map(cert => <SelectItem key={cert} value={cert}>{cert}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
@@ -492,7 +491,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                         </section>
                         
                         <section>
-                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Education & Medical</h3>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Education &amp; Medical</h3>
                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
                                     <Label htmlFor="Education_Qualification">Education Qualification</Label>
@@ -566,7 +565,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                         </section>
 
                         <section>
-                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Activities & Background</h3>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Activities &amp; Background</h3>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <Label htmlFor="Sports_Games">Sports / Games</Label>
