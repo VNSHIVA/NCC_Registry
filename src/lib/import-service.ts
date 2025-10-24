@@ -3,8 +3,8 @@
 import { db } from '@/lib/firebase';
 import { collection, writeBatch, query, where, getDocs, doc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import { format } from 'date-fns';
 
-const REQUIRED_FIELDS = ['regNo', 'Cadet_Name', 'batch'];
 
 const FIELD_MAPPING: { [key: string]: string } = {
     'regimental no': 'regNo',
@@ -64,11 +64,30 @@ const FIELD_MAPPING: { [key: string]: string } = {
     'criminal_court': 'Criminal_Court'
 };
 
+// Safely normalize a value to a string. Handles strings, numbers, and Date objects.
+const safeToString = (value: any): string => {
+    if (value === null || typeof value === 'undefined') {
+        return '';
+    }
+    if (value instanceof Date) {
+        // Excel dates can sometimes be parsed as JS dates. Format them consistently.
+        // Assuming dates are not timezone-sensitive for this purpose.
+        try {
+            return format(value, 'yyyy-MM-dd');
+        } catch {
+            return value.toISOString().split('T')[0];
+        }
+    }
+    return String(value);
+};
+
 
 // Helper to create a composite key for name + DOB matching
-const createNameDobKey = (name: string, dob: string) => {
-    if (!name || !dob) return null;
-    return `${name.toLowerCase().trim()}|${dob.trim()}`;
+const createNameDobKey = (name: any, dob: any) => {
+    const safeName = safeToString(name).toLowerCase().trim();
+    const safeDob = safeToString(dob).trim();
+    if (!safeName || !safeDob) return null;
+    return `${safeName}|${safeDob}`;
 };
 
 
@@ -94,30 +113,31 @@ export async function importCadets(cadets: any[], institutionName: string) {
     querySnapshot.docs.forEach(doc => {
         const data = doc.data();
         const record = { id: doc.id, data };
-        if (data.regNo) existingByRegNo.set(data.regNo, record);
-        if (data.adhaarnumber) existingByAadhaar.set(data.adhaarnumber, record);
+        if (data.regNo) existingByRegNo.set(safeToString(data.regNo), record);
+        if (data.adhaarnumber) existingByAadhaar.set(safeToString(data.adhaarnumber), record);
         const nameDobKey = createNameDobKey(data.Cadet_Name, data.Date_of_Birth);
         if (nameDobKey) existingByNameDob.set(nameDobKey, record);
     });
     
+    // Define required fields for validation after normalization
+    const REQUIRED_FIELDS = ['regNo', 'Cadet_Name', 'batch'];
 
     for (const rawRow of cadets) {
         const normalizedRow: { [key: string]: any } = {};
         for (const key in rawRow) {
             const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/[ _-]/g, '_').trim()] || key.trim();
-            // We keep null/empty values for now to check against required fields
-            normalizedRow[normalizedKey] = rawRow[key];
+            normalizedRow[normalizedKey] = safeToString(rawRow[key]);
         }
 
         // Clean object for Firestore: contains only fields with actual values
-        const dataForFirestore: { [key: string]: any } = {};
+        const dataForFirestore: { [key:string]: any } = {};
         for (const key in normalizedRow) {
-            if (normalizedRow[key] !== null && normalizedRow[key] !== '' && normalizedRow[key] !== undefined) {
+            if (normalizedRow[key] !== '') {
                 dataForFirestore[key] = normalizedRow[key];
             }
         }
         
-        // Check for required fields before proceeding
+        // Track missing required fields
         REQUIRED_FIELDS.forEach(field => {
             if (!dataForFirestore[field]) {
                 missingFieldsTracker.add(field);
@@ -126,11 +146,14 @@ export async function importCadets(cadets: any[], institutionName: string) {
         
         // Find existing cadet using prioritized criteria
         let existingCadet = null;
-        if (dataForFirestore.regNo) {
-            existingCadet = existingByRegNo.get(dataForFirestore.regNo);
+        const regNoStr = dataForFirestore.regNo ? safeToString(dataForFirestore.regNo) : '';
+        const aadhaarStr = dataForFirestore.adhaarnumber ? safeToString(dataForFirestore.adhaarnumber) : '';
+
+        if (regNoStr) {
+            existingCadet = existingByRegNo.get(regNoStr);
         }
-        if (!existingCadet && dataForFirestore.adhaarnumber) {
-            existingCadet = existingByAadhaar.get(dataForFirestore.adhaarnumber);
+        if (!existingCadet && aadhaarStr) {
+            existingCadet = existingByAadhaar.get(aadhaarStr);
         }
         if (!existingCadet) {
             const nameDobKey = createNameDobKey(dataForFirestore.Cadet_Name, dataForFirestore.Date_of_Birth);
