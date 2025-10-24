@@ -84,7 +84,7 @@ const FIELD_MAPPING: { [key: string]: string } = {
 };
 
 
-const normalizeHeaders = (header: string) => FIELD_MAPPING[header.toLowerCase().replace(/ /g, '_').trim()] || header.trim();
+const normalizeHeaders = (header: string) => FIELD_MAPPING[header.toLowerCase().replace(/ /g, '_').replace(/-/g, '_').trim()] || header.trim();
 
 type CadetImportDialogProps = {
     isOpen: boolean;
@@ -310,5 +310,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         </Dialog>
     );
 }
+
+    
 
     

@@ -84,7 +84,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         if (newDivision && newDivision !== formData.division) {
            setFormData((prev: any) => ({ ...prev, division: newDivision }));
         }
-    }, [formData?.institutetype, formData?.Cadet_Gender, formData]);
+    }, [formData?.institutetype, formData?.Cadet_Gender]);
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
@@ -625,5 +625,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         </div>
     );
 }
+
+    
 
     

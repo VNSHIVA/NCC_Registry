@@ -110,7 +110,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
     for (const rawRow of cadets) {
         const normalizedRow: { [key: string]: any } = {};
         for (const key in rawRow) {
-            const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/ /g, '_').trim()] || key.trim();
+            const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/[ _-]/g, '_').trim()] || key.trim();
             normalizedRow[normalizedKey] = rawRow[key];
         }
         
@@ -118,17 +118,21 @@ export async function importCadets(cadets: any[], institutionName: string) {
             continue;
         }
         
-        const { regNo, Cadet_Name, batch: batchYear, ...rest } = normalizedRow;
+        const { regNo, ...rest } = normalizedRow;
 
-        const camps = processCampData(normalizedRow);
+        // Auto-assign division logic
+        if (!rest.division && rest.institutetype && rest.Cadet_Gender) {
+             if (rest.institutetype === 'School') {
+                rest.division = rest.Cadet_Gender === 'Male' ? 'JD' : 'JW';
+            } else if (rest.institutetype === 'College') {
+                rest.division = rest.Cadet_Gender === 'Male' ? 'SD' : 'SW';
+            }
+        }
         
         const dataToSave = {
             institution: institutionName,
             regNo,
-            Cadet_Name,
-            batch: Number(batchYear) || new Date().getFullYear(),
-            camps: camps, // Add the structured camps array
-            ...rest // Add all other normalized fields
+            ...rest 
         };
         
         // Ensure default values for radio button fields if they are missing
@@ -161,5 +165,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
         return { success: false, error: error.message || 'Failed to import data to Firestore.' };
     }
 }
+
+    
 
     

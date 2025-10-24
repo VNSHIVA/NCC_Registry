@@ -109,8 +109,10 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
                 newDivision = Cadet_Gender === 'Male' ? 'SD' : 'SW';
             }
         }
-        setFormData(prev => ({ ...prev, division: newDivision }));
-    }, [formData.institutetype, formData.Cadet_Gender]);
+        if (newDivision !== formData.division) {
+            setFormData(prev => ({ ...prev, division: newDivision }));
+        }
+    }, [formData.institutetype, formData.Cadet_Gender, formData.division]);
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
         if (startDate && endDate) {
@@ -618,5 +620,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         </div>
     );
 }
+
+    
 
     
