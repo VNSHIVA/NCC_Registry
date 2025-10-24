@@ -123,18 +123,8 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             setError("The file is empty or could not be parsed.");
             return null;
         }
-
-        const normalizedData = data.map(row => {
-            const newRow: { [key: string]: any } = {};
-            for (const key in row) {
-                const normalizedKey = normalizeHeaders(key);
-                newRow[normalizedKey] = row[key];
-            }
-            return newRow;
-        });
-        
         setError(null);
-        return normalizedData;
+        return data; // Return raw data, normalization will happen on server
     };
     
     const handleInitiateImport = async () => {
@@ -156,7 +146,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                         const workbook = XLSX.read(data, { type: 'binary' });
                         const sheetName = workbook.SheetNames[0];
                         const worksheet = workbook.Sheets[sheetName];
-                        const json = XLSX.utils.sheet_to_json(worksheet);
+                        const json = XLSX.utils.sheet_to_json(worksheet, { defval: null }); // Keep blank cells as null
                         resolve(json);
                     } catch (err) {
                         reject(new Error("Failed to parse the file. Ensure it's a valid Excel or CSV."));
@@ -204,9 +194,9 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         try {
             const result = await importCadets(parsedData, institutionName);
             if(result.success) {
-                let description = `${result.count} records imported.`;
+                let description = `${result.added || 0} new cadets added. ${result.updated || 0} existing cadets updated.`;
                 if (result.missingFields && result.missingFields.length > 0) {
-                    description += ` Missing required fields: ${result.missingFields.join(', ')}. Please complete these records.`;
+                    description += ` Missing required fields were found for: ${result.missingFields.join(', ')}. Please complete these records.`;
                 }
 
                 toast({
@@ -246,8 +236,8 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                 <DialogHeader>
                     <DialogTitle>Import Cadet Details</DialogTitle>
                     <DialogDescription>
-                        Upload an Excel (.xlsx, .xls) or CSV file, or provide a public Google Sheets CSV link.
-                        Required columns: regNo, Cadet_Name, batch. Incomplete records will be flagged.
+                        Upload an Excel (.xlsx, .xls) or CSV file. The system will update existing cadets based on Regimental No and add new ones.
+                        Blank cells in the file will not overwrite existing data.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -283,7 +273,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                         <AlertDialogHeader>
                             <AlertDialogTitle>Confirm Import</AlertDialogTitle>
                             <AlertDialogDescription>
-                                {`Ready to import ${parsedData?.length || 0} cadet records. Do you want to proceed?`}
+                                {`Ready to process ${parsedData?.length || 0} records. Existing records will be updated and new records will be added. Do you want to proceed?`}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -307,7 +297,3 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         </Dialog>
     );
 }
-
-    
-
-    

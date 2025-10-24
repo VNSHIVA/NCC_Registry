@@ -65,33 +65,6 @@ const FIELD_MAPPING: { [key: string]: string } = {
     'criminal_court': 'Criminal_Court'
 };
 
-
-// Function to process and structure camp details from a flat row
-const processCampData = (row: any) => {
-    const camps = [];
-    const campTypeValues = campTypes.map(c => c.value);
-
-    // Iterative camp fields like 'camp1_type', 'camp1_location', etc.
-    for (let i = 1; i <= 10; i++) { // Check for up to 10 camps
-        const campType = row[`camp${i}_type`];
-        if (campType && campTypeValues.includes(campType.toUpperCase())) {
-            camps.push({
-                campType: campType.toUpperCase(),
-                level: row[`camp${i}_level`] || '',
-                location: row[`camp${i}_location`] || '',
-                startDate: row[`camp${i}_startDate`] || '',
-                endDate: row[`camp${i}_endDate`] || '',
-                reward: row[`camp${i}_reward`] || '',
-                durationDays: 0, // Should be calculated on front-end or here if dates are valid
-                certificateUrl: row[`camp${i}_certificateUrl`] || '',
-            });
-        }
-    }
-
-    return camps;
-};
-
-
 export async function importCadets(cadets: any[], institutionName: string) {
     if (!Array.isArray(cadets) || cadets.length === 0) {
         return { success: false, error: 'No cadet data provided.' };
@@ -99,66 +72,62 @@ export async function importCadets(cadets: any[], institutionName: string) {
 
     const cadetsCollection = collection(db, 'cadets');
     const batch = writeBatch(db);
-    let importedCount = 0;
+    let addedCount = 0;
+    let updatedCount = 0;
     const missingFieldsTracker = new Set<string>();
-
 
     const q = query(cadetsCollection, where('institution', '==', institutionName));
     const querySnapshot = await getDocs(q);
-    const existingCadets = new Map(querySnapshot.docs.map(doc => [doc.data().regNo, doc.id]));
+    const existingCadets = new Map(querySnapshot.docs.map(doc => [doc.data().regNo, { id: doc.id, data: doc.data() }]));
 
     for (const rawRow of cadets) {
         const normalizedRow: { [key: string]: any } = {};
         for (const key in rawRow) {
             const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/[ _-]/g, '_').trim()] || key.trim();
-            normalizedRow[normalizedKey] = rawRow[key];
+            if (rawRow[key] !== null && rawRow[key] !== '') {
+                 normalizedRow[normalizedKey] = rawRow[key];
+            }
         }
 
-        // Check for missing required fields but don't skip the row
         REQUIRED_FIELDS.forEach(field => {
             if (!normalizedRow[field]) {
                 missingFieldsTracker.add(field);
-                normalizedRow[field] = normalizedRow[field] || ''; // Ensure it's at least an empty string
             }
         });
         
-        const { regNo, ...rest } = normalizedRow;
-
-        // Auto-assign division logic
-        if (!rest.division && rest.institutetype && rest.Cadet_Gender) {
-             if (rest.institutetype === 'School') {
-                rest.division = rest.Cadet_Gender === 'Male' ? 'JD' : 'JW';
-            } else if (rest.institutetype === 'College') {
-                rest.division = rest.Cadet_Gender === 'Male' ? 'SD' : 'SW';
-            }
-        }
+        const { regNo } = normalizedRow;
         
-        const dataToSave = {
-            institution: institutionName,
-            regNo,
-            ...rest 
-        };
-        
-        // Ensure default values for radio button fields if they are missing
-        dataToSave.Willingness_to_undergo_Military_Training = dataToSave.Willingness_to_undergo_Military_Training || 'No';
-        dataToSave.Willingness_to_serve_in_NCC = dataToSave.Willingness_to_serve_in_NCC || 'No';
-        dataToSave.Previously_Applied_for_enrollment = dataToSave.Previously_Applied_for_enrollment || 'No';
-        dataToSave.Dismissed_from_NCC_TA_AF = dataToSave.Dismissed_from_NCC_TA_AF || 'No';
-        dataToSave.Criminal_Court = dataToSave.Criminal_Court || 'No';
-        dataToSave.rank = dataToSave.rank || 'CDT';
+        const existingCadet = regNo ? existingCadets.get(regNo) : null;
 
-
-        const existingCadetId = regNo ? existingCadets.get(regNo) : null;
-
-
-        if (existingCadetId) {
-            const cadetRef = doc(db, 'cadets', existingCadetId);
-            batch.update(cadetRef, dataToSave);
+        if (existingCadet) {
+            // Merge new data with existing data, preserving old values if new ones are blank
+            const dataToUpdate = { ...existingCadet.data, ...normalizedRow };
+            const cadetRef = doc(db, 'cadets', existingCadet.id);
+            batch.update(cadetRef, dataToUpdate);
+            updatedCount++;
         } else {
+            // Create a new record, ensuring required fields exist, even if empty
+            const dataToSave = {
+                institution: institutionName,
+                regNo: normalizedRow.regNo || '',
+                Cadet_Name: normalizedRow.Cadet_Name || '',
+                batch: normalizedRow.batch || '',
+                ...normalizedRow
+            };
+
+             // Auto-assign division logic
+            if (!dataToSave.division && dataToSave.institutetype && dataToSave.Cadet_Gender) {
+                if (dataToSave.institutetype === 'School') {
+                    dataToSave.division = dataToSave.Cadet_Gender === 'Male' ? 'JD' : 'JW';
+                } else if (dataToSave.institutetype === 'College') {
+                    dataToSave.division = dataToSave.Cadet_Gender === 'Male' ? 'SD' : 'SW';
+                }
+            }
+
             const cadetRef = doc(cadetsCollection);
             batch.set(cadetRef, dataToSave);
+            addedCount++;
         }
-        importedCount++;
     }
 
     try {
@@ -166,7 +135,8 @@ export async function importCadets(cadets: any[], institutionName: string) {
         revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
         return { 
             success: true, 
-            count: importedCount,
+            added: addedCount,
+            updated: updatedCount,
             missingFields: Array.from(missingFieldsTracker)
         };
     } catch (error: any) {
