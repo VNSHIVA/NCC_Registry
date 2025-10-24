@@ -62,6 +62,10 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
             let data = await getCadet(cadetId);
             if(data) {
                 data = migrateCadetData(data);
+                // Ensure institutetype is set
+                if (!data.institutetype) {
+                    data.institutetype = 'College';
+                }
                 setFormData(data);
             }
             setLoading(false);
@@ -348,7 +352,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                     <Input id="Date_of_Birth" type="date" value={formData.Date_of_Birth || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="Cadet_Gender">Cadet_Gender</Label>
+                                    <Label htmlFor="Cadet_Gender">Cadet Gender</Label>
                                     <Select onValueChange={(value) => handleSelectChange('Cadet_Gender', value)} value={formData.Cadet_Gender}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
                                         <SelectContent>
@@ -451,13 +455,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="institutetype">Institution Type</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('institutetype', value)} value={formData.institutetype}>
-                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="School">School</SelectItem>
-                                            <SelectItem value="College">College</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Input id="institutetype" value="College" disabled className="mt-1 bg-gray-100/20"/>
                                 </div>
                                 <div className="md:col-span-3">
                                     <Label htmlFor="Medical_Complaint_if_any">Medical Complaint (if any)</Label>
@@ -630,4 +628,5 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     
 
     
+
 

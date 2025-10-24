@@ -1,4 +1,5 @@
 
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import { getCadet, deleteCadet } from '@/lib/cadet-service';
@@ -176,7 +177,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
               <div><strong className="font-medium text-muted-foreground">Date of Birth:</strong> {cadet.Date_of_Birth}</div>
-              <div><strong className="font-medium text-muted-foreground">Cadet_Gender:</strong> {cadet.Cadet_Gender}</div>
+              <div><strong className="font-medium text-muted-foreground">Cadet Gender:</strong> {cadet.Cadet_Gender}</div>
               <div><strong className="font-medium text-muted-foreground">Mobile:</strong> {cadet.Cadet_Mobile_No}</div>
               <div><strong className="font-medium text-muted-foreground">Email:</strong> {cadet.Email_Address}</div>
               <div><strong className="font-medium text-muted-foreground">Nationality:</strong> {cadet.Nationality}</div>
@@ -290,3 +291,4 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     
 
     
+
