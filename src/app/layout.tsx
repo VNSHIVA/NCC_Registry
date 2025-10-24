@@ -34,19 +34,19 @@ export default function RootLayout({
             </Link>
           </div>
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/" className="flex items-center space-x-2 hover:text-accent font-semibold">
+            <Link href="/" className="flex items-center space-x-2 hover:text-black font-semibold">
               <Home className="h-5 w-5" />
               <span>Home</span>
             </Link>
-             <Link href="/dashboard" className="flex items-center space-x-2 hover:text-accent font-semibold">
+             <Link href="/dashboard" className="flex items-center space-x-2 hover:text-black font-semibold">
               <LayoutDashboard className="h-5 w-5" />
               <span>Dashboard</span>
             </Link>
-            <Link href="/institutions" className="flex items-center space-x-2 hover:text-accent font-semibold">
+            <Link href="/institutions" className="flex items-center space-x-2 hover:text-black font-semibold">
               <Building className="h-5 w-5" />
               <span>Institutions</span>
             </Link>
-            <Link href="/archived" className="flex items-center space-x-2 hover:text-accent font-semibold">
+            <Link href="/archived" className="flex items-center space-x-2 hover:text-black font-semibold">
               <Archive className="h-5 w-5" />
               <span>Archived</span>
             </Link>
@@ -59,19 +59,19 @@ export default function RootLayout({
         </div>
          {isMenuOpen && (
           <div className="md:hidden px-6 pb-4">
-            <Link href="/" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
+            <Link href="/" className="flex items-center space-x-2 py-2 hover:text-black font-semibold" onClick={() => setIsMenuOpen(false)}>
               <Home className="h-5 w-5" />
               <span>Home</span>
             </Link>
-            <Link href="/dashboard" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
+            <Link href="/dashboard" className="flex items-center space-x-2 py-2 hover:text-black font-semibold" onClick={() => setIsMenuOpen(false)}>
               <LayoutDashboard className="h-5 w-5" />
               <span>Dashboard</span>
             </Link>
-            <Link href="/institutions" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
+            <Link href="/institutions" className="flex items-center space-x-2 py-2 hover:text-black font-semibold" onClick={() => setIsMenuOpen(false)}>
               <Building className="h-5 w-5" />
               <span>Institutions</span>
             </Link>
-            <Link href="/archived" className="flex items-center space-x-2 py-2 hover:text-accent font-semibold" onClick={() => setIsMenuOpen(false)}>
+            <Link href="/archived" className="flex items-center space-x-2 py-2 hover:text-black font-semibold" onClick={() => setIsMenuOpen(false)}>
               <Archive className="h-5 w-5" />
               <span>Archived</span>
             </Link>
