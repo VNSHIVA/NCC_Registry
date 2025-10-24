@@ -79,10 +79,13 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         const { institutetype, Cadet_Gender } = formData;
         let newDivision = '';
         if (institutetype && Cadet_Gender) {
-            if (institutetype === 'School') {
+            const typeLower = institutetype.toLowerCase();
+            if (typeLower === 'school') {
                 newDivision = Cadet_Gender === 'MALE' ? 'JD' : 'JW';
-            } else if (institutetype === 'College') {
+            } else if (typeLower === 'college') {
                 newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
+            } else {
+                 newDivision = Cadet_Gender === 'MALE' ? 'SD' : 'SW';
             }
         }
         // Only update if it's different to avoid infinite loops
@@ -352,7 +355,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                     <Input id="Date_of_Birth" type="date" value={formData.Date_of_Birth || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div>
-                                    <Label htmlFor="Cadet_Gender">Cadet Gender</Label>
+                                    <Label htmlFor="Cadet_Gender">Cadet_Gender</Label>
                                     <Select onValueChange={(value) => handleSelectChange('Cadet_Gender', value)} value={formData.Cadet_Gender}>
                                         <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
                                         <SelectContent>
@@ -455,13 +458,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                 </div>
                                 <div>
                                     <Label htmlFor="institutetype">Institution Type</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('institutetype', value)} value={formData.institutetype}>
-                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="College">College</SelectItem>
-                                            <SelectItem value="School">School</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Input id="institutetype" value={formData.institutetype || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
                                 </div>
                                 <div className="md:col-span-3">
                                     <Label htmlFor="Medical_Complaint_if_any">Medical Complaint (if any)</Label>
@@ -634,6 +631,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     
 
     
+
 
 
 
