@@ -1,4 +1,5 @@
 
+
 'use server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, getDoc, updateDoc, addDoc, deleteDoc, query, where, writeBatch } from 'firebase/firestore';
@@ -15,7 +16,7 @@ const isActiveCadet = (cadet: any) => {
         return (currentYear - batchYear) < 3;
     }
     if (division === 'JD' || division === 'JW') {
-        return (currentYear - batchYear) < 1;
+        return (currentYear - batchYear) < 2; // Junior is 2 years
     }
     return false; // Default to inactive if division is unknown
 };
@@ -29,32 +30,20 @@ export async function getCadets(institutionName: string) {
     return cadetsList;
 }
 
-export async function getArchivedCadetsByInstitution() {
+export async function getArchivedCadets() {
     const cadetsCol = collection(db, 'cadets');
-    const cadetSnapshot = await getDocs(cadetsCol);
+    const institutionsCol = collection(db, 'institutions');
     
-    const archivedCadets = cadetSnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(cadet => !isActiveCadet(cadet));
-
-    const groupedByInstitution = archivedCadets.reduce((acc, cadet) => {
-        const institutionName = cadet.institutionName || 'Unknown Institution';
-        if (!acc[institutionName]) {
-            acc[institutionName] = [];
-        }
-        acc[institutionName].push(cadet);
-        return acc;
-    }, {} as { [key: string]: any[] });
-
-    // Sort institutions by name
-    const sortedInstitutions = Object.keys(groupedByInstitution).sort();
+    const [cadetSnapshot, institutionsSnapshot] = await Promise.all([
+        getDocs(cadetsCol),
+        getDocs(institutionsCol)
+    ]);
     
-    const result = sortedInstitutions.map(institutionName => ({
-        institutionName,
-        cadets: groupedByInstitution[institutionName].sort((a, b) => (a.Cadet_Name || '').localeCompare(b.Cadet_Name || '')) // Sort cadets by name
-    }));
+    const allCadets = cadetSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const archivedCadets = allCadets.filter(cadet => !isActiveCadet(cadet));
+    const institutions = institutionsSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
 
-    return result;
+    return { archivedCadets, institutions };
 }
 
 export async function getCadet(id: string) {
