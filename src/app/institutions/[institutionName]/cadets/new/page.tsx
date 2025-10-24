@@ -193,7 +193,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await addCadet({...formData, institution: institutionName}, institutionName);
+            await addCadet({...formData, institutionName: institutionName}, institutionName);
             router.push(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
         } catch (error) {
             console.error("Failed to add cadet", error);

@@ -144,7 +144,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
               <div><strong className="font-medium text-muted-foreground">Division:</strong> {cadet.division}</div>
               <div><strong className="font-medium text-muted-foreground">Batch:</strong> {cadet.batch}</div>
               <div><strong className="font-medium text-muted-foreground">Army Type:</strong> {cadet.armytype}</div>
-              <div><strong className="font-medium text-muted-foreground">Institution:</strong> {institutionName}</div>
+              <div><strong className="font-medium text-muted-foreground">Institution Name:</strong> {institutionName}</div>
                <div><strong className="font-medium text-muted-foreground">Willing to undergo Military Training:</strong> {cadet.Willingness_to_undergo_Military_Training}</div>
                 <div><strong className="font-medium text-muted-foreground">Willing to serve in NCC:</strong> {cadet.Willingness_to_serve_in_NCC}</div>
                 <div><strong className="font-medium text-muted-foreground">Previously Applied:</strong> {cadet.Previously_Applied_for_enrollment}</div>
