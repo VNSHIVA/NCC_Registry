@@ -199,7 +199,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
 
             // Auto-assign division logic if not provided
             if (!dataToSave.division && institutionType && dataToSave.Cadet_Gender) {
-                if (institutionType === 'School') {
+                if (safeToString(institutionType).toLowerCase() === 'school') {
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'JD' : 'JW';
                 } else { // Default to College logic
                     dataToSave.division = safeToString(dataToSave.Cadet_Gender).toUpperCase() === 'MALE' ? 'SD' : 'SW';
