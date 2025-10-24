@@ -54,6 +54,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     const { toast } = useToast();
     const [exportConfirm, setExportConfirm] = useState<{ show: boolean, type: 'selected' | 'all' }>({ show: false, type: 'all' });
     const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean, type: 'selected' | 'all' }>({ show: false, type: 'all' });
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
 
 
     async function fetchCadets() {
@@ -75,7 +76,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             (cadet.Cadet_Name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) &&
             (filters.batch === 'all' || cadet.batch?.toString() === filters.batch) &&
             (filters.rank === 'all' || cadet.rank === filters.rank) &&
-            (filters.bloodGroup === 'all' || cadet.Blood_Group === filters.bloodGroup) &&
+            (filters.bloodGroup === 'all' || cadet.bloodGroup === filters.bloodGroup) &&
             (filters.division === 'all' || cadet.division === filters.division) &&
             (!showActiveOnly || isActive) 
         );
@@ -87,12 +88,18 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
     const totalPages = Math.ceil(filteredCadets.length / cadetsPerPage);
 
+    // Reset selection when filters change
+    useEffect(() => {
+        setSelectedCadets([]);
+    }, [searchTerm, filters, showActiveOnly]);
+
     const handleReset = () => {
         setSearchTerm('');
         setFilters({ batch: 'all', rank: 'all', bloodGroup: 'all', division: 'all' });
         setShowActiveOnly(true);
         setCurrentPage(1);
         setSelectedCadets([]);
+        setIsSelectionMode(false);
     }
     
     const toggleSelectCadet = (id: string) => {
@@ -101,13 +108,25 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         );
     };
 
-    const handleToggleAll = () => {
-        if (selectedCadets.length === currentCadets.length && currentCadets.length > 0) {
-            setSelectedCadets([]);
+    const handleToggleAllOnPage = () => {
+        const allCurrentIds = currentCadets.map(c => c.id);
+        const allSelected = allCurrentIds.every(id => selectedCadets.includes(id));
+        
+        if (allSelected) {
+             setSelectedCadets(prev => prev.filter(id => !allCurrentIds.includes(id)));
         } else {
-            setSelectedCadets(currentCadets.map(c => c.id));
+            setSelectedCadets(prev => [...new Set([...prev, ...allCurrentIds])]);
         }
     };
+    
+    // When toggling selection mode off, clear selections
+    const handleSelectionModeChange = (checked: boolean) => {
+        setIsSelectionMode(checked);
+        if (!checked) {
+            setSelectedCadets([]);
+        }
+    }
+
 
     const formatDateForExport = (dateString: string) => {
         if (!dateString) return '';
@@ -382,16 +401,28 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                     </div>
                     <div className="border-t border-white/20 my-6"></div>
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                         <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id="select-all-toggle"
-                                checked={selectedCadets.length > 0 && currentCadets.length > 0 && selectedCadets.length === currentCadets.length}
-                                onCheckedChange={handleToggleAll}
-                                aria-label="Select all cadets on current page"
-                            />
-                            <Label htmlFor="select-all-toggle" className="text-sm font-medium">
-                                {selectedCadets.length > 0 ? `${selectedCadets.length} cadet(s) selected` : "Select cadets"}
-                            </Label>
+                         <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="selection-mode-toggle"
+                                    checked={isSelectionMode}
+                                    onCheckedChange={handleSelectionModeChange}
+                                />
+                                <Label htmlFor="selection-mode-toggle" className="text-sm font-medium">Select cadets</Label>
+                            </div>
+                            {isSelectionMode && (
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="select-all-toggle"
+                                        checked={currentCadets.length > 0 && currentCadets.every(c => selectedCadets.includes(c.id))}
+                                        onCheckedChange={handleToggleAllOnPage}
+                                        aria-label="Select all cadets on current page"
+                                    />
+                                    <Label htmlFor="select-all-toggle" className="text-sm font-medium">
+                                        {selectedCadets.length > 0 ? `${selectedCadets.length} selected` : "Select all on page"}
+                                    </Label>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -415,7 +446,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                             </DropdownMenu>
                              <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="destructive" className="w-full sm:w-auto" disabled={selectedCadets.length === 0 && filteredCadets.length === 0}>
+                                    <Button variant="destructive" className="w-full sm:w-auto" disabled={!isSelectionMode || selectedCadets.length === 0}>
                                         <Trash2 className="mr-2 h-4 w-4" /> Delete Cadets
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -454,15 +485,17 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                         </Card>
                     ))
                 ) : currentCadets.map(cadet => (
-                    <Card key={cadet.id} className="bg-card/80 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/20 overflow-hidden">
-                        <CardContent className="p-4 flex flex-col items-center text-center">
-                             <div className="absolute top-4 left-4">
+                    <Card key={cadet.id} className="bg-card/80 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/20 overflow-hidden relative">
+                         {isSelectionMode && (
+                            <div className="absolute top-4 left-4 z-10">
                                 <Checkbox
                                     checked={selectedCadets.includes(cadet.id)}
                                     onCheckedChange={() => toggleSelectCadet(cadet.id)}
                                     aria-label={`Select ${cadet.name}`}
                                 />
                             </div>
+                        )}
+                        <CardContent className="p-4 flex flex-col items-center text-center">
                             <h3 className="text-lg font-semibold text-primary pt-4">{cadet.Cadet_Name}</h3>
                             <p className="text-sm text-muted-foreground">{cadet.regNo}</p>
                             <div className="flex justify-center gap-4 my-3 text-sm">
