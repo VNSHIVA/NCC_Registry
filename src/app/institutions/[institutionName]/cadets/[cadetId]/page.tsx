@@ -127,7 +127,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
             <div>
               <CardTitle className="text-2xl font-bold text-primary flex items-center gap-2">
                 {cadet.Cadet_Name}
-                {!isCadetActive && <span className="text-sm font-semibold text-accent-foreground bg-accent/20 px-3 py-1 rounded-full">Course Completed</span>}
+                {!isCadetActive && <span className="text-sm font-semibold text-accent-foreground bg-accent/20 px-3 py-1 rounded-full">Archived</span>}
               </CardTitle>
               <p className="text-muted-foreground">{cadet.regNo}</p>
             </div>
@@ -320,3 +320,5 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     </div>
   );
 }
+
+    

@@ -460,7 +460,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                      <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
                          <div className="flex items-center space-x-2">
                             <Switch id="active-cadets" checked={showInactive} onCheckedChange={setShowInactive} />
-                            <Label htmlFor="active-cadets">Show Course-Completed Cadets</Label>
+                            <Label htmlFor="active-cadets">Show Archived Cadets</Label>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <Button variant="outline" onClick={handleReset} className="bg-transparent hover:bg-black/10">Reset</Button>
@@ -584,7 +584,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 <div><span className="font-semibold">Batch:</span> {cadet.batch}</div>
                                 <div><span className="font-semibold">Blood:</span> {cadet.Blood_Group}</div>
                             </div>
-                             {!isActiveCadet(cadet) && <div className="text-xs font-bold text-accent-foreground bg-accent/20 px-2 py-1 rounded-full mb-2">Course Completed</div>}
+                             {!isActiveCadet(cadet) && <div className="text-xs font-bold text-accent-foreground bg-accent/20 px-2 py-1 rounded-full mb-2">Archived</div>}
                             <div className="flex gap-2 w-full mt-2">
                                 <Link href={`/institutions/${encodeURIComponent(institutionName)}/cadets/${cadet.id}`} className="flex-1">
                                     <Button variant="outline" className="w-full bg-transparent hover:bg-black/10">View</Button>
@@ -623,3 +623,5 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         </div>
     );
 }
+
+    
