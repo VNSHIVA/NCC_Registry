@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { campTypes } from '@/lib/constants';
-import { FilteredCampStatsCard } from './_components/filtered-camp-stats-card';
+import { CampAttendancePieChart } from './_components/camp-attendance-pie-chart';
 
 export default function DashboardPage() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -72,7 +72,10 @@ export default function DashboardPage() {
         const unsubCadets = onSnapshot(cadetsCol, async () => {
             const updatedStats = await getDashboardStats();
             setStats(updatedStats);
-            if (filters.campType) applyFilters();
+            if (filters.campType) {
+                // Debounce or add a delay if this becomes too frequent
+                await applyFilters();
+            }
         });
 
         const unsubInstitutions = onSnapshot(institutionsCol, async () => {
@@ -85,7 +88,14 @@ export default function DashboardPage() {
             unsubCadets();
             unsubInstitutions();
         };
-    }, []); // Removed applyFilters from dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); 
+
+
+    const campAttendanceData = filteredCampStats ? [
+        { name: 'Attended', value: filteredCampStats.count, fill: 'hsl(var(--chart-1))' },
+        { name: 'Did Not Attend', value: filteredCampStats.total - filteredCampStats.count, fill: 'hsl(var(--chart-5))' },
+    ] : [];
 
 
     if (loading || !stats) {
@@ -170,19 +180,8 @@ export default function DashboardPage() {
                 </CardContent>
             </Card>
 
-            {filteredCampStats && (
-                <div className="mt-8">
-                    <FilteredCampStatsCard 
-                        count={filteredCampStats.count} 
-                        total={filteredCampStats.total}
-                        campType={campTypes.find(c => c.value === filters.campType)?.label || filters.campType}
-                    />
-                </div>
-            )}
-
-
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mt-8">
-                <Card className="lg:col-span-2 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
+                 <Card className="lg:col-span-2 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
                     <CardHeader>
                         <CardTitle className="text-xl text-primary">Cadet Division Breakdown</CardTitle>
                     </CardHeader>
@@ -190,15 +189,31 @@ export default function DashboardPage() {
                         <DivisionPieChart data={stats.divisionCounts} />
                     </CardContent>
                 </Card>
-                
-                <Card className="lg:col-span-3 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
-                    <CardHeader>
-                        <CardTitle className="text-xl text-primary">Batch-wise Enrollment</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <BatchBarChart data={stats.batchCounts} />
-                    </CardContent>
-                </Card>
+
+                {filteredCampStats ? (
+                    <Card className="lg:col-span-3 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
+                        <CardHeader>
+                            <CardTitle className="text-xl text-primary">
+                                Camp Attendance for {campTypes.find(c => c.value === filters.campType)?.label || 'Selected Camp'}
+                            </CardTitle>
+                             <p className="text-xs text-muted-foreground">
+                                Total Cadets in Filter: {filteredCampStats.total}
+                            </p>
+                        </CardHeader>
+                        <CardContent>
+                           <CampAttendancePieChart data={campAttendanceData} />
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Card className="lg:col-span-3 bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
+                        <CardHeader>
+                            <CardTitle className="text-xl text-primary">Batch-wise Enrollment</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <BatchBarChart data={stats.batchCounts} />
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </div>
     );
