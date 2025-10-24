@@ -12,13 +12,22 @@ export async function getInstitutions() {
         const institutionData = doc.data();
         const cadetsCol = collection(db, 'cadets');
         const q = query(cadetsCol, where("institutionName", "==", institutionData.name));
-        const cadetsSnapshot = await getCountFromServer(q);
-        const cadetCount = cadetsSnapshot.data().count;
+        const cadetsSnapshot = await getDocs(q);
+        const cadets = cadetsSnapshot.docs.map(d => d.data());
 
+        const divisionCounts = { SD: 0, SW: 0, JD: 0, JW: 0 };
+        for (const cadet of cadets) {
+            const division = cadet.division?.toUpperCase();
+            if (division in divisionCounts) {
+                divisionCounts[division as keyof typeof divisionCounts]++;
+            }
+        }
+        
         return { 
             id: doc.id, 
             ...institutionData,
-            cadetCount: cadetCount,
+            cadetCount: cadets.length,
+            divisionCounts,
         };
     }));
 
@@ -86,5 +95,3 @@ export async function deleteInstitution(id: string) {
     // Also revalidate the specific cadets page in case the user navigates back
     revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
 }
-
-    

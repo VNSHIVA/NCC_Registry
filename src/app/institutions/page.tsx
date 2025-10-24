@@ -38,6 +38,12 @@ type Institution = {
   anoName: string;
   type: 'School' | 'College';
   cadetCount: number;
+  divisionCounts: {
+    SD: number;
+    SW: number;
+    JD: number;
+    JW: number;
+  };
 };
 
 
@@ -45,6 +51,7 @@ export default function InstitutionsPage() {
   const [institutionsData, setInstitutionsData] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'School' | 'College'>('all');
   
   // State for Add Dialog
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -145,7 +152,8 @@ export default function InstitutionsPage() {
   };
 
   const filteredInstitutions = institutionsData.filter((institution) =>
-    institution.name.toLowerCase().includes(searchTerm.toLowerCase())
+    institution.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (typeFilter === 'all' || institution.type === typeFilter)
   );
 
   return (
@@ -231,8 +239,18 @@ export default function InstitutionsPage() {
         <h1 className="text-3xl font-bold text-primary">Institutions</h1>
         <div className="flex-1 w-full md:w-auto flex flex-col sm:flex-row justify-end items-center gap-4">
             <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input type="search" placeholder="Search institutions..." className="pl-10 bg-white/20 backdrop-blur-sm border-white/30" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input type="search" placeholder="Search institutions..." className="pl-10 bg-white/20 backdrop-blur-sm border-white/30" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            </div>
+            <div className="w-full sm:w-auto">
+              <Select onValueChange={(value: 'all' | 'School' | 'College') => setTypeFilter(value)} value={typeFilter}>
+                  <SelectTrigger className="bg-white/20 backdrop-blur-sm border-white/30"><SelectValue placeholder="Filter by type" /></SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="College">Colleges</SelectItem>
+                      <SelectItem value="School">Schools</SelectItem>
+                  </SelectContent>
+              </Select>
             </div>
              <Button className="w-full sm:w-auto" onClick={() => setIsAddDialogOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -260,9 +278,16 @@ export default function InstitutionsPage() {
                 <p className="text-sm text-muted-foreground">{institution.type}</p>
               </CardHeader>
               <CardContent className="space-y-3 flex-grow flex flex-col">
-                <div className="flex-grow">
+                <div className="flex-grow space-y-2">
                   <p><span className="font-semibold">ANO:</span> {institution.anoName}</p>
                   <p><span className="font-semibold">Total Cadets:</span> {institution.cadetCount}</p>
+                   <div className="text-sm">
+                      {institution.type === 'College' ? (
+                        <p><span className="font-semibold">Divisions:</span> SD: {institution.divisionCounts.SD} | SW: {institution.divisionCounts.SW}</p>
+                      ) : (
+                        <p><span className="font-semibold">Divisions:</span> JD: {institution.divisionCounts.JD} | JW: {institution.divisionCounts.JW}</p>
+                      )}
+                    </div>
                 </div>
                  <div className="flex gap-2 pt-4">
                     <Link href={`/institutions/${encodeURIComponent(institution.name)}/cadets`} className="flex-1">
@@ -285,5 +310,3 @@ export default function InstitutionsPage() {
     </div>
   );
 }
-
-    
