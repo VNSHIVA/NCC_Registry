@@ -133,14 +133,6 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             return newRow;
         });
         
-        const headers = Object.keys(normalizedData[0]);
-        const missingFields = REQUIRED_FIELDS.filter(field => !headers.includes(field));
-
-        if (missingFields.length > 0) {
-            setError(`The imported data is missing required columns: ${missingFields.join(', ')}.`);
-            return null;
-        }
-        
         setError(null);
         return normalizedData;
     };
@@ -212,9 +204,14 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
         try {
             const result = await importCadets(parsedData, institutionName);
             if(result.success) {
+                let description = `${result.count} records imported.`;
+                if (result.missingFields && result.missingFields.length > 0) {
+                    description += ` Missing required fields: ${result.missingFields.join(', ')}. Please complete these records.`;
+                }
+
                 toast({
                     title: 'Import Successful',
-                    description: `${result.count} cadet records have been imported/updated.`,
+                    description: description,
                 });
                 onImportSuccess();
                 handleClose();
@@ -250,7 +247,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                     <DialogTitle>Import Cadet Details</DialogTitle>
                     <DialogDescription>
                         Upload an Excel (.xlsx, .xls) or CSV file, or provide a public Google Sheets CSV link.
-                        Required columns: regNo, Cadet_Name, batch.
+                        Required columns: regNo, Cadet_Name, batch. Incomplete records will be flagged.
                     </DialogDescription>
                 </DialogHeader>
 

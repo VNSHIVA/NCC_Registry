@@ -5,9 +5,7 @@ import { collection, writeBatch, query, where, getDocs, doc } from 'firebase/fir
 import { revalidatePath } from 'next/cache';
 import { campTypes } from './constants';
 
-const validateCadetData = (cadet: any) => {
-    return cadet.regNo && cadet.Cadet_Name && cadet.batch;
-};
+const REQUIRED_FIELDS = ['regNo', 'Cadet_Name', 'batch'];
 
 const FIELD_MAPPING: { [key: string]: string } = {
     'regimental no': 'regNo',
@@ -102,6 +100,8 @@ export async function importCadets(cadets: any[], institutionName: string) {
     const cadetsCollection = collection(db, 'cadets');
     const batch = writeBatch(db);
     let importedCount = 0;
+    const missingFieldsTracker = new Set<string>();
+
 
     const q = query(cadetsCollection, where('institution', '==', institutionName));
     const querySnapshot = await getDocs(q);
@@ -113,10 +113,14 @@ export async function importCadets(cadets: any[], institutionName: string) {
             const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/[ _-]/g, '_').trim()] || key.trim();
             normalizedRow[normalizedKey] = rawRow[key];
         }
-        
-        if (!validateCadetData(normalizedRow)) {
-            continue;
-        }
+
+        // Check for missing required fields but don't skip the row
+        REQUIRED_FIELDS.forEach(field => {
+            if (!normalizedRow[field]) {
+                missingFieldsTracker.add(field);
+                normalizedRow[field] = normalizedRow[field] || ''; // Ensure it's at least an empty string
+            }
+        });
         
         const { regNo, ...rest } = normalizedRow;
 
@@ -144,7 +148,8 @@ export async function importCadets(cadets: any[], institutionName: string) {
         dataToSave.rank = dataToSave.rank || 'CDT';
 
 
-        const existingCadetId = existingCadets.get(regNo);
+        const existingCadetId = regNo ? existingCadets.get(regNo) : null;
+
 
         if (existingCadetId) {
             const cadetRef = doc(db, 'cadets', existingCadetId);
@@ -159,13 +164,13 @@ export async function importCadets(cadets: any[], institutionName: string) {
     try {
         await batch.commit();
         revalidatePath(`/institutions/${encodeURIComponent(institutionName)}/cadets`);
-        return { success: true, count: importedCount };
+        return { 
+            success: true, 
+            count: importedCount,
+            missingFields: Array.from(missingFieldsTracker)
+        };
     } catch (error: any) {
         console.error("Firestore batch commit failed:", error);
         return { success: false, error: error.message || 'Failed to import data to Firestore.' };
     }
 }
-
-    
-
-    
