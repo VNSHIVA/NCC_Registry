@@ -42,7 +42,7 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
     const institutionName = decodeURIComponent(resolvedParams.institutionName);
     const [institutionType, setInstitutionType] = useState<'School' | 'College' | null>(null);
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<any>({
         institutionName: institutionName,
         institution: 'College',
         regNo: '',
@@ -98,12 +98,11 @@ export default function NewCadetPage({ params }: { params: { institutionName: st
         Sports_Games: '',
         Co_Curricular_Activity: '',
         
-        Willingness_to_undergo_Military_Training: 'Yes',
-        Willingness_to_serve_in_NCC: 'Yes',
-        Previously_Applied_for_enrollment: 'No',
-        Dismissed_from_NCC_TA_AF: 'No',
-
-        Criminal_Court: 'No',
+        Willingness_to_undergo_Military_Training: null,
+        Willingness_to_serve_in_NCC: null,
+        Previously_Applied_for_enrollment: null,
+        Dismissed_from_NCC_TA_AF: null,
+        Criminal_Court: null,
         
         certificates: [] as any[],
         camps: [] as any[],

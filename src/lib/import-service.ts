@@ -74,6 +74,17 @@ const FIELD_MAPPING: { [key: string]: string } = {
     'criminal_court': 'Criminal_Court'
 };
 
+const mapExcelYesNo = (value: any): 'Yes' | 'No' | null => {
+    const str = String(value).toLowerCase().trim();
+    if (['yes', 'y', 'true', '1'].includes(str)) {
+        return 'Yes';
+    }
+    if (['no', 'n', 'false', '0'].includes(str)) {
+        return 'No';
+    }
+    return null;
+};
+
 // Safely normalize a value to a string. Handles strings, numbers, and Date objects.
 const safeToString = (value: any): string => {
     if (value === null || typeof value === 'undefined') {
@@ -114,6 +125,13 @@ export async function importCadets(cadets: any[], institutionName: string) {
     }
     const institutionType = institution.type;
 
+    const yesNoFields = [
+        'Willingness_to_undergo_Military_Training',
+        'Willingness_to_serve_in_NCC',
+        'Previously_Applied_for_enrollment',
+        'Dismissed_from_NCC_TA_AF',
+        'Criminal_Court'
+    ];
 
     const cadetsCollection = collection(db, 'cadets');
     const batch = writeBatch(db);
@@ -151,13 +169,20 @@ export async function importCadets(cadets: any[], institutionName: string) {
         // Clean object for Firestore: contains only fields with actual non-empty string values
         const dataForFirestore: { [key:string]: any } = {};
         for (const key in normalizedRow) {
-            const stringValue = safeToString(normalizedRow[key]);
-            if (stringValue !== '') {
-                // We store the original normalized value, not the stringified one, unless it's a date
-                 if (normalizedRow[key] instanceof Date) {
-                    dataForFirestore[key] = stringValue;
-                } else {
-                    dataForFirestore[key] = normalizedRow[key];
+            if (yesNoFields.includes(key)) {
+                const mappedValue = mapExcelYesNo(normalizedRow[key]);
+                if (mappedValue) {
+                    dataForFirestore[key] = mappedValue;
+                }
+            } else {
+                 const stringValue = safeToString(normalizedRow[key]);
+                if (stringValue !== '') {
+                    // We store the original normalized value, not the stringified one, unless it's a date
+                    if (normalizedRow[key] instanceof Date) {
+                        dataForFirestore[key] = stringValue;
+                    } else {
+                        dataForFirestore[key] = normalizedRow[key];
+                    }
                 }
             }
         }

@@ -168,10 +168,10 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
               <div><strong className="font-medium text-muted-foreground">Batch:</strong> {cadet.batch}</div>
               <div><strong className="font-medium text-muted-foreground">Army Type:</strong> {cadet.armytype}</div>
               <div><strong className="font-medium text-muted-foreground">Institution Name:</strong> {institutionName}</div>
-               <div><strong className="font-medium text-muted-foreground">Willing to undergo Military Training:</strong> {cadet.Willingness_to_undergo_Military_Training}</div>
-                <div><strong className="font-medium text-muted-foreground">Willing to serve in NCC:</strong> {cadet.Willingness_to_serve_in_NCC}</div>
-                <div><strong className="font-medium text-muted-foreground">Previously Applied:</strong> {cadet.Previously_Applied_for_enrollment}</div>
-                <div><strong className="font-medium text-muted-foreground">Dismissed from NCC/TA/AF:</strong> {cadet.Dismissed_from_NCC_TA_AF}</div>
+               <div><strong className="font-medium text-muted-foreground">Willing to undergo Military Training:</strong> {cadet.Willingness_to_undergo_Military_Training || 'N/A'}</div>
+                <div><strong className="font-medium text-muted-foreground">Willing to serve in NCC:</strong> {cadet.Willingness_to_serve_in_NCC || 'N/A'}</div>
+                <div><strong className="font-medium text-muted-foreground">Previously Applied:</strong> {cadet.Previously_Applied_for_enrollment || 'N/A'}</div>
+                <div><strong className="font-medium text-muted-foreground">Dismissed from NCC/TA/AF:</strong> {cadet.Dismissed_from_NCC_TA_AF || 'N/A'}</div>
             </div>
           </section>
 
@@ -274,7 +274,7 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <div><strong className="font-medium text-muted-foreground">Sports/Games:</strong> {cadet.Sports_Games}</div>
                 <div><strong className="font-medium text-muted-foreground">Co-Curricular:</strong> {cadet.Co_Curricular_Activity}</div>
-                <div><strong className="font-medium text-muted-foreground">Criminal Court Case:</strong> {cadet.Criminal_Court}</div>
+                <div><strong className="font-medium text-muted-foreground">Criminal Court Case:</strong> {cadet.Criminal_Court || 'N/A'}</div>
             </div>
           </section>
 
@@ -323,5 +323,3 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
     </div>
   );
 }
-
-    
