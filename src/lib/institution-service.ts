@@ -79,8 +79,36 @@ export async function addInstitution(data: { name: string; anoName: string; type
 }
 
 export async function updateInstitution(id: string, data: { name: string; anoName: string; type: 'School' | 'College' }) {
-    const institutionDoc = doc(db, 'institutions', id);
-    await updateDoc(institutionDoc, data);
+    const institutionDocRef = doc(db, 'institutions', id);
+
+    // Get the current institution name before updating
+    const institutionSnap = await getDoc(institutionDocRef);
+    if (!institutionSnap.exists()) {
+        throw new Error("Institution not found");
+    }
+    const oldInstitutionName = institutionSnap.data().name;
+    
+    const newInstitutionName = data.name;
+
+    const batch = writeBatch(db);
+
+    // Update the institution document itself
+    batch.update(institutionDocRef, data);
+
+    // If the name has changed, update all associated cadets
+    if (oldInstitutionName !== newInstitutionName) {
+        const cadetsQuery = query(collection(db, 'cadets'), where('institutionName', '==', oldInstitutionName));
+        const cadetsSnapshot = await getDocs(cadetsQuery);
+        
+        cadetsSnapshot.forEach((cadetDoc) => {
+            const cadetRef = doc(db, 'cadets', cadetDoc.id);
+            batch.update(cadetRef, { institutionName: newInstitutionName });
+        });
+    }
+
+    // Commit all batched writes
+    await batch.commit();
+
     revalidatePath('/institutions');
 }
 
