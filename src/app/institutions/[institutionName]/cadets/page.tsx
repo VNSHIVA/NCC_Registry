@@ -478,12 +478,12 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                             </DropdownMenu>
                         </div>
                     </div>
-                     {isSelectionMode && selectedCadets.length > 0 && (
+                     {isSelectionMode && (
                         <div className="mt-4 p-3 bg-accent/10 border border-accent/20 rounded-lg text-sm text-center">
                             {allFilteredSelected ? (
                                 <span>All {selectedCadets.length} cadets matching filters are selected. <Button variant="link" className="p-0 h-auto" onClick={handleDeselectAll}>Deselect all</Button></span>
                             ) : (
-                                <span>{selectedCadets.length} cadets selected on this page. <Button variant="link" className="p-0 h-auto" onClick={handleSelectAllFiltered}>Select all {filteredCadets.length} matching cadets</Button></span>
+                                <span>{selectedCadets.length} cadets selected. <Button variant="link" className="p-0 h-auto" onClick={handleSelectAllFiltered}>Select all {filteredCadets.length} matching cadets</Button></span>
                             )}
                         </div>
                      )}
@@ -567,3 +567,4 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     );
 }
 
+    
