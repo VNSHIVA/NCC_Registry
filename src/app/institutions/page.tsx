@@ -44,6 +44,11 @@ type Institution = {
     JD: number;
     JW: number;
   };
+  yearCounts: {
+    first: number;
+    second: number;
+    third: number;
+  };
 };
 
 
@@ -283,7 +288,10 @@ export default function InstitutionsPage() {
                   <p><span className="font-semibold">Total Cadets:</span> {institution.cadetCount}</p>
                    <div className="text-sm">
                       {institution.type === 'College' ? (
-                        <p><span className="font-semibold">Divisions:</span> SD: {institution.divisionCounts.SD} | SW: {institution.divisionCounts.SW}</p>
+                        <>
+                          <p><span className="font-semibold">Divisions:</span> SD: {institution.divisionCounts.SD} | SW: {institution.divisionCounts.SW}</p>
+                          <p><span className="font-semibold">Years:</span> 1st: {institution.yearCounts.first} | 2nd: {institution.yearCounts.second} | 3rd: {institution.yearCounts.third}</p>
+                        </>
                       ) : (
                         <p><span className="font-semibold">Divisions:</span> JD: {institution.divisionCounts.JD} | JW: {institution.divisionCounts.JW}</p>
                       )}
