@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -29,11 +30,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Institution = {
   id: string;
   name: string;
   anoName: string;
+  type: 'School' | 'College';
   cadetCount: number;
 };
 
@@ -47,6 +50,7 @@ export default function InstitutionsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newInstitutionName, setNewInstitutionName] = useState('');
   const [newAnoName, setNewAnoName] = useState('');
+  const [newInstitutionType, setNewInstitutionType] = useState<'School' | 'College'>('College');
 
   // State for Edit Dialog
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -77,9 +81,10 @@ export default function InstitutionsPage() {
     }
     setIsSubmitting(true);
     try {
-        await addInstitution({ name: newInstitutionName, anoName: newAnoName });
+        await addInstitution({ name: newInstitutionName, anoName: newAnoName, type: newInstitutionType });
         setNewInstitutionName('');
         setNewAnoName('');
+        setNewInstitutionType('College');
         setIsSubmitting(false);
         setIsAddDialogOpen(false);
         toast({ title: "Success", description: "Institution added successfully." });
@@ -103,7 +108,8 @@ export default function InstitutionsPage() {
     }
     setIsSubmitting(true);
     try {
-      await updateInstitution(editingInstitution.id, { name: editingInstitution.name, anoName: editingInstitution.anoName });
+      const { id, name, anoName, type } = editingInstitution;
+      await updateInstitution(id, { name, anoName, type });
       setIsSubmitting(false);
       setIsEditDialogOpen(false);
       setEditingInstitution(null);
@@ -157,6 +163,16 @@ export default function InstitutionsPage() {
               <Label htmlFor="ano-name" className="text-right">ANO Name</Label>
               <Input id="ano-name" value={newAnoName} onChange={(e) => setNewAnoName(e.target.value)} className="col-span-3" placeholder="Associate NCC Officer's Name" />
             </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="institution-type" className="text-right">Type</Label>
+                <Select onValueChange={(value: 'School' | 'College') => setNewInstitutionType(value)} value={newInstitutionType}>
+                    <SelectTrigger className="col-span-3"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="College">College</SelectItem>
+                        <SelectItem value="School">School</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
           </div>
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="outline" disabled={isSubmitting}>Cancel</Button></DialogClose>
@@ -179,6 +195,16 @@ export default function InstitutionsPage() {
                 <Label htmlFor="edit-ano-name" className="text-right">ANO Name</Label>
                 <Input id="edit-ano-name" value={editingInstitution.anoName} onChange={(e) => setEditingInstitution({...editingInstitution, anoName: e.target.value})} className="col-span-3" />
               </div>
+               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-institution-type" className="text-right">Type</Label>
+                <Select onValueChange={(value: 'School' | 'College') => setEditingInstitution({...editingInstitution, type: value})} value={editingInstitution.type}>
+                    <SelectTrigger className="col-span-3"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="College">College</SelectItem>
+                        <SelectItem value="School">School</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
             </div>
           )}
           <DialogFooter>
@@ -231,6 +257,7 @@ export default function InstitutionsPage() {
             <Card key={institution.id} className="bg-card/80 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/20 flex flex-col">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-primary">{institution.name}</CardTitle>
+                <p className="text-sm text-muted-foreground">{institution.type}</p>
               </CardHeader>
               <CardContent className="space-y-3 flex-grow flex flex-col">
                 <div className="flex-grow">
@@ -258,3 +285,5 @@ export default function InstitutionsPage() {
     </div>
   );
 }
+
+    

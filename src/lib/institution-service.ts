@@ -1,3 +1,4 @@
+
 'use server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, getCountFromServer, query, where, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -24,7 +25,7 @@ export async function getInstitutions() {
     return institutionList;
 }
 
-export async function addInstitution(data: { name: string; anoName: string; }) {
+export async function addInstitution(data: { name: string; anoName: string; type: 'School' | 'College' }) {
     const docRef = await addDoc(collection(db, "institutions"), {
         ...data,
         cadetCount: 0 
@@ -33,7 +34,7 @@ export async function addInstitution(data: { name: string; anoName: string; }) {
     return docRef.id;
 }
 
-export async function updateInstitution(id: string, data: { name: string; anoName: string; }) {
+export async function updateInstitution(id: string, data: { name: string; anoName: string; type: 'School' | 'College' }) {
     const institutionDoc = doc(db, 'institutions', id);
     await updateDoc(institutionDoc, data);
     revalidatePath('/institutions');
@@ -44,3 +45,5 @@ export async function deleteInstitution(id: string) {
     await deleteDoc(institutionDoc);
     revalidatePath('/institutions');
 }
+
+    
