@@ -185,7 +185,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
         const baseHeaders = [
             'Regimental No', 'Rank', 'Cadet Name', 'Batch', 'Division', 'Institution Name', 'Institution', 'Date of Birth',
             'Mobile', 'Email', 'Educational Qualification', 'Blood Group', 'Aadhaar No', 'Home Address',
-            'Any Sports / Culturals', 'NOK Name', 'NOK Relation', 'NOK Contact'
+            'Any Sports / Culturals', 'NOK Name', 'NOK Relation', 'NOK Contact',
+            'Account Holder Name', 'Bank Name', 'Bank Account Number', 'IFSC Code', 'Bank Branch', 'Bank Pincode'
         ];
 
         const campHeaders: string[] = [];
@@ -215,6 +216,12 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                 'NOK Name': cadet.NOK_Name || '',
                 'NOK Relation': cadet.NOK_Relationship || '',
                 'NOK Contact': cadet.NOK_Contact_Number || '',
+                'Account Holder Name': cadet.Account_Holder_Name || '',
+                'Bank Name': cadet.Bank_Name || '',
+                'Bank Account Number': cadet.Bank_Account_Number || '',
+                'IFSC Code': cadet.IFSC_Code || '',
+                'Bank Branch': cadet.Bank_Branch || '',
+                'Bank Pincode': cadet.Bank_Pincode || ''
             };
 
             uniqueCamps.forEach(campIdentifier => {

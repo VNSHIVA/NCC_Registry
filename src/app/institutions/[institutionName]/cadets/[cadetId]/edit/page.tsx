@@ -475,6 +475,36 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                         </section>
 
                         <section>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Bank Details</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div>
+                                    <Label htmlFor="Account_Holder_Name">Account Holder Name</Label>
+                                    <Input id="Account_Holder_Name" value={formData.Account_Holder_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="Bank_Name">Bank Name</Label>
+                                    <Input id="Bank_Name" value={formData.Bank_Name || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="Bank_Account_Number">Bank Account Number</Label>
+                                    <Input id="Bank_Account_Number" value={formData.Bank_Account_Number || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="IFSC_Code">IFSC Code</Label>
+                                    <Input id="IFSC_Code" value={formData.IFSC_Code || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="Bank_Branch">Bank Branch</Label>
+                                    <Input id="Bank_Branch" value={formData.Bank_Branch || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
+                                </div>
+                                <div>
+                                    <Label htmlFor="Bank_Pincode">Bank Pincode</Label>
+                                    <Input id="Bank_Pincode" value={formData.Bank_Pincode || ''} onChange={handleInputChange} className="mt-1 bg-white/20" />
+                                </div>
+                            </div>
+                        </section>
+
+                        <section>
                             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Next of Kin (NOK) Details</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>

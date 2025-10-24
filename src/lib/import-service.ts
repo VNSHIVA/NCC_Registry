@@ -56,6 +56,13 @@ const FIELD_MAPPING: { [key: string]: string } = {
     'nokstate': 'nokstate',
     'noknrs': 'noknrs',
     
+    'bank_name': 'Bank_Name',
+    'bank_account_number': 'Bank_Account_Number',
+    'ifsc_code': 'IFSC_Code',
+    'account_holder_name': 'Account_Holder_Name',
+    'bank_branch': 'Bank_Branch',
+    'bank_pincode': 'Bank_Pincode',
+    
     'sports_games': 'Sports_Games',
     'co_curricular_activity': 'Co_Curricular_Activity',
     

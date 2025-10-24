@@ -219,6 +219,18 @@ export default function CadetDetailsPage({ params }: { params: { institutionName
           </section>
 
           <section>
+            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Bank Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                <div><strong className="font-medium text-muted-foreground">Account Holder:</strong> {cadet.Account_Holder_Name}</div>
+                <div><strong className="font-medium text-muted-foreground">Bank Name:</strong> {cadet.Bank_Name}</div>
+                <div><strong className="font-medium text-muted-foreground">Account Number:</strong> {cadet.Bank_Account_Number}</div>
+                <div><strong className="font-medium text-muted-foreground">IFSC Code:</strong> {cadet.IFSC_Code}</div>
+                <div><strong className="font-medium text-muted-foreground">Branch:</strong> {cadet.Bank_Branch}</div>
+                <div><strong className="font-medium text-muted-foreground">Pincode:</strong> {cadet.Bank_Pincode}</div>
+            </div>
+          </section>
+
+          <section>
             <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">Next of Kin (NOK) Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
               <div><strong className="font-medium text-muted-foreground">Name:</strong> {cadet.NOK_Name}</div>
