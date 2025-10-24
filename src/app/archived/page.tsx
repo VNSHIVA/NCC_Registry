@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 type ArchivedCadet = {
     id: string;
@@ -14,6 +15,8 @@ type ArchivedCadet = {
     regNo: string;
     batch: string;
     institutionName: string;
+    rank: string;
+    Blood_Group: string;
 };
 
 type GroupedCadets = {
@@ -64,43 +67,44 @@ export default function ArchivedCadetsPage() {
                     </CardContent>
                 </Card>
             ) : (
-                <Card className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20">
-                    <CardHeader>
-                        <CardTitle className="text-xl text-primary">Cadets by Institution</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                         <Accordion type="multiple" className="w-full">
-                            {groupedCadets.map(({ institutionName, cadets }) => (
-                                <AccordionItem value={institutionName} key={institutionName}>
-                                    <AccordionTrigger className="hover:no-underline">
-                                        <div className="flex justify-between w-full pr-4">
-                                            <span className="font-semibold text-primary/90">{institutionName}</span>
-                                            <span className="text-muted-foreground">{cadets.length} archived cadet(s)</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <ul className="space-y-2 pt-2">
-                                            {cadets.map(cadet => (
-                                                <li key={cadet.id} className="p-3 bg-white/10 rounded-lg border border-white/20 flex justify-between items-center">
-                                                    <div>
-                                                        <Link href={`/institutions/${encodeURIComponent(cadet.institutionName)}/cadets/${cadet.id}`} className="font-medium hover:underline">
-                                                            {cadet.Cadet_Name}
-                                                        </Link>
-                                                        <p className="text-sm text-muted-foreground">Reg. No: {cadet.regNo} | Batch: {cadet.batch}</p>
-                                                    </div>
-                                                    <Link href={`/institutions/${encodeURIComponent(cadet.institutionName)}/cadets/${cadet.id}`}>
-                                                        <span className="text-sm text-primary hover:underline">View Details</span>
+                <Accordion type="multiple" className="w-full space-y-4">
+                    {groupedCadets.map(({ institutionName, cadets }) => (
+                        <AccordionItem value={institutionName} key={institutionName} className="bg-card/80 shadow-lg backdrop-blur-lg border rounded-xl border-white/20 px-6">
+                            <AccordionTrigger className="hover:no-underline py-4">
+                                <div className="flex justify-between w-full">
+                                    <span className="font-semibold text-xl text-primary/90">{institutionName}</span>
+                                    <span className="text-muted-foreground self-end">{cadets.length} archived cadet(s)</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-white/20">
+                                     {cadets.map(cadet => (
+                                        <Card key={cadet.id} className="bg-white/10 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-lg border rounded-xl border-white/20 overflow-hidden relative">
+                                            <CardContent className="p-4 flex flex-col items-center text-center">
+                                                <h3 className="text-lg font-semibold text-primary pt-4">{cadet.Cadet_Name}</h3>
+                                                <p className="text-sm text-muted-foreground">{cadet.regNo}</p>
+                                                <div className="flex justify-center gap-4 my-3 text-sm">
+                                                    <div><span className="font-semibold">Rank:</span> {cadet.rank || 'N/A'}</div>
+                                                    <div><span className="font-semibold">Batch:</span> {cadet.batch}</div>
+                                                    <div><span className="font-semibold">Blood:</span> {cadet.Blood_Group || 'N/A'}</div>
+                                                </div>
+                                                <div className="text-xs font-bold text-accent-foreground bg-accent/20 px-2 py-1 rounded-full mb-2">Archived</div>
+                                                <div className="flex gap-2 w-full mt-2">
+                                                    <Link href={`/institutions/${encodeURIComponent(cadet.institutionName)}/cadets/${cadet.id}`} className="flex-1">
+                                                        <Button variant="outline" className="w-full bg-transparent hover:bg-black/10">View</Button>
                                                     </Link>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                    </CardContent>
-                </Card>
+                                                    <Button variant="default" className="w-full" disabled={true}>Edit</Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
             )}
         </div>
     );
 }
+
