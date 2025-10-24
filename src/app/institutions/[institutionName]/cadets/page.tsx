@@ -76,7 +76,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
             (cadet.Cadet_Name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) &&
             (filters.batch === 'all' || cadet.batch?.toString() === filters.batch) &&
             (filters.rank === 'all' || cadet.rank === filters.rank) &&
-            (filters.bloodGroup === 'all' || cadet.bloodGroup === filters.bloodGroup) &&
+            (filters.bloodGroup === 'all' || cadet.Blood_Group === filters.bloodGroup) &&
             (filters.division === 'all' || cadet.division === filters.division) &&
             (!showActiveOnly || isActive) 
         );
@@ -91,7 +91,13 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     // Reset selection when filters change
     useEffect(() => {
         setSelectedCadets([]);
+        setIsSelectionMode(false);
     }, [searchTerm, filters, showActiveOnly]);
+    
+    useEffect(() => {
+        setSelectedCadets([]);
+    }, [currentPage]);
+
 
     const handleReset = () => {
         setSearchTerm('');
@@ -110,15 +116,24 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
 
     const handleToggleAllOnPage = () => {
         const allCurrentIds = currentCadets.map(c => c.id);
-        const allSelected = allCurrentIds.every(id => selectedCadets.includes(id));
+        const allOnPageSelected = allCurrentIds.every(id => selectedCadets.includes(id));
         
-        if (allSelected) {
+        if (allOnPageSelected) {
              setSelectedCadets(prev => prev.filter(id => !allCurrentIds.includes(id)));
         } else {
             setSelectedCadets(prev => [...new Set([...prev, ...allCurrentIds])]);
         }
     };
     
+    const handleSelectAllFiltered = () => {
+        const allFilteredIds = filteredCadets.map(c => c.id);
+        setSelectedCadets(allFilteredIds);
+    };
+    
+    const handleDeselectAll = () => {
+        setSelectedCadets([]);
+    }
+
     // When toggling selection mode off, clear selections
     const handleSelectionModeChange = (checked: boolean) => {
         setIsSelectionMode(checked);
@@ -289,7 +304,8 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     };
     
     const batchYears = [...new Set(cadetsData.map(c => c.batch).filter(Boolean))].sort((a,b) => b - a);
-
+    const allOnPageSelected = currentCadets.length > 0 && currentCadets.every(c => selectedCadets.includes(c.id));
+    const allFilteredSelected = selectedCadets.length === filteredCadets.length && filteredCadets.length > 0;
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -305,7 +321,7 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                     <AlertDialogHeader>
                     <AlertDialogTitle>Confirm Export</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Do you want to export the {exportConfirm.type === 'selected' ? `${selectedCadets.length} selected` : 'filtered'} cadet details to Excel?
+                        Do you want to export {exportConfirm.type === 'selected' ? `${selectedCadets.length} selected` : `${filteredCadets.length} filtered`} cadet records to Excel?
                     </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -414,12 +430,12 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 <div className="flex items-center space-x-2">
                                     <Checkbox
                                         id="select-all-toggle"
-                                        checked={currentCadets.length > 0 && currentCadets.every(c => selectedCadets.includes(c.id))}
+                                        checked={allOnPageSelected}
                                         onCheckedChange={handleToggleAllOnPage}
                                         aria-label="Select all cadets on current page"
                                     />
                                     <Label htmlFor="select-all-toggle" className="text-sm font-medium">
-                                        {selectedCadets.length > 0 ? `${selectedCadets.length} selected` : "Select all on page"}
+                                        Select all on page
                                     </Label>
                                 </div>
                             )}
@@ -437,10 +453,10 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => setExportConfirm({ show: true, type: 'selected' })} disabled={selectedCadets.length === 0}>
-                                        Export Selected
+                                        Export Selected ({selectedCadets.length})
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setExportConfirm({ show: true, type: 'all' })}>
-                                        Export All Filtered
+                                    <DropdownMenuItem onClick={() => setExportConfirm({ show: true, type: 'all' })} disabled={filteredCadets.length === 0}>
+                                        Export All Filtered ({filteredCadets.length})
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -451,17 +467,26 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => setDeleteConfirm({ show: true, type: 'selected' })} disabled={selectedCadets.length === 0} className="text-destructive">
-                                        Delete Selected
+                                    <DropdownMenuItem onClick={() => setDeleteConfirm({ show: true, type: 'selected' })} disabled={selectedCadets.length === 0} className="text-destructive focus:text-destructive-foreground focus:bg-destructive">
+                                        Delete Selected ({selectedCadets.length})
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => setDeleteConfirm({ show: true, type: 'all' })} disabled={filteredCadets.length === 0} className="text-destructive">
-                                        Delete All Filtered
+                                    <DropdownMenuItem onClick={() => setDeleteConfirm({ show: true, type: 'all' })} disabled={filteredCadets.length === 0} className="text-destructive focus:text-destructive-foreground focus:bg-destructive">
+                                        Delete All Filtered ({filteredCadets.length})
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
                     </div>
+                     {isSelectionMode && selectedCadets.length > 0 && (
+                        <div className="mt-4 p-3 bg-accent/10 border border-accent/20 rounded-lg text-sm text-center">
+                            {allFilteredSelected ? (
+                                <span>All {selectedCadets.length} cadets matching filters are selected. <Button variant="link" className="p-0 h-auto" onClick={handleDeselectAll}>Deselect all</Button></span>
+                            ) : (
+                                <span>{selectedCadets.length} cadets selected on this page. <Button variant="link" className="p-0 h-auto" onClick={handleSelectAllFiltered}>Select all {filteredCadets.length} matching cadets</Button></span>
+                            )}
+                        </div>
+                     )}
                 </CardContent>
             </Card>
 
@@ -542,4 +567,3 @@ export default function CadetsPage({ params }: { params: { institutionName: stri
     );
 }
 
-    
