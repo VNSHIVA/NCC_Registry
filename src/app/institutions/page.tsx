@@ -288,13 +288,14 @@ export default function InstitutionsPage() {
                    <div>
                       {institution.type === 'College' ? (
                         <>
-                          <div>
-                            <p className="font-semibold">SD Cadets: {institution.divisionCounts.SD}</p>
-                            <p className="pl-4 text-xs">Years: 1st: {institution.yearCounts.SD.first} | 2nd: {institution.yearCounts.SD.second} | 3rd: {institution.yearCounts.SD.third}</p>
+                          <div className="mt-1">
+                            <p className="font-semibold">1st Years: <span className="font-normal">SD: {institution.yearCounts.SD.first} | SW: {institution.yearCounts.SW.first}</span></p>
                           </div>
-                           <div>
-                            <p className="font-semibold mt-1">SW Cadets: {institution.divisionCounts.SW}</p>
-                            <p className="pl-4 text-xs">Years: 1st: {institution.yearCounts.SW.first} | 2nd: {institution.yearCounts.SW.second} | 3rd: {institution.yearCounts.SW.third}</p>
+                          <div className="mt-1">
+                            <p className="font-semibold">2nd Years: <span className="font-normal">SD: {institution.yearCounts.SD.second} | SW: {institution.yearCounts.SW.second}</span></p>
+                          </div>
+                          <div className="mt-1">
+                            <p className="font-semibold">3rd Years: <span className="font-normal">SD: {institution.yearCounts.SD.third} | SW: {institution.yearCounts.SW.third}</span></p>
                           </div>
                         </>
                       ) : (
