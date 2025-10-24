@@ -46,12 +46,28 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Certificate state
+    const [certificateOptions, setCertificateOptions] = useState({
+        current: ['None'],
+        appearing: [] as string[],
+    });
+    const [showNCCYear, setShowNCCYear] = useState(false);
+    const [showAppearingField, setShowAppearingField] = useState(false);
+    const [showGradeField, setShowGradeField] = useState(false);
+
     useEffect(() => {
         async function fetchCadet() {
             setLoading(true);
             let data = await getCadet(cadetId);
             if(data) {
                 data = migrateCampsData(data);
+                // Ensure certificate fields exist
+                data.ncc_year = data.ncc_year || '';
+                data.current_certificate = data.current_certificate || '';
+                data.appearing_for_certificate = data.appearing_for_certificate || '';
+                data.certificate_exam_year = data.certificate_exam_year || '';
+                data.certificate_status = data.certificate_status || '';
+                data.certificate_grade = data.certificate_grade || '';
                 setFormData(data);
             }
             setLoading(false);
@@ -59,6 +75,7 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         fetchCadet();
     }, [cadetId]);
 
+    // Effect for auto-assigning division
     useEffect(() => {
         if (!formData) return;
         const { institutetype, Cadet_Gender } = formData;
@@ -75,6 +92,41 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
            setFormData((prev: any) => ({ ...prev, division: newDivision }));
         }
     }, [formData?.institutetype, formData?.Cadet_Gender, formData]);
+
+    // Effect for certificate logic
+    useEffect(() => {
+        if (!formData) return;
+        const { institutetype, current_certificate, certificate_status } = formData;
+
+        // Visibility for NCC Year
+        setShowNCCYear(institutetype === 'College');
+
+        // Options for Current Certificate
+        const currentOptions = institutetype === 'School'
+            ? ["None", "A Certificate"]
+            : ["None", "A Certificate", "B Certificate", "C Certificate"];
+
+        // Options for Appearing Certificate
+        let appearingOptions: string[] = [];
+        if (institutetype === 'School') {
+            if (current_certificate === 'None') appearingOptions = ['A Certificate'];
+        } else if (institutetype === 'College') {
+            if (current_certificate === 'None') appearingOptions = ['A Certificate'];
+            else if (current_certificate === 'A Certificate') appearingOptions = ['B Certificate'];
+            else if (current_certificate === 'B Certificate') appearingOptions = ['C Certificate'];
+        }
+        
+        setShowAppearingField(appearingOptions.length > 0);
+        
+        // Visibility for Grade field
+        setShowGradeField(certificate_status === 'Passed');
+
+        setCertificateOptions({
+            current: currentOptions,
+            appearing: appearingOptions
+        });
+
+    }, [formData?.institutetype, formData?.current_certificate, formData?.certificate_status]);
 
 
     const calculateDuration = useCallback((startDate: string, endDate: string) => {
@@ -109,6 +161,32 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
 
         setFormData((prev: any) => ({ ...prev, camps: updatedCamps }));
     };
+    
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { id, value } = e.target;
+        setFormData((prev: any) => ({ ...prev!, [id]: value }));
+    }
+
+    const handleSelectChange = (id: string, value: string) => {
+        setFormData((prev: any) => {
+            const newState = { ...prev!, [id]: value };
+
+            // Reset dependent certificate fields
+            if (id === 'institutetype') {
+                newState.current_certificate = '';
+                newState.appearing_for_certificate = '';
+                newState.ncc_year = '';
+                newState.certificate_grade = '';
+            }
+            if (id === 'current_certificate') {
+                newState.appearing_for_certificate = '';
+            }
+            if (id === 'certificate_status' && value !== 'Passed') {
+                newState.certificate_grade = '';
+            }
+            return newState;
+        });
+    }
 
     if (loading) {
         return (
@@ -136,15 +214,6 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
         return <div className="container mx-auto px-4 py-8">Cadet not found</div>
     }
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value } = e.target;
-        setFormData((prev: any) => ({ ...prev!, [id]: value }));
-    }
-
-    const handleSelectChange = (id: string, value: string) => {
-        setFormData((prev: any) => ({ ...prev!, [id]: value }));
-    }
-    
     const addCamp = () => {
         setFormData((prev: any) => ({
             ...prev,
@@ -250,6 +319,78 @@ export default function EditCadetPage({ params }: { params: { institutionName: s
                                         <div className="flex items-center space-x-2"><RadioGroupItem value="No" id="dismissed-no" /><Label htmlFor="dismissed-no">No</Label></div>
                                     </RadioGroup>
                                 </div>
+                            </div>
+                        </section>
+
+                        <section>
+                            <h3 className="text-xl font-semibold mb-4 text-primary/90 border-b pb-2">NCC Certificate Details</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {showNCCYear && (
+                                    <div>
+                                        <Label htmlFor="ncc_year">NCC Year</Label>
+                                        <Select onValueChange={(value) => handleSelectChange('ncc_year', value)} value={formData.ncc_year || ''}>
+                                            <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="Select NCC Year" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="1st Year">1st Year</SelectItem>
+                                                <SelectItem value="2nd Year">2nd Year</SelectItem>
+                                                <SelectItem value="3rd Year">3rd Year</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+                                <div>
+                                    <Label htmlFor="current_certificate">Current NCC Certificate Held</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('current_certificate', value)} value={formData.current_certificate || ''}>
+                                        <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="Select Certificate" /></SelectTrigger>
+                                        <SelectContent>
+                                            {certificateOptions.current.map(cert => <SelectItem key={cert} value={cert}>{cert}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {showAppearingField && (
+                                    <div>
+                                        <Label htmlFor="appearing_for_certificate">Appearing for Certificate Exam</Label>
+                                        <Select onValueChange={(value) => handleSelectChange('appearing_for_certificate', value)} value={formData.appearing_for_certificate || ''}>
+                                            <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="Select Certificate" /></SelectTrigger>
+                                            <SelectContent>
+                                                {certificateOptions.appearing.map(cert => <SelectItem key={cert} value={cert}>{cert}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+                                {formData.appearing_for_certificate && (
+                                    <>
+                                        <div>
+                                            <Label htmlFor="certificate_exam_year">Certificate Exam Year</Label>
+                                            <Input id="certificate_exam_year" type="number" placeholder="YYYY" value={formData.certificate_exam_year || ''} onChange={handleInputChange} className="mt-1 bg-white/20"/>
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="certificate_status">Certificate Exam Status</Label>
+                                            <Select onValueChange={(value) => handleSelectChange('certificate_status', value)} value={formData.certificate_status || ''}>
+                                                <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="Select Status" /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Not Appeared">Not Appeared</SelectItem>
+                                                    <SelectItem value="Appeared - Result Pending">Appeared - Result Pending</SelectItem>
+                                                    <SelectItem value="Passed">Passed</SelectItem>
+                                                    <SelectItem value="Failed">Failed</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </>
+                                )}
+                                {showGradeField && (
+                                    <div>
+                                        <Label htmlFor="certificate_grade">Certificate Grade Obtained</Label>
+                                        <Select onValueChange={(value) => handleSelectChange('certificate_grade', value)} value={formData.certificate_grade || ''}>
+                                            <SelectTrigger className="mt-1 bg-white/20"><SelectValue placeholder="Select Grade" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="A Grade">A Grade</SelectItem>
+                                                <SelectItem value="B Grade">B Grade</SelectItem>
+                                                <SelectItem value="C Grade">C Grade</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
                             </div>
                         </section>
                         
