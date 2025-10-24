@@ -64,6 +64,14 @@ const FIELD_MAPPING: { [key: string]: string } = {
     'criminal_court': 'Criminal_Court'
 };
 
+
+// Helper to create a composite key for name + DOB matching
+const createNameDobKey = (name: string, dob: string) => {
+    if (!name || !dob) return null;
+    return `${name.toLowerCase().trim()}|${dob.trim()}`;
+};
+
+
 export async function importCadets(cadets: any[], institutionName: string) {
     if (!Array.isArray(cadets) || cadets.length === 0) {
         return { success: false, error: 'No cadet data provided.' };
@@ -77,52 +85,76 @@ export async function importCadets(cadets: any[], institutionName: string) {
 
     const q = query(cadetsCollection, where('institution', '==', institutionName));
     const querySnapshot = await getDocs(q);
-    const existingCadets = new Map(querySnapshot.docs.map(doc => [doc.data().regNo, { id: doc.id, data: doc.data() }]));
+
+    // Create maps for efficient lookups based on different criteria
+    const existingByRegNo = new Map();
+    const existingByAadhaar = new Map();
+    const existingByNameDob = new Map();
+
+    querySnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const record = { id: doc.id, data };
+        if (data.regNo) existingByRegNo.set(data.regNo, record);
+        if (data.adhaarnumber) existingByAadhaar.set(data.adhaarnumber, record);
+        const nameDobKey = createNameDobKey(data.Cadet_Name, data.Date_of_Birth);
+        if (nameDobKey) existingByNameDob.set(nameDobKey, record);
+    });
+    
 
     for (const rawRow of cadets) {
         const normalizedRow: { [key: string]: any } = {};
         for (const key in rawRow) {
             const normalizedKey = FIELD_MAPPING[key.toLowerCase().replace(/[ _-]/g, '_').trim()] || key.trim();
-            if (rawRow[key] !== null && rawRow[key] !== '') {
-                 normalizedRow[normalizedKey] = rawRow[key];
+            // We keep null/empty values for now to check against required fields
+            normalizedRow[normalizedKey] = rawRow[key];
+        }
+
+        // Clean object for Firestore: contains only fields with actual values
+        const dataForFirestore: { [key: string]: any } = {};
+        for (const key in normalizedRow) {
+            if (normalizedRow[key] !== null && normalizedRow[key] !== '' && normalizedRow[key] !== undefined) {
+                dataForFirestore[key] = normalizedRow[key];
             }
         }
         
+        // Check for required fields before proceeding
         REQUIRED_FIELDS.forEach(field => {
-            if (!normalizedRow[field]) {
+            if (!dataForFirestore[field]) {
                 missingFieldsTracker.add(field);
             }
         });
         
-        const { regNo } = normalizedRow;
-        
-        if (!regNo) {
-            continue; 
+        // Find existing cadet using prioritized criteria
+        let existingCadet = null;
+        if (dataForFirestore.regNo) {
+            existingCadet = existingByRegNo.get(dataForFirestore.regNo);
         }
-
-        const existingCadet = existingCadets.get(regNo);
-
+        if (!existingCadet && dataForFirestore.adhaarnumber) {
+            existingCadet = existingByAadhaar.get(dataForFirestore.adhaarnumber);
+        }
+        if (!existingCadet) {
+            const nameDobKey = createNameDobKey(dataForFirestore.Cadet_Name, dataForFirestore.Date_of_Birth);
+            if (nameDobKey) {
+                existingCadet = existingByNameDob.get(nameDobKey);
+            }
+        }
+        
         if (existingCadet) {
-            // Update existing record: merge new data, keeping existing values for blank fields
-            const dataToUpdate = { ...existingCadet.data, ...normalizedRow };
+            // UPDATE: Merge new non-empty data with existing record
             const cadetRef = doc(db, 'cadets', existingCadet.id);
-            // Using set with merge is equivalent to a smart update.
-            batch.set(cadetRef, dataToUpdate, { merge: true });
+            batch.set(cadetRef, dataForFirestore, { merge: true });
             updatedCount++;
         } else {
-            // Create a new record
+            // CREATE: Add a new record
             const dataToSave = {
                 institution: institutionName,
-                ...normalizedRow,
-                // Ensure required fields exist, even if blank, to match schema
-                regNo: normalizedRow.regNo || '',
-                Cadet_Name: normalizedRow.Cadet_Name || '',
-                batch: normalizedRow.batch || '',
-                certificates: [], // Ensure certificates array exists
-                camps: [], // Ensure camps array exists
+                ...dataForFirestore,
+                // Ensure array fields exist even if not in the import
+                certificates: dataForFirestore.certificates || [],
+                camps: dataForFirestore.camps || [],
             };
 
-             // Auto-assign division logic
+            // Auto-assign division logic if not provided
             if (!dataToSave.division && dataToSave.institutetype && dataToSave.Cadet_Gender) {
                 if (dataToSave.institutetype === 'School') {
                     dataToSave.division = dataToSave.Cadet_Gender === 'Male' ? 'JD' : 'JW';
@@ -130,7 +162,7 @@ export async function importCadets(cadets: any[], institutionName: string) {
                     dataToSave.division = dataToSave.Cadet_Gender === 'Male' ? 'SD' : 'SW';
                 }
             }
-
+            
             const cadetRef = doc(cadetsCollection);
             batch.set(cadetRef, dataToSave);
             addedCount++;

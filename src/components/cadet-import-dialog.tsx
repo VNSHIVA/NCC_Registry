@@ -124,6 +124,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             return null;
         }
 
+        // Sanitize the data to ensure it's plain objects
         const sanitizedData = data.map(row => {
             const plainObject: {[key: string]: any} = {};
             for (const key in row) {
