@@ -124,7 +124,6 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
             return null;
         }
 
-        // Sanitize the data to ensure it's an array of plain objects
         const sanitizedData = data.map(row => {
             const plainObject: {[key: string]: any} = {};
             for (const key in row) {
@@ -158,7 +157,7 @@ export function CadetImportDialog({ isOpen, onClose, onImportSuccess, institutio
                         const workbook = XLSX.read(data, { type: 'binary' });
                         const sheetName = workbook.SheetNames[0];
                         const worksheet = workbook.Sheets[sheetName];
-                        const json = XLSX.utils.sheet_to_json(worksheet, { defval: null }); // Keep blank cells as null
+                        const json = XLSX.utils.sheet_to_json(worksheet, { defval: null });
                         resolve(json);
                     } catch (err) {
                         reject(new Error("Failed to parse the file. Ensure it's a valid Excel or CSV."));

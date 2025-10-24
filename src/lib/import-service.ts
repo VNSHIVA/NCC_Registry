@@ -3,7 +3,6 @@
 import { db } from '@/lib/firebase';
 import { collection, writeBatch, query, where, getDocs, doc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
-import { campTypes } from './constants';
 
 const REQUIRED_FIELDS = ['regNo', 'Cadet_Name', 'batch'];
 
@@ -88,7 +87,8 @@ export async function importCadets(cadets: any[], institutionName: string) {
                  normalizedRow[normalizedKey] = rawRow[key];
             }
         }
-
+        
+        // Ensure required fields are checked, even if they end up being empty
         REQUIRED_FIELDS.forEach(field => {
             if (!normalizedRow[field]) {
                 missingFieldsTracker.add(field);
@@ -97,22 +97,30 @@ export async function importCadets(cadets: any[], institutionName: string) {
         
         const { regNo } = normalizedRow;
         
-        const existingCadet = regNo ? existingCadets.get(regNo) : null;
+        // Skip row if regNo is missing after normalization, as it's the primary key
+        if (!regNo) {
+            continue; 
+        }
+
+        const existingCadet = existingCadets.get(regNo);
 
         if (existingCadet) {
-            // Merge new data with existing data, preserving old values if new ones are blank
+            // Update existing record: merge new data, keeping existing values for blank fields
             const dataToUpdate = { ...existingCadet.data, ...normalizedRow };
             const cadetRef = doc(db, 'cadets', existingCadet.id);
             batch.update(cadetRef, dataToUpdate);
             updatedCount++;
         } else {
-            // Create a new record, ensuring required fields exist, even if empty
+            // Create a new record
             const dataToSave = {
                 institution: institutionName,
+                ...normalizedRow,
+                // Ensure required fields exist, even if blank, to match schema
                 regNo: normalizedRow.regNo || '',
                 Cadet_Name: normalizedRow.Cadet_Name || '',
                 batch: normalizedRow.batch || '',
-                ...normalizedRow
+                certificates: [], // Ensure certificates array exists
+                camps: [], // Ensure camps array exists
             };
 
              // Auto-assign division logic
