@@ -45,9 +45,8 @@ type Institution = {
     JW: number;
   };
   yearCounts: {
-    first: number;
-    second: number;
-    third: number;
+    SD: { first: number; second: number; third: number; };
+    SW: { first: number; second: number; third: number; };
   };
 };
 
@@ -283,14 +282,20 @@ export default function InstitutionsPage() {
                 <p className="text-sm text-muted-foreground">{institution.type}</p>
               </CardHeader>
               <CardContent className="space-y-3 flex-grow flex flex-col">
-                <div className="flex-grow space-y-2">
+                <div className="flex-grow space-y-2 text-sm">
                   <p><span className="font-semibold">ANO:</span> {institution.anoName}</p>
                   <p><span className="font-semibold">Total Cadets:</span> {institution.cadetCount}</p>
-                   <div className="text-sm">
+                   <div>
                       {institution.type === 'College' ? (
                         <>
-                          <p><span className="font-semibold">Divisions:</span> SD: {institution.divisionCounts.SD} | SW: {institution.divisionCounts.SW}</p>
-                          <p><span className="font-semibold">Years:</span> 1st: {institution.yearCounts.first} | 2nd: {institution.yearCounts.second} | 3rd: {institution.yearCounts.third}</p>
+                          <div>
+                            <p className="font-semibold">SD Cadets: {institution.divisionCounts.SD}</p>
+                            <p className="pl-4 text-xs">Years: 1st: {institution.yearCounts.SD.first} | 2nd: {institution.yearCounts.SD.second} | 3rd: {institution.yearCounts.SD.third}</p>
+                          </div>
+                           <div>
+                            <p className="font-semibold mt-1">SW Cadets: {institution.divisionCounts.SW}</p>
+                            <p className="pl-4 text-xs">Years: 1st: {institution.yearCounts.SW.first} | 2nd: {institution.yearCounts.SW.second} | 3rd: {institution.yearCounts.SW.third}</p>
+                          </div>
                         </>
                       ) : (
                         <p><span className="font-semibold">Divisions:</span> JD: {institution.divisionCounts.JD} | JW: {institution.divisionCounts.JW}</p>

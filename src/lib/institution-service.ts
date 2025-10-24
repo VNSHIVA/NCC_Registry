@@ -16,7 +16,10 @@ export async function getInstitutions() {
         const cadets = cadetsSnapshot.docs.map(d => d.data());
 
         const divisionCounts = { SD: 0, SW: 0, JD: 0, JW: 0 };
-        const yearCounts = { first: 0, second: 0, third: 0 };
+        const yearCounts = {
+            SD: { first: 0, second: 0, third: 0 },
+            SW: { first: 0, second: 0, third: 0 }
+        };
         const currentYear = new Date().getFullYear();
 
         for (const cadet of cadets) {
@@ -30,11 +33,11 @@ export async function getInstitutions() {
                 if (!isNaN(batchYear)) {
                     const yearDiff = currentYear - batchYear;
                     if (yearDiff === 0) {
-                        yearCounts.first++;
+                        yearCounts[division as 'SD' | 'SW'].first++;
                     } else if (yearDiff === 1) {
-                        yearCounts.second++;
+                        yearCounts[division as 'SD' | 'SW'].second++;
                     } else if (yearDiff === 2) {
-                        yearCounts.third++;
+                        yearCounts[division as 'SD' | 'SW'].third++;
                     }
                 }
             }
