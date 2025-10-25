@@ -1,4 +1,3 @@
-
 'use client';
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -33,8 +32,10 @@ export function DivisionPieChart({ data }: DivisionPieChartProps) {
                         background: 'hsl(var(--background))',
                         border: '1px solid hsl(var(--border))',
                         borderRadius: 'var(--radius)',
-                        color: 'white'
+                        color: '#FFFFFF' // ✅ Ensures tooltip text is white
                     }}
+                    labelStyle={{ color: '#FFFFFF' }} // ✅ Makes label text white
+                    itemStyle={{ color: '#FFFFFF' }}  // ✅ Makes item values white
                 />
                 <Pie
                     data={data}
